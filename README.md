@@ -1,41 +1,18 @@
-# MassTodonPy
-
-![Alt](/docs2/source/figs/masstodon_cracowian.jpg)
+# masstodon
 
 A Python module investigating the Electron Transfer Dissociation in Mass Spectrometry
 
 # Prerequisites
+This software works with Python3.
 
-In order to play with MassTodonPy on your computer shall need:
-1. UNIX based operating system, such as Linux (eg. Ubuntu, Fedora, Gentoo, or similar) or macOS (eg. macOS Sierra)
-2. python2.7 interpreter
+# Installation
 
-To check if you have the correct interpreter, open the terminal and simply type
-
-```{bash}
-python2.7
+The package will be available on Python Package index.
 ```
-and you should get:
-
-![Alt](/Webpage/python_terminal.png)
-
-To leave the terminal press cntr+d
-
-To install globally MassTodonPy, run in terminal
-```{bash}
-pip2 install MassTodonPy
+pip install masstodon
 ```
 
-This will install MassTodonPy and the required dependencies.
-To check the installation, simply write now:
-
-```{bash}
-masstodon_example_call
-```
-
-This will run an example session of the program to check that you are able to get any output. By no means is it necessary to run it more than once, just after installation.
-
-Great, you seem to have all the tools in place for some massive calculations!
+<!-- # Running *masstodon*
 
 There are now two ways to run the program:
 
@@ -146,3 +123,4 @@ bokeh_aggregated_precursors(res)
 bokeh_aggregated_fragments(res)
 bokeh_estimated_aggregated_fragments(res)
 ```
+ -->
