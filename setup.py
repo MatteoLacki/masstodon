@@ -41,16 +41,15 @@ setup(
         'Topic :: Scientific/Engineering :: Chemistry',
         'Programming Language :: Python :: 3.6'],
     install_requires=[
-        'cffi',
         'numpy',
         # 'pyteomics>=3.4.1',
         # 'lxml',
         'cvxopt',
+        'cffi',
         'IsoSpecPy<2.0',
         'networkx>=2.0',
-        # 'future',
-        # 'six',
-        # 'bokeh'
+        'matplotlib',
+        'intervaltree'
         ],
     # scripts=[
     #     'bin/masstodon',

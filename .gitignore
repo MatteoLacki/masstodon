@@ -1,0 +1,25 @@
+# Notes
+Notes/
+
+# Byte-compiled / optimized / DLL files
+*.py[cod]
+__pycache__
+
+#R
+.Rhistory
+.Rproj.user
+*.Rproj
+.RData
+
+#Python
+build
+dist
+*.egg-info
+*.csv
+*.swp
+
+# HTML
+*.html
+
+# VIM
+*.swo
