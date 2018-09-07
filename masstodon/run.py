@@ -1,6 +1,6 @@
-%load_ext autoreload
-%autoreload 2
-%load_ext line_profiler
+# %load_ext autoreload
+# %autoreload 2
+# %load_ext line_profiler
 
 from   collections          import  defaultdict, namedtuple, Counter
 import numpy                as      np
