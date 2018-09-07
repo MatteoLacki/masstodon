@@ -26,6 +26,8 @@ spec = spectrum(mz, intensity)
 spec.bitonic_clustering()
 spec.min_mz_diff_clustering()
 
+spec.plot()
+
 # spec.plot_mz_diffs()
 # spec.plot(clusters='bitonic')
 # spec.plot(clusters='min_mz_diff')
@@ -53,7 +55,7 @@ fit_time = time() - t0
 
 # imperator.plot()
 # imperator.plot_ccs()
-# imperator.plot_solutions()
-# imperator.solutions[10].plot()
-# imperator.solutions[10].plot_fancy()
+# imperator.plot_solutions(plt_style = 'ggplot')
+# imperator.solutions[10].plot(plt_style = 'fast')
+# imperator.solutions[10].plot_fancy(plt_style = 'ggplot')
 

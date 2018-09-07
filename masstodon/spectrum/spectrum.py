@@ -142,12 +142,13 @@ class Spectrum(Measure):
              peak_color= 'white',
              show      = True,
              clusters  = None):
-        if clusters is 'bitonic':
-            clusters = self.bc.clusters 
-        elif clusters is 'min_mz_diff':
-            clusters = self.mdc.clusters
-        else:
-            raise KeyError("Wrong clustering name: should be either 'bitonic' or 'min_mz_diff'.")
+        if clusters:
+            if clusters is 'bitonic':
+                clusters = self.bc.clusters 
+            elif clusters is 'min_mz_diff':
+                clusters = self.mdc.clusters
+            else:
+                raise KeyError("Wrong clustering name: should be either 'bitonic' or 'min_mz_diff'.")
         plot_spectrum(mz        = self.mz,
                       intensity = self.intensity,
                       clusters  = clusters,
