@@ -1,11 +1,10 @@
-from __future__ import absolute_import, division, print_function
 from collections import Counter, namedtuple
 import unittest
 
-from MassTodonPy.Data.get_dataset import get_dataset
-from MassTodonPy.MatchMaker.SimpleCzMatch import SimpleCzMatch
-from MassTodonPy.MatchMaker.CzMatch import CzMatch
-from MassTodonPy.Reporter.misc import Brick
+from masstodon.data.get_dataset             import get_dataset
+from masstodon.estimates_matcher.cz_simple  import SimpleCzMatch
+from masstodon.estimates_matcher.cz         import CzMatch
+from masstodon.reporter.misc                import Brick
 
 # TODO add test for the optimality of the fragment matching
 

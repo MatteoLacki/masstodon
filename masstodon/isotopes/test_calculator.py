@@ -1,21 +1,16 @@
 """Testing the isotope calculator."""
-from __future__ import absolute_import, division, print_function
 import numpy as np
 import unittest
 
-from MassTodonPy.IsotopeCalculator.IsotopeCalculator import IsotopeCalculator
-from MassTodonPy.Misc.binomial import binomial
+from masstodon.isotopes import isotope_calculator
+from masstodon.stats.binomial import binomial
 
 class TestPeakPicker(unittest.TestCase):
     def test_isotope_calculator(self):
-        print("Testing the get_envelope function.")
-
-        iso_calc = IsotopeCalculator(mz_digits=0,
-                                     _masses={'T': [1,1000]},
-                                     _probabilities={'T': [0.5, 0.5]})
-
-        distribution = iso_calc.get_envelope(formula='T10',
-                                             joint_probability=1.0)
+        iso_calc = isotope_calculator(digits=0,
+                                      _masses={'T': [1,1000]},
+                                      _probabilities={'T': [0.5, 0.5]})
+        distribution = iso_calc(formula={'T': 10}, prob=1.0)
         # E_ = expected
         E_atoms = np.array([1.*(10-i) + 1000.*i for i in range(11)])
         self.assertTrue(all(E_atoms == distribution.atoms))

@@ -110,8 +110,8 @@ class IsotopeCalculator(object):
                 env.round_mz(self.digits)
         # simplification: the q and g are only shifting the
         # distribution, rather than affecting the whole distribution.
-        H_mass = self._masses['H'][0]
         if q > 0:
+            H_mass = self._masses['H'][0]
             env = env.add_mass_divide_by_charge(H_mass * (q + g), q)
 
         env.round_mz(self.digits)

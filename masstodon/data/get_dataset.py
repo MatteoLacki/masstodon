@@ -19,47 +19,49 @@ class Dataset(object):
         out += "----------------"
         return out
 
-def get_dataset(dataset_name):
-    """Retrieve examplary spectra informations.
 
-    Parameters
-    ==========
-    dataset_name: string
-        Warning
-        =======
-        Can take values: substanceP or ubiquitin.
-    json : boolean
-        Should we read in json-saved file instead of python dictionary?
+# TODO: this has to be modified to meet the old spectra specification.
+# def get_dataset(dataset_name):
+#     """Retrieve examplary spectra informations.
 
-    Returns
-    =======
-    A dictionary.
-    """
-    if dataset_name is 'substanceP':
-        from MassTodonPy.Data.substanceP import substanceP as mol
-    else:
-        raise AttributeError("No data set of that name.")
-    spectrum = Spectrum(spectrum=mol['spectrum'])
+#     Parameters
+#     ==========
+#     dataset_name: string
+#         Warning
+#         =======
+#         Can take values: substanceP or ubiquitin.
+#     json : boolean
+#         Should we read in json-saved file instead of python dictionary?
 
-    modifications = {int(k): v for k, v in
-                     mol['modifications'].items()}
+#     Returns
+#     =======
+#     A dictionary.
+#     """
+#     if dataset_name is 'substanceP':
+#         from masstodon.data.substanceP import substanceP as mol
+#     else:
+#         raise AttributeError("No data set of that name.")
+#     spectrum = Spectrum(spectrum=mol['spectrum'])
 
-    precursor = Precursor(name=mol['name'],
-                          fasta=mol['fasta'],
-                          charge=mol['Q'],
-                          modifications=modifications,
-                          fragmentation_type="cz")
+#     modifications = {int(k): v for k, v in
+#                      mol['modifications'].items()}
 
-    instrument = {}
-    if dataset_name == 'substanceP':
-        instrument['name'] = 'synapt'
-        instrument['wave height'] = 0
-        instrument['wave velocity'] = 300
+#     precursor = Precursor(name=mol['name'],
+#                           fasta=mol['fasta'],
+#                           charge=mol['Q'],
+#                           modifications=modifications,
+#                           fragmentation_type="cz")
 
-    elif dataset_name == 'ubiquitin':
-        instrument['name'] = 'orbitrap'
-        instrument['acquisition time'] = '10 ms'
+#     instrument = {}
+#     if dataset_name == 'substanceP':
+#         instrument['name'] = 'synapt'
+#         instrument['wave height'] = 0
+#         instrument['wave velocity'] = 300
 
-    return Dataset(precursor=precursor,
-                   spectrum=spectrum,
-                   instrument=instrument)
+#     elif dataset_name == 'ubiquitin':
+#         instrument['name'] = 'orbitrap'
+#         instrument['acquisition time'] = '10 ms'
+
+#     return Dataset(precursor=precursor,
+#                    spectrum=spectrum,
+#                    instrument=instrument)

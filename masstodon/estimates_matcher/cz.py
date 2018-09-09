@@ -16,7 +16,7 @@
 #   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 from collections import Counter, namedtuple
 
-from .cz_match_simple import SimpleCzMatch
+from .cz_simple import SimpleCzMatch
 from ..write.csv_tsv  import write_rows
 
 
