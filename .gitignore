@@ -4,6 +4,7 @@ Notes/
 # Byte-compiled / optimized / DLL files
 *.py[cod]
 __pycache__
+.eggs
 
 #R
 .Rhistory

@@ -1,11 +1,11 @@
-"""Testing the setting up of the deconvolution problems."""
-from   collections import Counter
-import networkx as nx
-import unittest
+# """Testing the setting up of the deconvolution problems."""
+# from   collections import Counter
+# import networkx as nx
+# import unittest
 
-from ..data.get_dataset  import get_dataset
-from .deconvolve         import deconvolve
-from ..spectrum.spectrum import spectrum
+# from ..data.get_dataset  import get_dataset
+# from .deconvolve         import deconvolve
+# from ..spectrum.spectrum import spectrum
 
 
 # class TestDeconvolution(unittest.TestCase):

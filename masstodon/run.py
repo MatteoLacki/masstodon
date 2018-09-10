@@ -9,14 +9,14 @@ import matplotlib.pyplot    as      plt
 from   time                 import  time
 from   math                 import  log10, floor
 
-from masstodon.readers.from_npy               import spectrum_from_npy
-from masstodon.precursor.precursor            import precursor
-from masstodon.isotopes                       import isotope_calculator
-from masstodon.spectrum.spectrum              import spectrum
-from masstodon.models.polynomial              import polynomial
-from masstodon.preprocessing.filters          import filter_subspectra_molecules
-from masstodon.deconvolve.divide_ed_impera    import divide_ed_impera
-from masstodon.estimates_matcher.cz_match_simple import SimpleCzMatch
+from masstodon.readers.from_npy            import spectrum_from_npy
+from masstodon.precursor.precursor         import precursor
+from masstodon.isotopes                    import isotope_calculator
+from masstodon.spectrum.spectrum           import spectrum
+from masstodon.models.polynomial           import polynomial
+from masstodon.preprocessing.filters       import filter_subspectra_molecules
+from masstodon.deconvolve.divide_ed_impera import divide_ed_impera
+from masstodon.estimates_matcher.cz_simple import SimpleCzMatch
 
 if __name__ == '__main__':
     # generating subspectra
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     spec.bitonic_clustering()
     spec.min_mz_diff_clustering()
 
-    spec.plot()
+    # spec.plot()
 
     # spec.plot_mz_diffs()
     # spec.plot(clusters='bitonic')
@@ -52,6 +52,40 @@ if __name__ == '__main__':
     t0 = time()
     imperator = divide_ed_impera(good_mols, spec.bc, min_prob, isotopic_coverage)
     fit_time = time() - t0
+
+    # getting the biggest optimization problem available.
+    a, i = max([ (s.XY()[0].shape[1], i) for i, s in enumerate(imperator.solutions)])
+    X, Y = imperator.solutions[i].XY()
+    X.shape
+
+    from masstodon.stats.weighted_median import weighted_median
+
+
+    np.all(X >= 0)
+    X.shape, Y.shape
+    from itertools import combinations
+
+
+
+    def l1(a, b):
+        return np.abs(a - b).sum()
+
+    l1_distances = {}
+    for i, j in combinations(range(X.shape[1]), 2):
+        l1_distances[(i,j)] = l1(X[:,i], X[:,j])
+
+    np.percentile(list(l1_distances.values()),
+                  q = range(0,100, 10))
+
+    min((v, k) for k, v in l1_distances.items())
+
+    X[:,1]
+    X[:,11]
+
+
+    weighted_median()
+
+
 
 
     # imperator.plot()

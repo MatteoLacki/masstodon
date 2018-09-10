@@ -1,18 +1,18 @@
-from collections import Counter, namedtuple
-import unittest
+# from collections import Counter, namedtuple
+# import unittest
 
-from masstodon.data.get_dataset             import get_dataset
-from masstodon.estimates_matcher.cz_simple  import SimpleCzMatch
-from masstodon.estimates_matcher.cz         import CzMatch
-from masstodon.reporter.misc                import Brick
+# from masstodon.data.get_dataset             import get_dataset
+# from masstodon.estimates_matcher.cz_simple  import SimpleCzMatch
+# from masstodon.estimates_matcher.cz         import CzMatch
+# from masstodon.reporter.misc                import Brick
 
-# TODO add test for the optimality of the fragment matching
+# # TODO add test for the optimality of the fragment matching
 
-def node_to_tuple(node):
-    return node.type + str(node.no), node.q
+# def node_to_tuple(node):
+#     return node.type + str(node.no), node.q
 
-class VoidClass(object):
-    pass
+# class VoidClass(object):
+#     pass
 
 
 # no alphas now: rewrite test using graphs

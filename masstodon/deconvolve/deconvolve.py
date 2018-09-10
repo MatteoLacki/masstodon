@@ -29,7 +29,13 @@ class DeconvolutionProblem(object):
             Y = np.concatenate((Y, np.zeros(X.shape[1])))
             x = 1.0 - np.array(X.sum(axis=0)).flatten()
             X = np.concatenate((X, np.diag(x)))
-        self.model  = nnls(X, Y)
+        self.X = X
+        self.Y = Y
+        self.model = nnls(X, Y)
+
+    def XY(self):
+        """Return contingency matrix and response vector."""
+        return self.X, self.Y
 
     def iter_estimates(self):
         coefs = np.nditer(self.model.coef())

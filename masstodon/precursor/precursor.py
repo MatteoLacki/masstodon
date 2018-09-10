@@ -76,7 +76,7 @@ class Precursor(Molecule):
                              # include N, C_alpha, C_carbo in start and end.
         self.group2frag = dict(start = dict(N='y', C_alpha='z', C_carbo='x'),
                                  end = dict(N='c', C_alpha='a', C_carbo='b'))
-        self.modifications = {(number - 1, group): Formula(atom_cnt)
+        self.modifications = {(int(number) - 1, group): Formula(atom_cnt)
                               for number, mods in modifications.items()
                               for group, atom_cnt in mods.items()}
         self.formula = sum(self[number, group]

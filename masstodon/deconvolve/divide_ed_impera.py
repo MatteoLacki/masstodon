@@ -114,7 +114,6 @@ class Imperator(object):
         return len(self.G)
 
 
-
 def divide_ed_impera(molecules,
                      clustering,
                      min_prob          = .8,

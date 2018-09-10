@@ -27,7 +27,7 @@ def dict_2_string(d):
     return "".join(element + str(count) for element, count in sorted(d.items()))
 
 def dict_2_string_readable(d):
-    return " ".join(element + ":"+ str(count) for element, count in sorted(d.items()))
+    return " ".join(element + "_"+ str(count) for element, count in sorted(d.items()))
 
 
 class Formula(LinearDict):

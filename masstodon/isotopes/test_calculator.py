@@ -7,6 +7,7 @@ from masstodon.stats.binomial import binomial
 
 class TestPeakPicker(unittest.TestCase):
     def test_isotope_calculator(self):
+        """Reproducing binomial distribution."""
         iso_calc = isotope_calculator(digits=0,
                                       _masses={'T': [1,1000]},
                                       _probabilities={'T': [0.5, 0.5]})

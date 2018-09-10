@@ -1,4 +1,4 @@
-from MassTodonPy.Parsers.Paths import parse_path
+from masstodon.parse.path import parse_path
 
 def add_backslash(p):
     if p[-1] != '/':
