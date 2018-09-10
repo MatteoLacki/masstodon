@@ -1,6 +1,9 @@
 from    networkx.linalg.attrmatrix  import attr_matrix
 import  numpy                       as     np
-import  matplotlib.pyplot           as     plt
+try:
+    import matplotlib.pyplot as plt
+except RuntimeError:
+    pass
 
 from    masstodon.models.nnls import nnls
 

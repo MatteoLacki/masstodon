@@ -1,5 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except RuntimeError:
+    pass
 
 from masstodon.models.model import Model
 

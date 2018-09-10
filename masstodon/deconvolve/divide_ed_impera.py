@@ -5,7 +5,11 @@ Now, it really should."""
 
 import  networkx            as      nx
 from    collections         import  defaultdict, Counter
-import  matplotlib.pyplot   as      plt
+try:
+    import matplotlib.pyplot as plt
+except RuntimeError:
+    pass
+
 
 from masstodon.deconvolve.deconvolve import deconvolve 
 
