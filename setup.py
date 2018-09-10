@@ -21,7 +21,7 @@ from setuptools import setup, find_packages
 setup(
     name='masstodon',
     packages=find_packages(),
-    version='0.11',
+    version='0.12',
     description='Investigate mass spectra for chemical substances, especially ETD products.',
     author=u'Mateusz Krzysztof Łącki',
     author_email='matteo.lacki@gmail.com',
