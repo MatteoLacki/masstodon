@@ -18,6 +18,9 @@
 
 from setuptools import setup, find_packages
 
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
 setup(
     name='masstodon',
     packages=find_packages(),
@@ -52,6 +55,8 @@ setup(
         'matplotlib',
         'intervaltree'
         ],
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     # scripts=[
     #     'bin/masstodon',
     #     'bin/masstodon_example_call',

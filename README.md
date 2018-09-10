@@ -3,11 +3,9 @@
 A Python module investigating the Electron Transfer Dissociation in Mass Spectrometry
 
 # Prerequisites
-This software works with Python3.
+Python3
 
 # Installation
-
-The package will be available on Python Package index.
 ```
 pip install masstodon
 ```
