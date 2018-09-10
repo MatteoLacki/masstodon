@@ -5,7 +5,10 @@
 from   collections          import  defaultdict, namedtuple, Counter
 import numpy                as      np
 import networkx             as      nx
-import matplotlib.pyplot    as      plt
+try:
+    import matplotlib.pyplot as plt
+except RuntimeError:
+    print('Warning: Python not installed as framework. You will not be able to use matplotlib.')
 from   time                 import  time
 from   math                 import  log10, floor
 

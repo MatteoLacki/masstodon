@@ -1,7 +1,6 @@
 """Various operations on arrays."""
-
 import numpy as np
-import pandas as pd
+import unittest
 
 
 def is_sorted(x):
@@ -28,12 +27,27 @@ def dedup_sort(x, y,
     -------
     tuple of np.arrays: fixed 'x' and 'y'.
     """
-    if drop_duplicates or sort:
-        d = pd.DataFrame({'x':x, 'y':y})
-        if drop_duplicates:
-            d = d.drop_duplicates(subset='x', keep=False)
-        if sort:
-            d = d.sort_values(['x'])
-        return d.x.values, d.y.values
-    else:
-        return x, y
+    if drop_duplicates:
+        elements, counts = np.unique(x, return_counts = True)
+        unique_entries   = np.isin(x, elements[counts == 1])
+        x = x[unique_entries]
+        y = y[unique_entries]
+    if sort:
+        i = np.argsort(x)
+        x = x[i]
+        y = y[i]
+    return x, y
+
+
+class Test_operations(unittest.TestCase):
+    def test_dedup_sort(self):
+        """Testing deduplication and sorting."""
+        x = np.array([1, 2, 1, 3, 5])
+        y = np.array(['a', 'b', 'c', 'd', 'e'])
+        x_, y_ = dedup_sort(x, y)
+        self.assertTrue(all(x_ == np.array([2,3,5])))
+        self.assertTrue(all(y_ == np.array(['b','d','e'])))
+
+
+if __name__ == "__main__":
+    unittest.main()

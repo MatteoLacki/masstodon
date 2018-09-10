@@ -5,7 +5,7 @@ https://gist.github.com/tinybike/d9ff1dad515b66cc0d87
 """
 
 def weighted_median(data, weights):
-    """Calculate the weighted median."""twine upload -r test
+    """Calculate the weighted median."""
     data, weights = np.array(data).squeeze(), np.array(weights).squeeze()
     s_data, s_weights = map(np.array, zip(*sorted(zip(data, weights))))
     midpoint = 0.5 * sum(s_weights)
