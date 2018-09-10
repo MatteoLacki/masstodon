@@ -1,4 +1,8 @@
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except RuntimeError:
+    print('Warning: Python not installed as framework. You will not be able to use matplotlib.')
+    pass
 import numpy as np
 import scipy.optimize
 

@@ -42,6 +42,7 @@ setup(
         'Programming Language :: Python :: 3.6'],
     install_requires=[
         'numpy',
+        'scipy',
         # 'pyteomics>=3.4.1',
         # 'lxml',
         'cvxopt',

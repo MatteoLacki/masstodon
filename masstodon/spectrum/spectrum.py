@@ -1,5 +1,8 @@
 from   bisect            import bisect_left, bisect_right
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except RuntimeError:
+    print('Warning: Python not installed as framework. You will not be able to use matplotlib.')
 import numpy             as np
 
 from masstodon.arrays.operations import dedup_sort

@@ -16,7 +16,10 @@
 #   Version 3 along with MassTodon.  If not, see
 #   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 import numpy as np
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except RuntimeError:
+    print('Warning: Python not installed as framework. You will not be able to use matplotlib.')
 
 from masstodon.measure.measure import Measure
 
