@@ -48,7 +48,7 @@ setup(
         'scipy',
         # 'pyteomics>=3.4.1',
         # 'lxml',
-        'cvxopt',
+        'cvxopt', # needed for the bloody cz-matching.
         'cffi',
         'IsoSpecPy<2.0',
         'networkx>=2.0',
