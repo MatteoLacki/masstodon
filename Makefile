@@ -1,14 +1,16 @@
-testpypi_install: ## Install from testpypi
-	virtualenv -p python3 ../testpypi
-	../testpypi/bin/pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple masstodon
-
 testpypi_upload: ## Upload repo to testpypi
 	twine upload -r test dist
 
-pypi_upload: ## upload repo to pypi
+pypi_upload: ## Upload repo to pypi
 	twine upload -r pypi --skip-existing dist/*
 
+testpypi_install: ## Install from testpypi
+	rm -rf ../testpypi || true
+	virtualenv -p python3 ../testpypi
+	../testpypi/bin/pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple masstodon
+
 pypi_install: ## Install from testpypi
+	rm -rf ../pypi || true
 	virtualenv -p python3 ../pypi
 	../pypi/bin/pip install masstodon
 
