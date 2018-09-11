@@ -66,16 +66,16 @@ imperator.impera()
 imperator.set_estimated_intensities()
 
 
-cz_simple   = SimpleCzMatch(good_mols, charge)
-cz          = CzMatch(good_mols, charge)
+cz_simple = SimpleCzMatch(good_mols, charge)
+cz        = CzMatch(good_mols, charge)
 
 # observed_mols = [m for m in good_mols if m.intensity > 0]
 # 373 out of 60K
 
 
-from masstodon.masstodon import masstodon_base
 
-todon = masstodon_base(mz, intensity, fasta, charge)
+
+
 
 
 
@@ -84,10 +84,7 @@ todon = masstodon_base(mz, intensity, fasta, charge)
 a, i = max([ (s.XY()[0].shape[1], i) for i, s in enumerate(imperator.solutions)])
 X, Y = imperator.solutions[i].XY()
 X.shape
-
 from masstodon.stats.weighted_median import weighted_median
-
-
 np.all(X >= 0)
 X.shape, Y.shape
 from itertools import combinations

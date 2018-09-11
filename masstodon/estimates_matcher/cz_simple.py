@@ -263,13 +263,17 @@ class SimpleCzMatch(object):
         return {n:f"${n.type}_"+"{"+f"{n.no}"+"}^{"+f"{n.q}"+"}$\n"+f"{d['intensity']}"
                 for n, d in G.nodes(data=True)}
 
-    def plot(self, plt_style       = 'fast',
+    def plot(self, plt_style       = 'seaborn-poster',
                    node_size       = 10,
                    node_label_size = 10,
                    edge_label_size = 9,
+                   cut_zero_edges  = True,
                    show            = True):
         plt.style.use(plt_style)
         G = union_all(cc for cc in get_ccs(self.graph) if len(cc) > 1)
+        if cut_zero_edges:
+            G.remove_edges_from([(a,b) for a,b,d in G.edges(data=True) if d['flow'] == 0])
+            G = union_all(cc for cc in get_ccs(G) if len(cc) > 1)
         layout = nx.spring_layout(G)
         labels = self._get_edge_labels_4_plot(G)
         node_labels = nx.draw_networkx_labels(G, pos       = layout,
