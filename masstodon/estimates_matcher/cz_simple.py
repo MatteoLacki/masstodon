@@ -14,14 +14,19 @@
 #   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
 #   Version 3 along with MassTodon.  If not, see
 #   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
-from    collections                 import  Counter, namedtuple
-import  networkx                    as      nx
-from    networkx                    import  connected_component_subgraphs as get_ccs
-from    networkx.linalg.graphmatrix import  incidence_matrix
-import  numpy                       as      np
-from    scipy.optimize              import  linprog
+from    collections                         import  Counter, namedtuple
+try:
+    import matplotlib.pyplot as plt
+except RuntimeError:
+    pass
+import  networkx                            as      nx
+from    networkx                            import  connected_component_subgraphs as get_ccs
+from    networkx.algorithms.operators.all   import  union_all
+from    networkx.linalg.graphmatrix         import  incidence_matrix
+import  numpy                               as      np
+from    scipy.optimize                      import  linprog
 
-from masstodon.write.csv_tsv  import write_rows
+from    masstodon.write.csv_tsv             import  write_rows
 
 
 def G_to_linprog_args(G):
@@ -59,34 +64,27 @@ class SimpleCzMatch(object):
         A list containing reaction products from one precusor.
     precursor_charge : int
         The charge of the precursor molecule.
-    show_progress : boolean
-        Show progress of the CVXOPT calculations.
-    maxiters : int
-        Maximum number of iterations for the CVXOPT algorithm.
-
     """
     def __init__(self,
                  molecules,
-                 precursor_charge,
-                 show_progress=False,
-                 maxiters=1000,
-                 **kwds):
+                 precursor_charge):
         self._molecules = molecules
         self._Q = int(precursor_charge)
         # we prepend _I_ for 'intensity'
-        self._I_ETDorHTR_bond = Counter()
-        self._I_ETDorHTR        = 0.0
-        self._I_ETnoD_precursor = 0.0
-        self._I_PTR_precursor   = 0.0
+        self._I_ETDorHTR_bond       = Counter()
+        self._I_ETDorHTR            = 0.0
+        self._I_ETnoD_precursor     = 0.0
+        self._I_PTR_precursor       = 0.0
         self._I_ETnoD_PTR_precursor = Counter()  # len(ETnoD), len(PTR) -> Intensity
         self._I_ETnoD_PTR_fragments = 0.0
-        self._I_ETnoD_PTR_bond = Counter()
-        self._I_lavish = 0.0
+        self._I_ETnoD_PTR_bond      = Counter()
+        self._I_lavish              = 0.0
         self._make_graph()
-        # self._match()
-        # self.intensities = self._get_intensities()
-        # self.probabilities = self._get_probabilities()
-        # self.branching_ratio = self._I_PTR_precursor / self._I_ETnoD_precursor if self._I_ETnoD_precursor else None
+        self._errors = []
+        self._match()
+        self.intensities     = self._get_intensities()
+        self.probabilities   = self._get_probabilities()
+        self.branching_ratio = self._I_PTR_precursor / self._I_ETnoD_precursor if self._I_ETnoD_precursor else None
 
     def _get_node(self, molecule):
         """Define what should be hashed as graph node."""
@@ -155,12 +153,10 @@ class SimpleCzMatch(object):
                 sol = linprog(method ='simplex', c=c, A_eq=A_eq, b_eq=b_eq)
                 self._I_ETnoD_PTR_fragments += sol['fun']
                 for i, (N, M) in enumerate(G.edges()):
-                    print(i, N, M)
-                    # print(self.graph[N][M]['flow'])
                     self.graph[N][M]['flow'] = sol['x'][i]
             except TypeError:
-                self.error = G, c, A_eq, b_eq
-                raise TypeError
+                self._errors.append((G, c, A_eq, b_eq))
+                raise TypeError('The linprog did not work out the solution.')
         else:
             self._I_ETnoD_PTR_fragments += lavish
             N, N_intensity = list(G.nodes.data('intensity'))[0]
@@ -233,13 +229,18 @@ class SimpleCzMatch(object):
 
     def _iter_probabilities(self):
         """Generate rows for a csv/tsv file with estimated probabilities."""
-
         if self._I_ETnoD_precursor + self._I_PTR_precursor > 0:
-            yield ('probability', 'ETnoD (precusor)', "{:10.3f}%".format(100 * self._P_ETnoD_precursor))
-            yield ('probability', 'PTR (precusor)', "{:10.3f}%".format(100 * self._P_PTR_precursor))
+            yield ('probability',
+                   'ETnoD (precusor)',
+                   "{:10.3f}%".format(100 * self._P_ETnoD_precursor))
+            yield ('probability',
+                   'PTR (precusor)',
+                   "{:10.3f}%".format(100 * self._P_PTR_precursor))
 
         if self._I_total_ETnoDorPTR > 0:
-            yield ('probability', 'ETnoD of PTR', "{:10.3f}%".format(100 * self._P_ETnoD_PTR))
+            yield ('probability',
+                   'ETnoD of PTR',
+                   "{:10.3f}%".format(100 * self._P_ETnoD_PTR))
 
         if self._I_reactions > 0:
             yield ('probability', 'fragmentation', "{:10.3f}%".format(100 * self._P_fragmentation))
@@ -248,12 +249,37 @@ class SimpleCzMatch(object):
             for no, v in bonds:
                 yield ('', 'bond %d' % no, "{:10.3f}%".format(100 * v) )
 
-    def write(self, path):
+    def write(self, path=''):
         """Write intensities and probabilities to a given path."""
-        write_rows(self._iter_intensities(), path + 'simple_pairing_intensities.csv')
+        write_rows(self._iter_intensities(),   path + 'simple_pairing_intensities.csv')
         write_rows(self._iter_probabilities(), path + 'simple_pairing_probabilities.csv')
 
     def _match(self):
         """Pair molecules minimizing the number of reactions and calculate the resulting probabilities."""
         for G in get_ccs(self.graph):
             self._optimize(G)
+
+    def _get_edge_labels_4_plot(self, G):
+        return {n:f"${n.type}_"+"{"+f"{n.no}"+"}^{"+f"{n.q}"+"}$\n"+f"{d['intensity']}"
+                for n, d in G.nodes(data=True)}
+
+    def plot(self, plt_style       = 'fast',
+                   node_size       = 10,
+                   node_label_size = 10,
+                   edge_label_size = 9,
+                   show            = True):
+        plt.style.use(plt_style)
+        G = union_all(cc for cc in get_ccs(self.graph) if len(cc) > 1)
+        layout = nx.spring_layout(G)
+        labels = self._get_edge_labels_4_plot(G)
+        node_labels = nx.draw_networkx_labels(G, pos       = layout,
+                                                 labels    = labels,
+                                                 font_size = node_label_size)
+        nx.draw_networkx_nodes(G, pos=layout, node_size=node_size)
+        edge_labels = {(a,b): str(int(G[a][b]['flow'])) for a,b in G.edges}
+        nx.draw_networkx_edge_labels(G, pos         = layout,
+                                        edge_labels = edge_labels,
+                                        font_size   = edge_label_size)
+        nx.draw_networkx_edges(G, pos=layout)
+        if show:
+            plt.show()

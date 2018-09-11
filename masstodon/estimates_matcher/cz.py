@@ -24,7 +24,7 @@ Node = namedtuple('Node', 'type no bp q g')
 
 
 class CzMatch(SimpleCzMatch):
-    def __init__(self, **kwds):
+    def __init__(self, molecules, precursor_charge):
         """Match c and z ions' intensities.
 
         Parameters
@@ -33,16 +33,14 @@ class CzMatch(SimpleCzMatch):
             A list containing reaction products from one precusor.
         precursor_charge : int
             The charge of the precursor molecule.
-
         """
         self._I_ETnoD_fragments = 0
-        self._I_PTR_fragments = 0
-        super().__init__(**kwds)
+        self._I_PTR_fragments   = 0
+        super().__init__(molecules, precursor_charge)
 
     def _get_node(self, molecule):
         """Define what should be hashed as graph node."""
         mt, po, cs = molecule._molType_position_cleavageSite()
-
         return Node(mt, po, cs, molecule.q, molecule.g)
 
     def _add_edge(self, C, Z):
@@ -67,7 +65,11 @@ class CzMatch(SimpleCzMatch):
                                       PTR= Q-1 -C.g -Z.g -C.q -Z.q,
                                       ETnoD_PTR= Q -1 -C.q -Z.q)
 
-    def write(self, path):
+    def write(self, path=''):
         """Write intensities and probabilities to a given path."""
         write_rows(self._iter_intensities(), path + 'pairing_intensities.csv')
         write_rows(self._iter_probabilities(), path + 'pairing_probabilities.csv')
+
+    def _get_edge_labels_4_plot(self, G):
+        return {n:f"${n.type}_"+"{"+f"{n.no}"+"}^{"+f"{n.q}+{n.g}"+"}$\n"+f"{d['intensity']}"
+                for n, d in G.nodes(data=True)}

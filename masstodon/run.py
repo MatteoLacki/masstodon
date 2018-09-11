@@ -1,6 +1,6 @@
-# %load_ext autoreload
-# %autoreload 2
-# %load_ext line_profiler
+%load_ext autoreload
+%autoreload 2
+%load_ext line_profiler
 
 from   collections  import  defaultdict, namedtuple, Counter
 import numpy        as      np
@@ -19,7 +19,9 @@ from masstodon.spectrum.spectrum           import spectrum
 from masstodon.models.polynomial           import polynomial
 from masstodon.preprocessing.filters       import filter_subspectra_molecules
 from masstodon.deconvolve.divide_ed_impera import divide_ed_impera
+from masstodon.deconvolve.divide_ed_impera import Imperator
 from masstodon.estimates_matcher.cz_simple import SimpleCzMatch
+from masstodon.estimates_matcher.cz        import CzMatch
 
 # if __name__ == '__main__':
     # generating subspectra
@@ -52,85 +54,27 @@ good_mols, good_subspectra = filter_subspectra_molecules(subspectra,
                                                          mols,
                                                          std_cnt = 3)
 
-
-
-t0        = time()
-imperator = divide_ed_impera(good_mols, spec.bc, min_prob, isotopic_coverage)
-fit_time  = time() - t0
+# t0        = time()
+# imperator = divide_ed_impera(good_mols, spec.bc, min_prob, isotopic_coverage)
+# fit_time  = time() - t0
 
 # imperator.save_graph("G.gpickle")
 # imperator.load_graph("G.gpickle")
-cz = SimpleCzMatch(good_mols, charge, True)
-cz._match()
-
-G, c, A_eq, b_eq = cz.error
-
-list(G.edges(data=True))
-list(G.nodes(data=True))
+imperator = Imperator(good_mols, spec.bc, min_prob, isotopic_coverage)
+imperator.load_graph('G.gpickle')
+imperator.impera()
+imperator.set_estimated_intensities()
 
 
-
-c = Node('z', 49, 107, 5)
-z = Node('c', 107, 107, 11)
-
-cz.graph[c][z]['flow']
-cz.graph.edges[(c,z)]['flow'] = 23
-cz.graph[z][c]['flow']
-
-
-
-
-cz.graph.edges(data=True)
-cz.graph.nodes
-e = next(cz.graph.edges)
-
-cz.graph.edges
+cz_simple = SimpleCzMatch(good_mols, charge)
+cz = CzMatch(good_mols, charge)
 
 
 # observed_mols = [m for m in good_mols if m.intensity > 0]
 # 373 out of 60K
-from networkx import connected_component_subgraphs as connected_components
-
-ccs = list(connected_components(cz.graph))
-
-from masstodon.estimates_matcher.cz_simple import SimpleCzMatch
 
 
-
-
-G = ccs[63]
-
-
-
-
-
-
-
-
-
-## thus, it is ok to recode it and scrap CVXOPT altogether
-
-from networkx.drawing.nx_agraph import to_agraph 
-import networkx as nx
-layout = nx.spring_layout(G)
-nx.draw_networkx_nodes(G, pos = layout, node_color = 'orange')
-nx.draw_networkx_edges(G, pos = layout, edge_color = 'green')
-plt.show()
-
-
-
-# A = to_agraph(G) 
-# A.layout('dot')                                                                 
-# A.draw('multi.png') 
-
-#
-
-
-
-
-
-
-
+cz_simple.write()
 
 
 
@@ -165,8 +109,6 @@ min((v, k) for k, v in l1_distances.items())
 
 X[:,1]
 X[:,11]
-
-
 weighted_median()
 
 

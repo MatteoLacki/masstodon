@@ -64,11 +64,11 @@
 # .7.......7...O....O...O... I.......Z.....Z....Z... $...O...O...$....O...O....Z..
 # .7.......7....OOOOO....ZOZI....:ZOZ......Z.....ZOZ7.....OZZ.....7ZOZ....Z....Z..
 # ................................................................................
-from collections    import Counter
-from math           import ceil, log10
-from time           import time
-import csv
-import os
+from    collections import Counter
+from    math        import ceil, log10
+from    time        import time
+import  csv
+import  os
 
 # from masstodon.data.constants             import eps
 # from masstodon.ceconvolution.Deconvolve   import build_deconvolution_graph

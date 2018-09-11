@@ -18,6 +18,8 @@ dist
 *.egg-info
 *.csv
 *.swp
+*.gpickle
+
 
 # HTML
 *.html
