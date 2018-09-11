@@ -2,15 +2,14 @@
 %autoreload 2
 %load_ext line_profiler
 
-from   collections  import  defaultdict, namedtuple, Counter
 import numpy        as      np
 import networkx     as      nx
 try:
     import matplotlib.pyplot as plt
 except RuntimeError:
     pass
-from   time                 import  time
-from   math                 import  log10, floor
+from   time         import  time
+from   math         import  log10, floor
 
 from masstodon.readers.from_npy            import spectrum_from_npy
 from masstodon.precursor.precursor         import precursor
@@ -50,6 +49,7 @@ prec   = precursor(fasta, charge, name="", iso_calc=iso_calc)
 mols   = np.array(list(prec.molecules()))
 min_prob = .8
 isotopic_coverage = .999
+
 good_mols, good_subspectra = filter_subspectra_molecules(subspectra,
                                                          mols,
                                                          std_cnt = 3)
@@ -66,17 +66,16 @@ imperator.impera()
 imperator.set_estimated_intensities()
 
 
-cz_simple = SimpleCzMatch(good_mols, charge)
-cz = CzMatch(good_mols, charge)
-
+cz_simple   = SimpleCzMatch(good_mols, charge)
+cz          = CzMatch(good_mols, charge)
 
 # observed_mols = [m for m in good_mols if m.intensity > 0]
 # 373 out of 60K
 
 
-cz_simple.write()
+from masstodon.masstodon import masstodon_base
 
-
+todon = masstodon_base(mz, intensity, fasta, charge)
 
 
 

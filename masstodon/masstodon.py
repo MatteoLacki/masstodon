@@ -64,212 +64,126 @@
 # .7.......7...O....O...O... I.......Z.....Z....Z... $...O...O...$....O...O....Z..
 # .7.......7....OOOOO....ZOZI....:ZOZ......Z.....ZOZ7.....OZZ.....7ZOZ....Z....Z..
 # ................................................................................
-from    collections import Counter
-from    math        import ceil, log10
-from    time        import time
-import  csv
-import  os
+import numpy as np
+from time import time
 
-# from masstodon.data.constants             import eps
-# from masstodon.ceconvolution.Deconvolve   import build_deconvolution_graph
-# from masstodon.Deconvolution.Deconvolve   import deconvolve
-# from masstodon.MatchMaker.CzMatch         import CzMatch
-# from masstodon.MatchMaker.SimpleCzMatch   import SimpleCzMatch
-# from masstodon.Parsers.Paths              import parse_path
-# from masstodon.Plot.bokeh_spectrum        import bokeh_spectrum
-# from masstodon.Precursor.Precursor        import Precursor
-# from masstodon.Spectra.Spectrum           import Spectrum
-# from masstodon.Reporter.Reporter          import Reporter
-
-# #TODO: simplify this call: there are way too many explicit arguments
-# class MassTodon(object):
-#     def __init__(self,
-#                  spectrum,
-#                  fasta,
-#                  charge,
-#                  mz_tol,
-#                  mz_digits=-10.,
-#                  name="",
-#                  modifications={},
-#                  fragments="cz",
-#                  blocked_fragments=set(['c0']),
-#                  block_prolines=True,
-#                  distance_charges=5.,
-#                  min_intensity=eps,
-#                  percent_top_peaks=.999,
-#                  deconvolution_method='Matteo',
-#                  joint_probability=.999,
-#                  min_prob_per_molecule=.7,
-#                  _max_buffer_len=0.5,
-#                  _L1_flow=0.01,
-#                  _L2_flow=0.01,
-#                  _L1_intensity=0.01,
-#                  _L2_intensity=0.01,
-#                  _max_times=10.,
-#                  _show_progress=False,
-#                  _maxiters=1000.,
-#                  _verbose=False,
-#                  sigma2=.1,
-#                  ni2=.1):
-#         """Run a full session of the MassTodon.
-
-#         Parameters
-#         ==========
-#         spectrum : st, tuple of numpy.arrays, or an instance of Spectrum
-#             The string path can end with:
-#                 *.txt, for spectra saved in tab separated format.
-#                 *.mzXml, for spectra saved in mzXml format.
-#                 *.mzml, for spectra saved mzml format.
-#             The tuple consists of two numpy arrays:
-#                 one with m over z ratios,
-#                 the other with intensities.
-#         fasta : str
-#             The FASTA sequence of the protein to study.
-#         charge : int
-#             The initial charge of the precursor filtered out in MS1.
-#         mz_tol : float
-#             The tolerance in the m/z axis.
-#             Ultimately turned into a function mz_tol(mz),
-#             reporting the tolerance interval - a tuple '(mz_L, mz_R)',
-#             where mz_L = mz - mz_tol and mz_R = mz + mz_tol.
-#             Accepts user-provided functions too: in that case, the header should be
-#             'def mz_tol(mz):' and it should return a tuple '(mz_L, mz_R)'.
-#             If providing a function, it is necessary to provide
-#             mz_digits.
-#         mz_digits : int
-#             The number of significant digits used for m/z representation.
-#             If not explicitly provided, set to 'int(ceil(-log10(mz_tol)))'.
-#             Defaults to nonsensical -10.
-#         name : str
-#             The precursor's name.
-#         modifications : dictionary
-#             A dictionary of modifications.
-#         fragments : str
-#             Only 'cz' accepted for now.
-#             Planning other fragmentation schemes, including inner fragments.
-#         blocked_fragments : list
-#             Fragments you don't want to include, e.g. 'z5'.
-#         block_prolines : boolean
-#             Should we block prolines?
-#         distance_charges :
-#             The minimal distance between charges on the fasta sequence.
-#             Defaults to charges being 4 amino acids apart.
-#         min_intensity : float
-#             Experimental peaks with lower height will be trimmed.
-#         percent_top_peaks : float
-#             Percentage of the heighest peaks in the spectrum to be included.
-#         deconvolution_method : str
-#             Input 'Matteo' for MassTodon paper deconvolution.
-#             Input 'Ciacho_Wanda' for gaussian kernel deconvolution.
-#         joint_probability : float
-#             The joint probability of the calculated isotopic distribution.
-#             Defaults to a decent '0.999'.
-#         min_prob_per_molecule : float
-#             The minimal probability an envelope has to scoop
-#             to be included in the deconvolution graph.
-#         _max_buffer_len : float
-#             The maximal length of the visual buffer between peaks, i.e.
-#             the big rectangle width.
-#         _L1_flow : float
-#             L1 penalty for high flows of intensities.
-#         _L2_flow : float
-#             L2 penalty (a.k.a. ridge regression like) for high flows of intensities.
-#         _L1_intensity : float
-#             L1 penalty for high intensity estimates.
-#         _L2_intensities : float
-#             L2 penalty (a.k.a. ridge regression like) for high intensities.
-#         _max_times : int
-#             The maximal number of times to run CVXOPT.
-#         _show_progress : boolean
-#             Show progress of the CVXOPT calculations.
-#         _maxiters : int
-#             Maximum number of iterations for the CVXOPT algorithm.
-#         _verbose : boolean
-#             Should we show the content in a verbose mode?
-#         sigma2 : float
-#             Variance of the experimental peak's m/z ratio.
-#         ni2 : float
-#             Variance of the theoretic isotopologue's m/z ratio.
-#         """
-#         self.times = {}
-#         t0 = time()
-#         if isinstance(mz_tol, str):
-#             mz_tol = float(mz_tol)
-#         if not isinstance(mz_tol, float):
-#             assert isinstance(mz_digits, int) and mz_digits != -10
-#         self.mz_digits = int(ceil(-log10(mz_tol))) if mz_digits in (-10,'-10') else mz_digits
-#         self.precursor = Precursor(name=name,
-#                                    fasta=fasta,
-#                                    charge=charge,
-#                                    modifications=modifications,
-#                                    fragments=fragments,
-#                                    blocked_fragments=blocked_fragments,
-#                                    block_prolines=block_prolines,
-#                                    distance_charges=distance_charges)
-#         self.molecules = list(self.precursor.molecules())
-#         t1 = time()
-#         self.times["creating_molecules"] = t1 - t0
-#         self.spectrum = Spectrum(spectrum=spectrum,
-#                                  mz_digits=self.mz_digits,
-#                                  min_intensity=min_intensity,
-#                                  percent_top_peaks=percent_top_peaks)
-#         t2 = time()
-#         self.times["spectrum_preprocessing"] = t2 - t1
-#         self.deconvolution_method = deconvolution_method
-#         self.deconvolution_graph = \
-#             build_deconvolution_graph(molecules=self.molecules, 
-#                                       spectrum=self.spectrum,
-#                                       mz_tol=mz_tol,
-#                                       min_prob_per_molecule=min_prob_per_molecule,
-#                                      _verbose=_verbose,
-#                                       method=deconvolution_method,
-#                                       # IsoSpec arguments:
-#                                       joint_probability=joint_probability, 
-#                                       mz_digits=self.mz_digits)
-#         t3 = time()
-#         self.times["deconvolution_graph"] = t3 - t2
-#         self.solutions = \
-#             deconvolve(deconvolution_graph=self.deconvolution_graph,
-#                        method=self.deconvolution_method,
-#                       _verbose=_verbose,
-#                        # deconvutor arguments
-#                        L1_flow=_L1_flow,
-#                        L2_flow=_L2_flow,
-#                        L1_intensity=_L1_intensity,
-#                        L2_intensity=_L2_intensity,
-#                        max_times=_max_times,
-#                        show_progress=_show_progress,
-#                        maxiters=_maxiters)
-#         #TODO: leaving as generator causes problems: no 'len' to call later on.
-#         self.solutions = list(self.solutions)
-#         t4 = time()
-#         self.times["deconvolution"] = t4 - t3
-#         self.report = Reporter(masstodon=self,
-#                                max_buffer_len=_max_buffer_len)
-#         t5 = time()
-#         self.times["report"] = t5 - t4
-#         #TODO: change the code below so that it could handle
-#         #      reaction products from different precursors
-#         #TODO: make it work with a,b,x,y fragment types
-#         self.simple_cz_match = \
-#             SimpleCzMatch(molecules=self.molecules,
-#                           precursor_charge=self.precursor.q)
-#         t6 = time()
-#         self.times["simple_cz_match"] = t6 - t5
-#         self.cz_match = \
-#             CzMatch(molecules=self.molecules,
-#                     precursor_charge=self.precursor.q)
-#         t7 = time()
-#         self.times["cz_match"] = t7 - t6
+from masstodon.deconvolve.divide_ed_impera import divide_ed_impera, Imperator
+from masstodon.estimates_matcher.cz        import CzMatch
+from masstodon.estimates_matcher.cz_simple import SimpleCzMatch
+from masstodon.isotopes                    import isotope_calculator
+from masstodon.precursor.precursor         import precursor
+from masstodon.preprocessing.filters       import filter_subspectra_molecules
+from masstodon.spectrum.spectrum           import spectrum
 
 
-#     def write(self, path):
-#         """Write results to path."""
-#         self.report.write(path)
-#         self.simple_cz_match.write(path)
-#         self.cz_match.write(path)
-#         with open(os.path.join(path, 'dict.csv'), 'w') as h:
-#             writer = csv.writer(h)
-#             for key, value in self.times.items():
-#                 writer.writerow([key, value])
+class MasstodonBase(object):
+    def set_spectrum(self, mz, intensity):
+        self.spec = spectrum(mz, intensity)
+        self.spec.bitonic_clustering()
+        self.spec.min_mz_diff_clustering()
+        self.subspectra = list(self.spec.iter_min_mz_diff_subspectra())
+
+    def set_isotopic_calculator(self):
+        mz_digits = self.spec.bc.get_smallest_diff_digits()
+        self.iso_calc = isotope_calculator(digits=mz_digits)
+
+    def set_molecules(self, fasta, charge, name, 
+                      modifications, fragments,
+                      blocked_fragments, block_prolines,
+                      distance_charges):
+        self.prec = precursor(fasta, charge, name, modifications, fragments,
+                              blocked_fragments, block_prolines, distance_charges,
+                              iso_calc = self.iso_calc)
+        self.mols = np.array(list(self.prec.molecules()))
+
+    def trivial_divide_et_impera(self, std_cnt=3):
+        self.good_mols, self.good_subspectra = filter_subspectra_molecules(self.subspectra,
+                                                                           self.mols,
+                                                                           std_cnt = 3)
+
+    def divide_et_impera(self, min_prob, isotopic_coverage):
+        self.imperator = divide_ed_impera(self.good_mols,
+                                          self.spec.bc,
+                                          min_prob,
+                                          isotopic_coverage)
+
+    def load_imperator(self, min_prob, isotopic_coverage, deconvolution_graph_path):
+        self.imperator = Imperator(self.good_mols,
+                                   self.spec.bc,
+                                   min_prob,
+                                   isotopic_coverage)
+        self.imperator.load_graph(deconvolution_graph_path)
+        self.imperator.impera()
+        self.imperator.set_estimated_intensities()
+
+    def match_estimates(self):
+        self.cz_simple = SimpleCzMatch(self.good_mols, self.prec.q)
+        self.cz = CzMatch(self.good_mols, self.prec.q)
+
+    def write(self, path):
+        """Write results to path."""
+        # self.report.write(path)
+        self.cz.write(path)
+        self.cz_simple.write(path)
+
+
+def masstodon_base(mz, intensity, fasta, charge,
+                   name             = "", 
+                   modifications    = {},
+                   fragments        = "cz",
+                   blocked_fragments= set(['c0']),
+                   block_prolines   = True,
+                   distance_charges = 5.,
+                   std_cnt          = 3,
+                   isotopic_coverage= .999,
+                   min_prob         = .7,
+                   deconvolution_graph_path = '',
+                   _verbose         = False):
+    """Run a basic session of the MassTodon.
+
+    Parameters
+    ==========
+    mz : np.array
+        Observed mass to charge ratios.
+    intensity : np.array
+        Observed intensities (corresponding to mass to charge ratios).
+    fasta : str
+        The FASTA sequence of the protein to study.
+    charge : int
+        The initial charge of the precursor filtered out in MS1.
+    name : str
+        The precursor's name.
+    modifications : dictionary
+        A dictionary of modifications.
+    fragments : str
+        Only 'cz' accepted for now.
+        Planning other fragmentation schemes, including inner fragments.
+    blocked_fragments : list
+        Fragments you don't want to include, e.g. 'z5'.
+    block_prolines : boolean
+        Should we block prolines?
+    distance_charges :
+        The minimal distance between charges on the fasta sequence.
+        Defaults to charges being 4 amino acids apart.
+    isotopic_coverage : float
+        The joint probability of the calculated isotopic distribution.
+        Defaults to a decent '0.999'.
+    min_prob : float
+        The minimal probability an envelope has to scoop
+        to be included in the deconvolution graph.
+    _verbose : boolean
+        Should we show the content in a verbose mode?
+    """
+    todon = MasstodonBase()
+    todon.set_spectrum(mz, intensity)
+    todon.set_isotopic_calculator()
+    todon.set_molecules(fasta, charge, name, modifications, fragments,
+                        blocked_fragments, block_prolines, distance_charges)
+    todon.trivial_divide_et_impera(std_cnt)
+    if not deconvolution_graph_path:
+        todon.divide_et_impera(min_prob, isotopic_coverage)
+    else:
+        todon.load_imperator(min_prob, isotopic_coverage, deconvolution_graph_path)
+    todon.match_estimates()
+    return todon
 
