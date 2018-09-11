@@ -14,31 +14,41 @@
 #   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
 #   Version 3 along with MassTodon.  If not, see
 #   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
-from collections import Counter, namedtuple
-from cvxopt import  matrix, spmatrix, sparse, spdiag, solvers
-import networkx as nx
-from networkx import connected_component_subgraphs as connected_components
+from    collections                 import  Counter, namedtuple
+import  networkx                    as      nx
+from    networkx                    import  connected_component_subgraphs as get_ccs
+from    networkx.linalg.graphmatrix import  incidence_matrix
+import  numpy                       as      np
+from    scipy.optimize              import  linprog
 
-from masstodon.data.constants import eps, infinity
 from masstodon.write.csv_tsv  import write_rows
 
 
-def diag(val, dim):
-    """Make a sparse identity matrix multiplied by a scalar val."""
-    return spdiag([spmatrix(val,[0],[0]) for i in range(dim)])
+def G_to_linprog_args(G):
+    """Get equality constraints for the pairing problem.
 
+    Parameters
+    ==========
+    G : nx.graph
+        The connected component to be analysed.
 
-def incidence_matrix(graph, row_cnt, col_cnt):
-    """Make a sparse incidence matrix of the graph G."""
-    L = spmatrix([], [], [], size=(row_cnt, col_cnt) )
-    NodesNo = dict([ (N,i) for i,N in enumerate(graph)])
-    for j, (N0, N1) in enumerate(graph.edges()):
-        L[NodesNo[N0],j] = 1
-        L[NodesNo[N1],j] = 1
-    return L
+    Returns
+    =======
+    tuple: A_eq and b_eq for A_eq x <= b_eq.
+    """
+    c = [float(ETnoD_PTR) for N,M, ETnoD_PTR in G.edges.data('ETnoD_PTR')]
+    A_eq = incidence_matrix(G).todense()
+    nodes_2_indices = {n: i for i, n in enumerate(G.nodes)}
+    for j, e in enumerate(G.edges):
+        if e[0] == e[1]:
+            i = nodes_2_indices[e[0]]
+            A_eq[i,j] = 1.0
+    b_eq = np.array([float(I) for N, I in G.nodes.data('intensity')])
+    return c, A_eq, b_eq
 
 
 Node = namedtuple('Node', 'type no bp q')
+
 
 class SimpleCzMatch(object):
     """Match c and z ions' intensities neglecting the quenched charge.
@@ -61,16 +71,13 @@ class SimpleCzMatch(object):
                  show_progress=False,
                  maxiters=1000,
                  **kwds):
-        solvers.options['show_progress'] = bool(show_progress)
-        solvers.options['maxiters'] = int(maxiters)
-
         self._molecules = molecules
         self._Q = int(precursor_charge)
-        # _I_ = Intensity
+        # we prepend _I_ for 'intensity'
         self._I_ETDorHTR_bond = Counter()
-        self._I_ETDorHTR = 0.0
+        self._I_ETDorHTR        = 0.0
         self._I_ETnoD_precursor = 0.0
-        self._I_PTR_precursor = 0.0
+        self._I_PTR_precursor   = 0.0
         self._I_ETnoD_PTR_precursor = Counter()  # len(ETnoD), len(PTR) -> Intensity
         self._I_ETnoD_PTR_fragments = 0.0
         self._I_ETnoD_PTR_bond = Counter()
@@ -96,12 +103,21 @@ class SimpleCzMatch(object):
         """Add edge between a 'c' fragment and a 'z' fragment."""
         self.graph.add_edge(N, N, ETnoD_PTR=self._Q - 1 - N.q)
 
-    def _make_graph(self):
-        """Prepare the matching graph."""
+    def _make_graph(self, round_estimates=True):
+        """Prepare the matching graph.
+
+        Parameters
+        ==========
+        round_estimates : boolean
+            Should we round the estimates down to the nearest integer (take the 'floor' of the estimate)?
+            This seems to make the simplex method more stable.
+        """
         Q = self._Q
         self.graph = nx.Graph()
         for mol in self._molecules:
             estimate = mol.intensity
+            if round_estimates:
+                estimate = int(estimate)
             if estimate > 0:
                 if mol.name == 'precursor':
                     g = mol.g
@@ -134,25 +150,17 @@ class SimpleCzMatch(object):
         lavish = sum((Q - 1 - N.q) * I for N, I in G.nodes.data('intensity'))
         self._I_lavish += lavish
         if len(G) > 1:
-            intensities = matrix([float(I) for N, I in G.nodes.data('intensity')])
-            costs = matrix([float(ETnoD_PTR) for N,M, ETnoD_PTR
-                            in G.edges.data('ETnoD_PTR')])
-            edges_cnt    = G.size()  # number of c-z pairings
-            equalities   = incidence_matrix(G, len(intensities), edges_cnt)
-            inequalities = diag(-1.0, edges_cnt)
-            upper_bounds = matrix([0.0] * edges_cnt)
-            primalstart = {}
-            primalstart['x'] = matrix([0.0] * edges_cnt)
-            primalstart['s'] = matrix([eps] * len(upper_bounds))
-            solution = solvers.conelp(c = costs,
-                                      G = inequalities,
-                                      h = upper_bounds,
-                                      A = equalities,
-                                      b = intensities,
-                                      primalstart = primalstart)
-            self._I_ETnoD_PTR_fragments += solution['primal objective']
-            for i, (N, M) in enumerate(G.edges()):
-                self.graph[N][M]['flow'] = solution['x'][i]
+            try:
+                c, A_eq, b_eq = G_to_linprog_args(G)
+                sol = linprog(method ='simplex', c=c, A_eq=A_eq, b_eq=b_eq)
+                self._I_ETnoD_PTR_fragments += sol['fun']
+                for i, (N, M) in enumerate(G.edges()):
+                    print(i, N, M)
+                    # print(self.graph[N][M]['flow'])
+                    self.graph[N][M]['flow'] = sol['x'][i]
+            except TypeError:
+                self.error = G, c, A_eq, b_eq
+                raise TypeError
         else:
             self._I_ETnoD_PTR_fragments += lavish
             N, N_intensity = list(G.nodes.data('intensity'))[0]
@@ -247,5 +255,5 @@ class SimpleCzMatch(object):
 
     def _match(self):
         """Pair molecules minimizing the number of reactions and calculate the resulting probabilities."""
-        for G in connected_components(self.graph):
+        for G in get_ccs(self.graph):
             self._optimize(G)

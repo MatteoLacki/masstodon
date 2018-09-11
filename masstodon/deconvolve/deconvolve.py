@@ -5,7 +5,7 @@ try:
 except RuntimeError:
     pass
 
-from    masstodon.models.nnls import nnls
+from masstodon.models.nnls import nnls
 
 
 class DeconvolutionProblem(object):

@@ -10,7 +10,6 @@ try:
 except RuntimeError:
     pass
 
-
 from masstodon.deconvolve.deconvolve import deconvolve 
 
 
@@ -32,6 +31,28 @@ class Imperator(object):
         for tree in self.divide_iter():
             self.G.add_edges_from((M_cnt, E, {'prob': P}) for 
                                   (M_cnt, E), P in tree.items())
+
+    def save_graph(self, path):
+        """Save the computed graph.
+
+        Do assure that the folders in the 'path' do exist beforehand.
+
+        Parameters
+        ==========
+        path : str
+            Path where to store the deconvolution graph.
+        """
+        nx.write_gpickle(self.G, path)
+
+    def load_graph(self, path):
+        """Load a computed graph.
+
+        Parameters
+        ==========
+        path : str
+            Path where the deconvolution graph is stored.
+        """
+        self.G = nx.read_gpickle(path)
 
     def divide_iter(self):
         ls = self.clust.ls
