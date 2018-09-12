@@ -19,33 +19,14 @@ todon = masstodon_base(mz, intensity, fasta, charge,
                        std_cnt           = std_cnt,
                        isotopic_coverage = isotopic_coverage)
 
-
-
 todon.imperator.plot_ccs()
-todon.cz.plot(plt_style='seaborn')
-
-todon.spec.bc is not None
-
-# import jsonpickle
-
-# frozen_todon = jsonpickle.encode(todon)
-
-# with open('test.pickle', 'w') as f:
-#     f.write(frozen_todon)
-
-# wahaha = jsonpickle.decode(frozen_todon)
-
+todon.cz.plot(plt_style='ggplot')
 todon.dump('dump')
-
-import json
-
-with open('dump/params.json', 'r') as f:
-    params = json.load(f)
 
 
 todon2 = masstodon_base_load('dump')
-todon2.spec
-todon2.imperator
+todon2.imperator.plot_ccs()
+todon2.cz.plot(plt_style='ggplot')
 todon2.dump('dump2')
 
 # final touch: the loading of the bloody graph.
