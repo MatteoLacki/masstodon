@@ -23,6 +23,12 @@ todon.imperator.plot_ccs()
 todon.cz.plot(plt_style='seaborn')
 
 
-import json
+# import jsonpickle
 
-todon.spec.clusters
+# frozen_todon = jsonpickle.encode(todon)
+
+# with open('test.pickle', 'w') as f:
+#     f.write(frozen_todon)
+
+# wahaha = jsonpickle.decode(frozen_todon)
+
