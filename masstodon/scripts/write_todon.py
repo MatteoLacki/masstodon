@@ -45,6 +45,9 @@ with open('dump/params.json', 'r') as f:
 
 todon2 = masstodon_base_load('dump')
 todon2.spec
+todon2.imperator
+todon2.dump('dump2')
 
 # final touch: the loading of the bloody graph.
 # and the saving thereof
+

@@ -149,7 +149,7 @@ class MasstodonBase(object):
                                                 'min_prob')}
         with open(pjoin(path, 'params.json'), 'w') as f:
             json.dump(params, f)
-
+        self.imperator.save_graph(pjoin(path, 'deconvolution_graph.gpickle'))
 
 
 def masstodon_base(mz, intensity, fasta, charge,
@@ -215,17 +215,20 @@ def masstodon_base(mz, intensity, fasta, charge,
     todon.set_spectrum()
     todon.set_isotopic_calculator()
     todon.set_molecules()
-    # todon.trivial_divide_et_impera()
-    # if not deconvolution_graph_path:
-    #     todon.divide_et_impera()
-    # else:
-    #     todon.load_imperator()
-    # todon.match_estimates()
+    todon.trivial_divide_et_impera()
+    if not deconvolution_graph_path:
+        todon.divide_et_impera()
+    else:
+        todon.load_imperator()
+    todon.match_estimates()
     return todon
 
 
-def masstodon_base_load(path):
+def masstodon_base_load(path,
+                        deconvolution_graph_file = 'deconvolution_graph.gpickle'):
     mz, intensity = spectrum_from_npy(path)
     with open(pjoin(path, 'params.json'), 'r') as f:
         params = json.load(f)
+    deconvolution_graph_path = pjoin(path, deconvolution_graph_file)
+    params['deconvolution_graph_path'] = deconvolution_graph_path
     return masstodon_base(mz, intensity, **params)
