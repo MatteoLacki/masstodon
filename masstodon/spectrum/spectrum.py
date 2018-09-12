@@ -4,10 +4,13 @@ try:
 except RuntimeError:
     pass
 import numpy             as np
+from   os.path import join as pjoin
+import json
 
 from masstodon.arrays.operations import dedup_sort
 from masstodon.measure.measure   import Measure
 from masstodon.plot.spectrum     import plot_spectrum
+from masstodon.readers.from_npy  import spectrum_from_npy
 from masstodon.spectrum.cluster  import min_diff_clust, bitonic_clust
 from masstodon.stats.gaussian    import mean, sd, skewness
 
@@ -36,7 +39,6 @@ class Spectrum(Measure):
                  intensity       = np.array([]),
                  sort            = True,
                  drop_duplicates = True,
-                 only_positive   = True,
                  bc              = None,
                  mdc             = None,
                  mz_diff_model   = None,
@@ -56,6 +58,10 @@ class Spectrum(Measure):
         self.mz_diff_model   = mz_diff_model
         self.min_mz_diff_bc  = min_mz_diff_bc
         self.min_mz_diff_mdc = min_mz_diff_mdc
+
+    def dump(self, path):
+        np.save(pjoin(path, 'mz'), self.mz)
+        np.save(pjoin(path, 'in'), self.intensity)
 
     @property
     def mz(self):
@@ -238,3 +244,11 @@ def spectrum(mz        = np.array([]),
              sort      = True):
     spec = Spectrum(mz, intensity, sort)
     return spec
+
+
+def load_spectrum(path):
+    mz, intensity = spectrum_from_npy(path)
+    spec = spectrum(mz,
+                    intensity,
+                    sort = False,
+                    drop_duplicates = False)

@@ -82,7 +82,7 @@ class Precursor(Molecule):
         self.formula = sum(self[number, group]
                            for number in range(len(self))
                            for group in self.groups)
-        self.blocked_fragments = blocked_fragments
+        self.blocked_fragments = set(blocked_fragments)
         self.fragments = fragments
         self.distance_charges = int(distance_charges)
         if block_prolines:

@@ -6,6 +6,9 @@ Notes/
 __pycache__
 .eggs
 
+# dumps
+dump/
+
 #R
 .Rhistory
 .Rproj.user

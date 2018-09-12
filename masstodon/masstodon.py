@@ -64,7 +64,9 @@
 # .7.......7...O....O...O... I.......Z.....Z....Z... $...O...O...$....O...O....Z..
 # .7.......7....OOOOO....ZOZI....:ZOZ......Z.....ZOZ7.....OZZ.....7ZOZ....Z....Z..
 # ................................................................................
+import json
 import numpy  as      np
+from   os.path import join as pjoin
 from   time   import  time
 
 from masstodon.deconvolve.divide_ed_impera import divide_ed_impera, Imperator
@@ -73,12 +75,16 @@ from masstodon.estimates_matcher.cz_simple import SimpleCzMatch
 from masstodon.isotopes                    import isotope_calculator
 from masstodon.precursor.precursor         import precursor
 from masstodon.preprocessing.filters       import filter_subspectra_molecules
+from masstodon.readers.from_npy            import spectrum_from_npy
 from masstodon.spectrum.spectrum           import spectrum
 
 
 class MasstodonBase(object):
-    def set_spectrum(self, mz, intensity):
-        self.spec = spectrum(mz, intensity)
+    def __init__(self, **kwds):
+        self.__dict__.update(kwds)
+
+    def set_spectrum(self):
+        self.spec = spectrum(self.mz, self.intensity)
         self.spec.bitonic_clustering()
         self.spec.min_mz_diff_clustering()
         self.subspectra = list(self.spec.iter_min_mz_diff_subspectra())
@@ -87,32 +93,35 @@ class MasstodonBase(object):
         mz_digits = self.spec.bc.get_smallest_diff_digits()
         self.iso_calc = isotope_calculator(digits=mz_digits)
 
-    def set_molecules(self, fasta, charge, name, 
-                      modifications, fragments,
-                      blocked_fragments, block_prolines,
-                      distance_charges):
-        self.prec = precursor(fasta, charge, name, modifications, fragments,
-                              blocked_fragments, block_prolines, distance_charges,
+    def set_molecules(self):
+        self.prec = precursor(self.fasta,
+                              self.charge,
+                              self.name,
+                              self.modifications,
+                              self.fragments,
+                              self.blocked_fragments,
+                              self.block_prolines,
+                              self.distance_charges,
                               iso_calc = self.iso_calc)
         self.mols = np.array(list(self.prec.molecules()))
 
-    def trivial_divide_et_impera(self, std_cnt=3):
+    def trivial_divide_et_impera(self):
         self.good_mols, self.good_subspectra = filter_subspectra_molecules(self.subspectra,
                                                                            self.mols,
-                                                                           std_cnt = 3)
+                                                                           std_cnt = self.std_cnt)
 
-    def divide_et_impera(self, min_prob, isotopic_coverage):
+    def divide_et_impera(self):
         self.imperator = divide_ed_impera(self.good_mols,
                                           self.spec.bc,
-                                          min_prob,
-                                          isotopic_coverage)
+                                          self.min_prob,
+                                          self.isotopic_coverage)
 
-    def load_imperator(self, min_prob, isotopic_coverage, deconvolution_graph_path):
+    def load_imperator(self):
         self.imperator = Imperator(self.good_mols,
                                    self.spec.bc,
-                                   min_prob,
-                                   isotopic_coverage)
-        self.imperator.load_graph(deconvolution_graph_path)
+                                   self.min_prob,
+                                   self.isotopic_coverage)
+        self.imperator.load_graph(self.deconvolution_graph_path)
         self.imperator.impera()
         self.imperator.set_estimated_intensities()
 
@@ -126,21 +135,34 @@ class MasstodonBase(object):
         self.cz_simple.write(path)
 
     def dump(self, path):
-        pass
+        self.spec.dump(path)
+        params = {k: self.__dict__[k] for k in ('fasta',
+                                                'charge',
+                                                'name',
+                                                'modifications',
+                                                'fragments',
+                                                'blocked_fragments',
+                                                'block_prolines',
+                                                'distance_charges',
+                                                'std_cnt',
+                                                'isotopic_coverage',
+                                                'min_prob')}
+        with open(pjoin(path, 'params.json'), 'w') as f:
+            json.dump(params, f)
+
 
 
 def masstodon_base(mz, intensity, fasta, charge,
                    name             = "", 
                    modifications    = {},
                    fragments        = "cz",
-                   blocked_fragments= set(['c0']),
+                   blocked_fragments= ['c0'],
                    block_prolines   = True,
                    distance_charges = 5.,
                    std_cnt          = 3,
                    isotopic_coverage= .999,
                    min_prob         = .7,
-                   deconvolution_graph_path = '',
-                   _verbose         = False):
+                   deconvolution_graph_path = ''):
     """Run a basic session of the MassTodon.
 
     Parameters
@@ -176,16 +198,34 @@ def masstodon_base(mz, intensity, fasta, charge,
     _verbose : boolean
         Should we show the content in a verbose mode?
     """
-    todon = MasstodonBase()
-    todon.set_spectrum(mz, intensity)
+    todon = MasstodonBase(mz = mz,
+                          intensity = intensity,
+                          fasta = fasta,
+                          charge = charge,
+                          name = name,
+                          modifications = modifications,
+                          fragments = fragments,
+                          blocked_fragments = blocked_fragments,
+                          block_prolines = block_prolines,
+                          distance_charges = distance_charges,
+                          std_cnt = std_cnt,
+                          isotopic_coverage = isotopic_coverage,
+                          min_prob = min_prob,
+                          deconvolution_graph_path = deconvolution_graph_path)
+    todon.set_spectrum()
     todon.set_isotopic_calculator()
-    todon.set_molecules(fasta, charge, name, modifications, fragments,
-                        blocked_fragments, block_prolines, distance_charges)
-    todon.trivial_divide_et_impera(std_cnt)
-    if not deconvolution_graph_path:
-        todon.divide_et_impera(min_prob, isotopic_coverage)
-    else:
-        todon.load_imperator(min_prob, isotopic_coverage, deconvolution_graph_path)
-    todon.match_estimates()
+    todon.set_molecules()
+    # todon.trivial_divide_et_impera()
+    # if not deconvolution_graph_path:
+    #     todon.divide_et_impera()
+    # else:
+    #     todon.load_imperator()
+    # todon.match_estimates()
     return todon
 
+
+def masstodon_base_load(path):
+    mz, intensity = spectrum_from_npy(path)
+    with open(pjoin(path, 'params.json'), 'r') as f:
+        params = json.load(f)
+    return masstodon_base(mz, intensity, **params)
