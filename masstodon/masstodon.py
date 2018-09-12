@@ -64,8 +64,8 @@
 # .7.......7...O....O...O... I.......Z.....Z....Z... $...O...O...$....O...O....Z..
 # .7.......7....OOOOO....ZOZI....:ZOZ......Z.....ZOZ7.....OZZ.....7ZOZ....Z....Z..
 # ................................................................................
-import numpy as np
-from time import time
+import numpy  as      np
+from   time   import  time
 
 from masstodon.deconvolve.divide_ed_impera import divide_ed_impera, Imperator
 from masstodon.estimates_matcher.cz        import CzMatch
@@ -120,11 +120,13 @@ class MasstodonBase(object):
         self.cz_simple = SimpleCzMatch(self.good_mols, self.prec.q)
         self.cz = CzMatch(self.good_mols, self.prec.q)
 
-    def write(self, path):
+    def write_csv(self, path):
         """Write results to path."""
-        # self.report.write(path)
         self.cz.write(path)
         self.cz_simple.write(path)
+
+    def dump(self, path):
+        pass
 
 
 def masstodon_base(mz, intensity, fasta, charge,

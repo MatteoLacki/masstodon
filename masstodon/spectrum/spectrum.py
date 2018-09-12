@@ -44,7 +44,6 @@ class Spectrum(Measure):
                  min_mz_diff_mdc = None):
         """Initialize the Spectrum."""
         self._store_names = ('m/z', 'intensity')
-        self.clusters     = None
         self.mz, self.intensity = dedup_sort(mz,
                                              intensity,
                                              drop_duplicates,

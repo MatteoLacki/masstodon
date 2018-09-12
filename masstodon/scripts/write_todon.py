@@ -1,7 +1,12 @@
+%load_ext autoreload
+%autoreload 2
+%load_ext line_profiler
+
+
 from masstodon.masstodon        import masstodon_base
 from masstodon.readers.from_npy import spectrum_from_npy
 
-data_path     = '/Users/matteo/Projects/masstodon/review/data/PXD001845/numpy_files/20141202_AMB_pBora_PLK_10x_40MeOH_1FA_OT_120k_10uscans_928_ETciD_8ms_15SA_19precZ/1'
+data_path     = '/Users/matteo/Projects/masstodon/data/PXD001845/numpy_files/20141202_AMB_pBora_PLK_10x_40MeOH_1FA_OT_120k_10uscans_928_ETciD_8ms_15SA_19precZ/1'
 mz, intensity = spectrum_from_npy(data_path)
 
 fasta  = "GAASMMGDVKESKMQITPETPGRIPVLNPFESPSDYSNLHEQTLASPSVFKSTKLPTPGKFRWSIDQLAVINPVEIDPEDIHRQALYLSHSRIDKDVEDKRQKAIEEFFTKDVIVPSPWTDHEGKQLSQCHSSKCTNINSDSPVGKKLTIHSEKSD"
@@ -15,4 +20,9 @@ todon = masstodon_base(mz, intensity, fasta, charge,
                        isotopic_coverage = isotopic_coverage)
 
 todon.imperator.plot_ccs()
-todon.cz.plot()
+todon.cz.plot(plt_style='seaborn')
+
+
+import json
+
+todon.spec.clusters
