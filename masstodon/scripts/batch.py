@@ -18,7 +18,8 @@ for x in range(no_cores):
     tasks.put('end')
 
 # Interlude: add the bloody csv output of the results.
-
+todon = masstodon_base_load('dump')
+todon.spec.plot()
 
 # 
 

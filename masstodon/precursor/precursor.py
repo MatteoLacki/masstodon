@@ -16,7 +16,7 @@
 #   Version 3 along with MassTodon.  If not, see
 #   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 from masstodon.data.amino_acids     import get_amino_acids
-from masstodon.formula.formula      import Formula, formula as as_formula
+from masstodon.formula.formula      import Formula
 from masstodon.isotopes             import iso_calc
 from masstodon.molecule.molecule    import Molecule
 
@@ -212,11 +212,11 @@ class Precursor(Molecule):
                     potential_charges_cnt += 1
                     # +0000 +0000 00+  at most 3 charges
                 if potential_charges_cnt >= q:
-                    yield Molecule(name     = name, 
-                                   formula  = formula,
+                    mol = Molecule(formula  = formula,
                                    iso_calc = self.iso_calc,
                                    q        = q,
                                    g        = g)
+                    yield mol, name
 
     def __hash__(self):
         """Get a hash from the precursor's unique id.
@@ -228,8 +228,18 @@ class Precursor(Molecule):
                      self.q,
                      flatten_modification(self.modifications)))
 
+    def __eq__(self, other):
+        A = self.name == other.name
+        B = self.fasta == other.fasta
+        C = self.q == other.q
+        return A and B and C
+
 
 class FalsePrecursor(Molecule):
+    """This is a class needed only for the Molecules class.
+
+    That's obiously fishy and we should inspect, if it is necessary at all.
+    """
     def __init__(self,
                  name,
                  formula,
@@ -243,6 +253,13 @@ class FalsePrecursor(Molecule):
         self.intensity = 0.0
         self.iso_calc  = iso_calc
         self.real      = False
+
+    def __eq__(self, other):
+        A = self.name    == other.name
+        B = self.formula == other.formula
+        C = self.q       == other.q
+        return A and B and C
+
 
 
 def precursor(fasta,

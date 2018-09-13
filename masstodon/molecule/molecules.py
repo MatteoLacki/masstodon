@@ -7,10 +7,10 @@
 from masstodon.masstodon import MasstodonBase
 
 fasta  = "GAASMMGDVKESKMQITPETPGRIPVLNPFESPSDYSNLHEQTLASPSVFKSTKLPTPGKFRWSIDQLAVINPVEIDPEDIHRQALYLSHSRIDKDVEDKRQKAIEEFFTKDVIVPSPWTDHEGKQLSQCHSSKCTNINSDSPVGKKLTIHSEKSD"
-charge = 24
-min_prob = .8
-isotopic_coverage = .999
-std_cnt = 3
+charge              = 24
+min_prob            = .8
+isotopic_coverage   = .999
+std_cnt             = 3
 
 todon = MasstodonBase( mz_digits=4,
                        fasta=fasta,
@@ -26,24 +26,12 @@ todon = MasstodonBase( mz_digits=4,
                        min_prob         = .7,
                        deconvolution_graph_path = '' )
 
-
 todon.set_isotopic_calculator()
 todon.set_molecules()
-todon.prec
-todon.mols
-
-todon.iso_calc
 
 from masstodon.precursor.precursor  import precursor, FalsePrecursor
 from masstodon.molecule.molecule    import molecule
 from masstodon.formula.formula      import Formula, dict2string
-
-f_dict = {'C':100, 'H':202}
-f = Formula(f_dict)
-str(f)
-f_str = dict2string(f)
-f = Formula(f_str)
-f.str_with_charges(q=1, g=10)
 
 precursors = [
     dict(fasta = "AAAACCCKKK",
@@ -56,6 +44,7 @@ precursors = [
          q     = 3,
          name  = "c-zine"),
 ]
+
 molecules = [
     dict(name   = 'saliva',
          formula= 'C100H202',
@@ -92,8 +81,10 @@ class Molecules(object):
             name = m_kwds['name']
             m_kwds = m_kwds.copy()
             del m_kwds['name']
-            mol  = molecule(name = 'precursor', iso_calc = self.iso_calc, **m_kwds)
-            prec = FalsePrecursor(name = name,  iso_calc = self.iso_calc, **m_kwds)
+            mol = molecule(iso_calc=self.iso_calc, **m_kwds)
+            prec = FalsePrecursor(name=name, iso_calc=self.iso_calc, **m_kwds)
+            print(prec, hash(prec))
+            print(mol, hash(mol))
             self.G.add_node(prec, type='substance')
             self.G.add_node(mol,  type='observable')
             self.G.add_edge(mol, prec)
@@ -150,3 +141,62 @@ mols = Molecules(todon.iso_calc)
 mols.make_graph(precursors, molecules)
 list(mols.observables())
 list(mols.substances())
+
+
+molecules = [
+    dict(name   = 'saliva',
+         formula= 'C100H202',
+         q      =  2),
+    dict(name   = 'lipstick',
+         formula= 'C100H202',
+         q      =  2)
+    # dict(name   = "startrek's leather underwear",
+    #      formula= 'C100H202',
+    #      q      =  2)
+]
+
+mols = Molecules(todon.iso_calc)
+mols.make_graph([], molecules)
+mols.plot()
+mols.G.nodes(data=True)
+# still doesn't work. 
+# we need to be able to distinguish the source nodes.
+
+
+for n in mols.G:
+    print(n)
+    print(n.__hash__())
+
+
+class T(object):
+    def __init__(self, t):
+        self.t = t
+
+    def __hash__(self):
+        return 1
+
+    def __repr__(self):
+        return "a"
+
+    def __eq__(self, other):
+        return True
+
+# actually, to be Pythonic, we should make these objects immutable.
+# no, it's making things overcomplicated...
+
+
+t = T(1)
+s = T(2)
+
+G = nx.Graph()
+G.add_node(t)
+G.add_node(s)
+
+
+x = {}
+x[t] = 1
+x[s] = 2
+x[s]
+
+hash(t)
+hash(s)

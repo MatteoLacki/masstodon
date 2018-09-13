@@ -23,12 +23,7 @@ from masstodon.formula.formula import as_formula
 # PROBLEM: have to free the molecules from the precursors.
 # in particular, we should not know, if a fragment is a c
 class Molecule(object):
-    def __init__(self, name,
-                       formula,
-                       iso_calc = iso_calc,
-                       q        = 0,
-                       g        = 0):
-        self.name      = name
+    def __init__(self, formula, q=0, g=0, iso_calc=iso_calc):
         self.formula   = as_formula(formula)
         self.q         = int(q)
         self.g         = int(g)
@@ -83,8 +78,9 @@ class Molecule(object):
                             _memoize=_memoize)
 
     def __repr__(self):
-        return "({name} q={q} g={g} I={I_int})".format(
-            I_int=int(self.intensity),
+        return "({f} q={q} g={g} I={I_int})".format(
+            I_int = int(self.intensity),
+            f = self.formula.str_with_charges(self.q, self.g),
             **self.__dict__)
 
     def __hash__(self):
@@ -97,6 +93,12 @@ class Molecule(object):
                                                    g=self.g),
                      self.q))
 
+    def __eq__(self, other):
+        A = self.formula.str_with_charges(self.q, self.g) == \
+            other.formula.str_with_charges(other.q, other.g)
+        B = self.q == other.q
+        return A and B 
+
     def plot(self,
              plt_style = 'dark_background',
              show      = True):
@@ -106,11 +108,7 @@ class Molecule(object):
                  show      = show)
 
 
-def molecule(name,
-             formula,
-             iso_calc = iso_calc,
-             q        = 0,
-             g        = 0):
-    mol = Molecule(name, formula, iso_calc, q, g)
+def molecule(formula, q=0, g=0, iso_calc=iso_calc):
+    mol = Molecule(formula, q, g, iso_calc)
     return mol
 
