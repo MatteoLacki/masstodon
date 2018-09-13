@@ -23,10 +23,10 @@ class NegativeAtomCount(Exception):
     pass
 
 
-def dict_2_string(d):
+def dict2string(d):
     return "".join(element + str(count) for element, count in sorted(d.items()))
 
-def dict_2_string_readable(d):
+def dict2string_readable(d):
     return " ".join(element + "_"+ str(count) for element, count in sorted(d.items()))
 
 
@@ -38,12 +38,21 @@ class Formula(LinearDict):
         cls.pattern = get_pattern(pattern)
 
     def __init__(self, formula={}):
+        """Initialize the formula.
+
+        Parameters
+        ==========
+        formula : str or dict
+            Either a string, e.g. 'C100H202', or a dictionary
+            specifying the chemical formula, e.g. "{'C':100, 'H':202}".
+        """
         if isinstance(formula, str):
             formula = parse(formula, self.pattern)
         super().__init__(formula)
 
-    def __str__(self):
-        return dict_2_string_readable(self._storage)
+    def __str__(self, readable=False):
+        foo = dict2string_readable if readable else dict2string
+        return foo(self._storage)
 
     def __repr__(self):
         return str(self)
@@ -53,10 +62,17 @@ class Formula(LinearDict):
             raise NegativeAtomCount("Attention: negative atom count after including your modifications.")
 
     def str_with_charges(self, q=0, g=0):
+        """String that includes charges and quenched charges.
+
+        This is mainly used to uniquely hash a molecule.
+        """
         out = self._storage.copy()
         out['H'] += q + g
-        return dict_2_string(out)
+        return dict2string(out)
 
 
-def formula(formula):
-    return Formula(formula)
+def as_formula(f):
+    if isinstance(f, str):
+        return Formula(f)
+    else:
+        return f

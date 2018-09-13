@@ -16,9 +16,10 @@
 #   Version 3 along with MassTodon.  If not, see
 #   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 from masstodon.data.amino_acids     import get_amino_acids
-from masstodon.formula.formula      import Formula
+from masstodon.formula.formula      import Formula, formula as as_formula
 from masstodon.isotopes             import iso_calc
 from masstodon.molecule.molecule    import Molecule
+
 
 def flatten_modification(mod):
     return ''.join(''.join((str(n), t, str(v)))
@@ -58,7 +59,7 @@ class Precursor(Molecule):
 
     def __init__(self,
                  fasta,
-                 charge,
+                 q,
                  name              = "",
                  modifications     = {},
                  fragments         = "cz",
@@ -67,24 +68,29 @@ class Precursor(Molecule):
                  distance_charges  = 5,
                  iso_calc          = iso_calc,
                  **kwds):
-        self.name  = name
+        self.name = name
+        self.real = True
         self.fasta = fasta
-        self.q     = int(charge)
+        self.q     = int(q)
         self.g     = 0 # To get the plotting from superclass.
         self.iso_calc = iso_calc
         self.groups   = ('N', 'C_alpha', 'C_carbo')
                              # include N, C_alpha, C_carbo in start and end.
         self.group2frag = dict(start = dict(N='y', C_alpha='z', C_carbo='x'),
                                  end = dict(N='c', C_alpha='a', C_carbo='b'))
+        
         self.modifications = {(int(number) - 1, group): Formula(atom_cnt)
                               for number, mods in modifications.items()
                               for group, atom_cnt in mods.items()}
+        
         self.formula = sum(self[number, group]
                            for number in range(len(self))
                            for group in self.groups)
+
         self.blocked_fragments = set(blocked_fragments)
-        self.fragments = fragments
-        self.distance_charges = int(distance_charges)
+        self.fragments         = fragments
+        self.distance_charges  = int(distance_charges)
+
         if block_prolines:
             for i, f in enumerate(self.fasta):
                 if f == 'P':
@@ -128,9 +134,8 @@ class Precursor(Molecule):
             raise KeyError("Supply '(number, group)' or just 'group'.")
 
     def __repr__(self):
-        out = "{name}, {q}-charged,".format(**self.__dict__)
-        out += ' modified,\n' if self.modifications else '\n'
-        out += "fasta: {fasta}".format(**self.__dict__)
+        out = "({name} {q}+ {fasta}".format(**self.__dict__)
+        out += '-modified)' if self.modifications else ')'
         return out
 
     def __len__(self):
@@ -208,7 +213,6 @@ class Precursor(Molecule):
                     # +0000 +0000 00+  at most 3 charges
                 if potential_charges_cnt >= q:
                     yield Molecule(name     = name, 
-                                   source   = self,
                                    formula  = formula,
                                    iso_calc = self.iso_calc,
                                    q        = q,
@@ -221,11 +225,28 @@ class Precursor(Molecule):
         """
         return hash((self.name,
                      self.fasta,
-                     self.q, flatten_modification(self.modifications)))
+                     self.q,
+                     flatten_modification(self.modifications)))
+
+
+class FalsePrecursor(Molecule):
+    def __init__(self,
+                 name,
+                 formula,
+                 iso_calc = iso_calc,
+                 q        = 0,
+                 g        = 0):
+        self.name      = name
+        self.formula   = Formula(formula)
+        self.q         = int(q)
+        self.g         = int(g)
+        self.intensity = 0.0
+        self.iso_calc  = iso_calc
+        self.real      = False
 
 
 def precursor(fasta,
-              charge,
+              q,
               name              = "",
               modifications     = {},
               fragments         = "cz",
@@ -235,7 +256,7 @@ def precursor(fasta,
               iso_calc          = iso_calc):
     """Prepare a ready precursor."""
     prec = Precursor(fasta,
-                     charge,
+                     q,
                      name,
                      modifications,
                      fragments,

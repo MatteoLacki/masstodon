@@ -86,12 +86,12 @@ class MasstodonBase(object):
     def set_spectrum(self):
         self.spec = spectrum(self.mz, self.intensity)
         self.spec.bitonic_clustering()
+        self.mz_digits = self.spec.bc.get_smallest_diff_digits()
         self.spec.min_mz_diff_clustering()
         self.subspectra = list(self.spec.iter_min_mz_diff_subspectra())
 
     def set_isotopic_calculator(self):
-        mz_digits = self.spec.bc.get_smallest_diff_digits()
-        self.iso_calc = isotope_calculator(digits=mz_digits)
+        self.iso_calc = isotope_calculator(digits=self.mz_digits)
 
     def set_molecules(self):
         self.prec = precursor(self.fasta,

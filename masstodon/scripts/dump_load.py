@@ -1,8 +1,3 @@
-%load_ext autoreload
-%autoreload 2
-%load_ext line_profiler
-
-
 from masstodon.masstodon        import masstodon_base, masstodon_base_load
 from masstodon.readers.from_npy import spectrum_from_npy
 
@@ -28,7 +23,3 @@ todon2 = masstodon_base_load('dump')
 todon2.imperator.plot_ccs()
 todon2.cz.plot(plt_style='ggplot')
 todon2.dump('dump2')
-
-# final touch: the loading of the bloody graph.
-# and the saving thereof
-

@@ -2,11 +2,10 @@ import gc
 import multiprocessing
 import time
 
-from masstodon.masstodon import masstodon_base
+from masstodon.masstodon import masstodon_base, masstodon_base_load
 
 orbi_data = list(iter_scans(path, paths_only=True))
 mz_path, intensity_path, charge, scan_dir = orbi_data[0]
-
 
 no_cores = 3
 timeout  = 2
@@ -17,6 +16,12 @@ for input_tuple in iter_scans(path, paths_only=True):
     tasks.put(input_tuple)
 for x in range(no_cores):
     tasks.put('end')
+
+# Interlude: add the bloody csv output of the results.
+
+
+# 
+
 
 foo = masstodon_base
 

@@ -15,37 +15,38 @@
 #   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
 #   Version 3 along with MassTodon.  If not, see
 #   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
-from masstodon.data.constants import infinity
-from masstodon.plot.spectrum  import plot_spectrum
-from masstodon.isotopes       import iso_calc
+from masstodon.data.constants  import infinity
+from masstodon.plot.spectrum   import plot_spectrum
+from masstodon.isotopes        import iso_calc
+from masstodon.formula.formula import as_formula
 
-
+# PROBLEM: have to free the molecules from the precursors.
+# in particular, we should not know, if a fragment is a c
 class Molecule(object):
     def __init__(self, name,
-                       source,
                        formula,
                        iso_calc = iso_calc,
                        q        = 0,
                        g        = 0):
         self.name      = name
-        self.source    = source
-        self.formula   = formula
+        self.formula   = as_formula(formula)
         self.q         = int(q)
         self.g         = int(g)
         self.intensity = 0.0
         self.iso_calc  = iso_calc
 
-    #TODO generalize to abxy
-    def _molType_position_cleavageSite(self):
-        mt = self.name[0]
-        if mt == 'p':
-            return None
-        else:
-            po = int(self.name[1:])
-            fasta_len = len(self.source.fasta)
-            cs = None if mt == 'p' else \
-                   po if mt == 'c' else fasta_len - po
-            return mt, po, cs
+    # TODO generalize to abxy
+    # this function cannot get called when there are multiple sources.
+    # def _molType_position_cleavageSite(self):
+    #     mt = self.name[0]
+    #     if mt == 'p':
+    #         return None
+    #     else:
+    #         po = int(self.name[1:])
+    #         fasta_len = len(self.source.fasta)
+    #         cs = None if mt == 'p' else \
+    #                po if mt == 'c' else fasta_len - po
+    #         return mt, po, cs
 
     @property
     def monoisotopic_mz(self):
@@ -82,16 +83,19 @@ class Molecule(object):
                             _memoize=_memoize)
 
     def __repr__(self):
-        return "({name} {source.name} q={q} g={g} I={I_int})".format(
+        return "({name} q={q} g={g} I={I_int})".format(
             I_int=int(self.intensity),
             **self.__dict__)
 
     def __hash__(self):
-        return hash((self.name,
-                     self.source,
-                     str(self.formula),
-                     self.q,
-                     self.g))
+        """The least you need to know to trace a molecule.
+
+        The molecule is uniquely defined by its total atom count and charge.
+        As best summarized by Metallica: nothing else matters.
+        """
+        return hash((self.formula.str_with_charges(q=self.q,
+                                                   g=self.g),
+                     self.q))
 
     def plot(self,
              plt_style = 'dark_background',
@@ -103,11 +107,10 @@ class Molecule(object):
 
 
 def molecule(name,
-             source,
              formula,
              iso_calc = iso_calc,
              q        = 0,
              g        = 0):
-    mol = Molecule(name, source, formula, iso_calc, q, g)
+    mol = Molecule(name, formula, iso_calc, q, g)
     return mol
 
