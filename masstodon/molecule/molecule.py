@@ -89,8 +89,7 @@ class Molecule(object):
         The molecule is uniquely defined by its total atom count and charge.
         As best summarized by Metallica: nothing else matters.
         """
-        return hash((self.formula.str_with_charges(q=self.q,
-                                                   g=self.g),
+        return hash((self.formula.str_with_charges(self.q, self.g),
                      self.q))
 
     def __eq__(self, other):

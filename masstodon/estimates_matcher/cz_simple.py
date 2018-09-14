@@ -230,16 +230,13 @@ class SimpleCzMatch(object):
     def _iter_probabilities(self):
         """Generate rows for a csv/tsv file with estimated probabilities."""
         if self._I_ETnoD_precursor + self._I_PTR_precursor > 0:
-            yield ('probability',
-                   'ETnoD (precusor)',
+            yield ('probability', 'ETnoD (precusor)',
                    "{:10.3f}%".format(100 * self._P_ETnoD_precursor))
-            yield ('probability',
-                   'PTR (precusor)',
+            yield ('probability', 'PTR (precusor)',
                    "{:10.3f}%".format(100 * self._P_PTR_precursor))
 
         if self._I_total_ETnoDorPTR > 0:
-            yield ('probability',
-                   'ETnoD of PTR',
+            yield ('probability', 'ETnoD of PTR',
                    "{:10.3f}%".format(100 * self._P_ETnoD_PTR))
 
         if self._I_reactions > 0:
@@ -251,8 +248,8 @@ class SimpleCzMatch(object):
 
     def write(self, path=''):
         """Write intensities and probabilities to a given path."""
-        write_rows(self._iter_intensities(),   path + 'simple_pairing_intensities.csv')
-        write_rows(self._iter_probabilities(), path + 'simple_pairing_probabilities.csv')
+        write_rows(self._iter_intensities(),   path+'simple_pairing_intensities.csv')
+        write_rows(self._iter_probabilities(), path+'simple_pairing_probabilities.csv')
 
     def _match(self):
         """Pair molecules minimizing the number of reactions and calculate the resulting probabilities."""

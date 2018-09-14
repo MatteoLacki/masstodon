@@ -79,7 +79,7 @@ from masstodon.readers.from_npy            import spectrum_from_npy
 from masstodon.spectrum.spectrum           import spectrum
 
 
-class MasstodonBase(object):
+class Masstodon(object):
     def __init__(self, **kwds):
         self.__dict__.update(kwds)
 
@@ -152,17 +152,47 @@ class MasstodonBase(object):
         self.imperator.save_graph(pjoin(path, 'deconvolution_graph.gpickle'))
 
 
-def masstodon_base(mz, intensity, fasta, charge,
-                   name             = "", 
-                   modifications    = {},
-                   fragments        = "cz",
-                   blocked_fragments= ['c0'],
-                   block_prolines   = True,
-                   distance_charges = 5.,
-                   std_cnt          = 3,
-                   isotopic_coverage= .999,
-                   min_prob         = .7,
-                   deconvolution_graph_path = ''):
+def masstodon_batch(mz, intensity, molecules, precursors,
+                    all_molecules_kwds  = {},
+                    all_precursors_kwds = {},
+                    std_cnt             = 3,
+                    isotopic_coverage   = .999,
+                    min_prob            = .7,
+                    deconvolution_graph_path = ''):
+    """Run a session of masstodon with multiple sources.
+
+    Parameters
+    ==========
+    mz : np.array
+        Observed mass to charge ratios.
+    intensity : np.array
+        Observed intensities (corresponding to mass to charge ratios).
+    all_molecules_kwds : dict
+        Arguments
+    std_cnt : float
+        Number of standard deviations around average theoretical m/z of a fragment to be considered in the trivial filtering.
+    isotopic_coverage : float
+        The joint probability of the calculated isotopic distribution.
+        Defaults to a decent '0.999'.
+    min_prob : float
+        The minimal probability an envelope has to scoop
+        to be included in the deconvolution graph.
+    deconvolution_graph_path : str
+        A path to a valid premade deconvolution graph.
+    """
+    
+
+def masstodon_single(mz, intensity, fasta, charge,
+              name             = "", 
+              modifications    = {},
+              fragments        = "cz",
+              blocked_fragments= ['c0'],
+              block_prolines   = True,
+              distance_charges = 5.,
+              std_cnt          = 3,
+              isotopic_coverage= .999,
+              min_prob         = .7,
+              deconvolution_graph_path = ''):
     """Run a basic session of the MassTodon.
 
     Parameters
@@ -198,20 +228,20 @@ def masstodon_base(mz, intensity, fasta, charge,
     _verbose : boolean
         Should we show the content in a verbose mode?
     """
-    todon = MasstodonBase(mz = mz,
-                          intensity = intensity,
-                          fasta = fasta,
-                          charge = charge,
-                          name = name,
-                          modifications = modifications,
-                          fragments = fragments,
-                          blocked_fragments = blocked_fragments,
-                          block_prolines = block_prolines,
-                          distance_charges = distance_charges,
-                          std_cnt = std_cnt,
-                          isotopic_coverage = isotopic_coverage,
-                          min_prob = min_prob,
-                          deconvolution_graph_path = deconvolution_graph_path)
+    todon = Masstodon(mz = mz,
+                      intensity = intensity,
+                      fasta = fasta,
+                      charge = charge,
+                      name = name,
+                      modifications = modifications,
+                      fragments = fragments,
+                      blocked_fragments = blocked_fragments,
+                      block_prolines = block_prolines,
+                      distance_charges = distance_charges,
+                      std_cnt = std_cnt,
+                      isotopic_coverage = isotopic_coverage,
+                      min_prob = min_prob,
+                      deconvolution_graph_path = deconvolution_graph_path)
     todon.set_spectrum()
     todon.set_isotopic_calculator()
     todon.set_molecules()

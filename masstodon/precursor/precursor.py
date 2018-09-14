@@ -235,6 +235,7 @@ class Precursor(Molecule):
         return A and B and C
 
 
+
 class FalsePrecursor(Molecule):
     """This is a class needed only for the Molecules class.
 
@@ -244,15 +245,18 @@ class FalsePrecursor(Molecule):
                  name,
                  formula,
                  iso_calc = iso_calc,
-                 q        = 0,
-                 g        = 0):
+                 q        = 0):
         self.name      = name
         self.formula   = Formula(formula)
         self.q         = int(q)
-        self.g         = int(g)
         self.intensity = 0.0
         self.iso_calc  = iso_calc
         self.real      = False
+
+    def __hash__(self):
+        return hash((self.name,
+                     self.formula.str_with_charges(self.q),
+                     self.q))
 
     def __eq__(self, other):
         A = self.name    == other.name
@@ -260,6 +264,10 @@ class FalsePrecursor(Molecule):
         C = self.q       == other.q
         return A and B and C
 
+    def __repr__(self):
+        return "({name} q={q} I={I_int})".format(
+            I_int = int(self.intensity),
+            **self.__dict__)
 
 
 def precursor(fasta,
