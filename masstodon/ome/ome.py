@@ -33,6 +33,28 @@ class Ome(object):
             self.G.add_node(mol,  type='observable')
             self.G.add_edge(mol, prec, name='precursor')
 
+    def dump(self, path):
+        """Save the computed sources-observables graph.
+
+        Do assure that the folders in the 'path' do exist beforehand.
+
+        Parameters
+        ==========
+        path : str
+            Path where to store the sources-observables graph.
+        """
+        nx.write_gpickle(self.G, path)
+
+    def load(self, path):
+        """Load a computed graph.
+
+        Parameters
+        ==========
+        path : str
+            Path where the deconvolution graph is stored.
+        """
+        self.G = nx.read_gpickle(path)
+
     def plot(self, plt_style = 'seaborn-poster',
                    node_label_size = 10,
                    node_size = 10,
@@ -95,3 +117,17 @@ class Ome(object):
                 status = 'std_dev'
             self.G.node[mol]['status'] = status
         return good_mols, good_subspectra
+
+
+def ome(iso_calc, precursors=[], molecules=[]):
+    """Generate an ome. """
+    _ome = Ome(iso_calc)
+    _ome.make_graph(precursors, molecules)
+    return _ome
+
+
+def load_ome(iso_calc, path):
+    """Load a dumped ome. """
+    _ome = Ome(iso_calc)
+    _ome.load(path=path)
+    return _ome

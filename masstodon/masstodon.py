@@ -69,7 +69,7 @@ import numpy  as      np
 from   os.path import join as pjoin
 from   time   import  time
 
-from masstodon.deconvolve.divide_ed_impera import divide_ed_impera, Imperator
+from masstodon.deconvolve.divide_ed_impera import imperator, load_imperator
 from masstodon.estimates_matcher.cz        import CzMatch
 from masstodon.estimates_matcher.cz_simple import SimpleCzMatch
 from masstodon.isotopes                    import isotope_calculator
@@ -77,14 +77,11 @@ from masstodon.precursor.precursor         import precursor
 from masstodon.preprocessing.filters       import filter_subspectra_molecules
 from masstodon.readers.from_npy            import spectrum_from_npy
 from masstodon.spectrum.spectrum           import spectrum
-
+from masstodon.ome.ome                     import ome
 
 class Masstodon(object):
-    def __init__(self, **kwds):
-        self.__dict__.update(kwds)
-
-    def set_spectrum(self):
-        self.spec = spectrum(self.mz, self.intensity)
+    def set_spectrum(self, mz, intensity):
+        self.spec = spectrum(mz, intensity)
         self.spec.bitonic_clustering()
         self.mz_digits = self.spec.bc.get_smallest_diff_digits()
         self.spec.min_mz_diff_clustering()
@@ -93,69 +90,78 @@ class Masstodon(object):
     def set_isotopic_calculator(self):
         self.iso_calc = isotope_calculator(digits=self.mz_digits)
 
-    def set_molecules(self):
-        self.prec = precursor(self.fasta,
-                              self.charge,
-                              self.name,
-                              self.modifications,
-                              self.fragments,
-                              self.blocked_fragments,
-                              self.block_prolines,
-                              self.distance_charges,
-                              iso_calc = self.iso_calc)
-        self.mols = np.array(list(self.prec.molecules()))
+    def set_ome(self, 
+                precursors=[],
+                molecules=[],
+                std_cnt=3):
+        self.precursors = precursors
+        self.molecules  = molecules
+        self.std_cnt    = std_cnt
+        self.ome = ome(self.iso_calc,
+                       self.precursors,
+                       self.molecules)
+        self.good_mols, self.good_subspectra = \
+            self.ome.filter_by_deviations(self.subspectra,
+                                          self.std_cnt)
 
-    def trivial_divide_et_impera(self):
-        self.good_mols, self.good_subspectra = filter_subspectra_molecules(self.subspectra,
-                                                                           self.mols,
-                                                                           std_cnt = self.std_cnt)
-
-    def divide_et_impera(self):
-        self.imperator = divide_ed_impera(self.good_mols,
-                                          self.spec.bc,
-                                          self.min_prob,
-                                          self.isotopic_coverage)
-
-    def load_imperator(self):
-        self.imperator = Imperator(self.good_mols,
+    def divide_et_impera(self, 
+                         min_prob,
+                         isotopic_coverage):
+        self.min_prob          = min_prob
+        self.isotopic_coverage = isotopic_coverage
+        self.imperator = imperator(self.good_mols,
                                    self.spec.bc,
                                    self.min_prob,
                                    self.isotopic_coverage)
-        self.imperator.load_graph(self.deconvolution_graph_path)
-        self.imperator.impera()
-        self.imperator.set_estimated_intensities()
+
+    def load_imperator(self, 
+                       deconvolution_graph_path,
+                       min_prob, 
+                       isotopic_coverage):
+        self.deconvolution_graph_path = deconvolution_graph_path
+        self.min_prob                 = min_prob
+        self.isotopic_coverage        = isotopic_coverage
+        self.imperator = load_imperator(self.good_mols,
+                                        self.spec.bc,
+                                        self.deconvolution_graph_path,
+                                        self.min_prob,
+                                        self.isotopic_coverage)
 
     def match_estimates(self):
-        self.cz_simple = SimpleCzMatch(self.good_mols, self.prec.q)
-        self.cz = CzMatch(self.good_mols, self.prec.q)
+        self.cz_simple = SimpleCzMatch(self.good_mols,
+                                       self.prec.q)
+        self.cz = CzMatch(self.good_mols,
+                          self.prec.q)
 
     def write_csv(self, path):
         """Write results to path."""
         self.cz.write(path)
         self.cz_simple.write(path)
 
-    def dump(self, path):
+    def dump(self, path, source_observables_graph=False):
         self.spec.dump(path)
-        params = {k: self.__dict__[k] for k in ('fasta',
-                                                'charge',
-                                                'name',
-                                                'modifications',
-                                                'fragments',
-                                                'blocked_fragments',
-                                                'block_prolines',
-                                                'distance_charges',
-                                                'std_cnt',
-                                                'isotopic_coverage',
-                                                'min_prob')}
+        params = {"precursors": self.precursors,
+                  "molecules" : self.molecules,
+                  "std_cnt"   : self.std_cnt,
+                  "isotopic_coverage" : self.isotopic_coverage,
+                  "min_prob"  : self.min_prob}
         with open(pjoin(path, 'params.json'), 'w') as f:
             json.dump(params, f)
         self.imperator.save_graph(pjoin(path, 'deconvolution_graph.gpickle'))
+        if source_observables_graph:
+            self.ome.dump(pjoin(path,
+                                'sources_observables_graph.gpickle'))
 
 
-def masstodon_batch(mz, intensity, molecules, precursors,
+
+def masstodon_batch(mz, 
+                    intensity, 
+                    precursors          = [],
+                    molecules           = [],
                     all_molecules_kwds  = {},
                     all_precursors_kwds = {},
                     std_cnt             = 3,
+                    mz_digits           = None,
                     isotopic_coverage   = .999,
                     min_prob            = .7,
                     deconvolution_graph_path = ''):
@@ -167,6 +173,10 @@ def masstodon_batch(mz, intensity, molecules, precursors,
         Observed mass to charge ratios.
     intensity : np.array
         Observed intensities (corresponding to mass to charge ratios).
+    precursors : list of dicts
+        Arguments to the precursor function.
+    molecules : list of dicts
+        Arguments to the molecule function.
     all_molecules_kwds : dict
         Arguments
     std_cnt : float
@@ -180,19 +190,33 @@ def masstodon_batch(mz, intensity, molecules, precursors,
     deconvolution_graph_path : str
         A path to a valid premade deconvolution graph.
     """
-    
+    m = Masstodon()
+    m.set_spectrum(mz, intensity)
+    if mz_digits is None:
+        mz_digits = m.mz_digits
+    m.set_isotopic_calculator()
+    m.set_ome(precursors, molecules, std_cnt)
+    if not deconvolution_graph_path:
+        m.divide_et_impera(min_prob, isotopic_coverage)
+    else:
+        m.load_imperator(deconvolution_graph_path,
+                         min_prob,
+                         isotopic_coverage)
+    return m
 
-def masstodon_single(mz, intensity, fasta, charge,
-              name             = "", 
-              modifications    = {},
-              fragments        = "cz",
-              blocked_fragments= ['c0'],
-              block_prolines   = True,
-              distance_charges = 5.,
-              std_cnt          = 3,
-              isotopic_coverage= .999,
-              min_prob         = .7,
-              deconvolution_graph_path = ''):
+
+def masstodon_single(mz, intensity, fasta, q,
+                     name              = "", 
+                     modifications     = {},
+                     fragments         = "cz",
+                     blocked_fragments = ['c0'],
+                     block_prolines    = True,
+                     distance_charges  = 5.,
+                     std_cnt           = 3,
+                     mz_digits         = None,
+                     isotopic_coverage = .999,
+                     min_prob          = .7,
+                     deconvolution_graph_path = ''):
     """Run a basic session of the MassTodon.
 
     Parameters
@@ -203,7 +227,7 @@ def masstodon_single(mz, intensity, fasta, charge,
         Observed intensities (corresponding to mass to charge ratios).
     fasta : str
         The FASTA sequence of the protein to study.
-    charge : int
+    q : int
         The initial charge of the precursor filtered out in MS1.
     name : str
         The precursor's name.
@@ -228,37 +252,35 @@ def masstodon_single(mz, intensity, fasta, charge,
     _verbose : boolean
         Should we show the content in a verbose mode?
     """
-    todon = Masstodon(mz = mz,
-                      intensity = intensity,
-                      fasta = fasta,
-                      charge = charge,
-                      name = name,
-                      modifications = modifications,
-                      fragments = fragments,
-                      blocked_fragments = blocked_fragments,
-                      block_prolines = block_prolines,
-                      distance_charges = distance_charges,
-                      std_cnt = std_cnt,
-                      isotopic_coverage = isotopic_coverage,
-                      min_prob = min_prob,
-                      deconvolution_graph_path = deconvolution_graph_path)
-    todon.set_spectrum()
-    todon.set_isotopic_calculator()
-    todon.set_molecules()
-    todon.trivial_divide_et_impera()
+    m = Masstodon()
+    m.set_spectrum(mz, intensity)
+    if mz_digits is None:
+        mz_digits = m.mz_digits
+    m.set_isotopic_calculator()
+    precursor = [ {  "fasta":               fasta,
+                     "q":                   q,
+                     "name":                name,
+                     "modifications":       modifications,
+                     "blocked_fragments":   blocked_fragments,
+                     "block_prolines":      block_prolines,
+                     "distance_charges":    distance_charges } ]
+    m.set_ome(precursors = precursor,
+              std_cnt    = std_cnt)
     if not deconvolution_graph_path:
-        todon.divide_et_impera()
+        m.divide_et_impera(min_prob, isotopic_coverage)
     else:
-        todon.load_imperator()
-    todon.match_estimates()
-    return todon
+        m.load_imperator(deconvolution_graph_path,
+                         min_prob,
+                         isotopic_coverage)
+    return m
 
 
-def masstodon_base_load(path,
-                        deconvolution_graph_file = 'deconvolution_graph.gpickle'):
+
+def masstodon_load(path):
     mz, intensity = spectrum_from_npy(path)
     with open(pjoin(path, 'params.json'), 'r') as f:
         params = json.load(f)
-    deconvolution_graph_path = pjoin(path, deconvolution_graph_file)
-    params['deconvolution_graph_path'] = deconvolution_graph_path
-    return masstodon_base(mz, intensity, **params)
+    params['deconvolution_graph_path'] = pjoin(
+        path, "deconvolution_graph.gpickle")
+    m = masstodon_batch(mz, intensity, **params)
+    return m

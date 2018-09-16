@@ -22,7 +22,7 @@ class Imperator(object):
         for prob in (min_prob, isotopic_coverage):
             assert prob > 0.0 and prob <= 1.0
         self.min_prob = min_prob
-        self.P        = isotopic_coverage
+        self.isotopic_coverage = isotopic_coverage
         self.clust    = clustering
         self.mols     = molecules
 
@@ -33,7 +33,7 @@ class Imperator(object):
                                   (M_cnt, E), P in tree.items())
 
     def save_graph(self, path):
-        """Save the computed graph.
+        """Save the computed deconvolution graph.
 
         Do assure that the folders in the 'path' do exist beforehand.
 
@@ -61,7 +61,7 @@ class Imperator(object):
             P_within_groups = 0.0
             # edge is an collection of merged isotopologues
             I = defaultdict(float) # values correspond to total probability on that edge. 
-            for I_mz, I_prob in M.isotopologues(self.P, True):
+            for I_mz, I_prob in M.isotopologues(self.isotopic_coverage, True):
                 E = ls[I_mz]
                 if E > 0:
                     I[(M_cnt, E)]   += I_prob
@@ -139,10 +139,10 @@ class Imperator(object):
         return len(self.G)
 
 
-def divide_ed_impera(molecules,
-                     clustering,
-                     min_prob          = .8,
-                     isotopic_coverage = .99):
+def imperator(molecules,
+              clustering,
+              min_prob          = .8,
+              isotopic_coverage = .99):
     imp = Imperator(molecules, clustering, min_prob, isotopic_coverage)
     imp.divide()
     imp.impera()
@@ -150,3 +150,13 @@ def divide_ed_impera(molecules,
     return imp
 
 
+def load_imperator(molecules,
+                   clustering,
+                   deconvolution_graph_path,
+                   min_prob          = .8,
+                   isotopic_coverage = .99):
+    imp = Imperator(molecules, clustering, min_prob, isotopic_coverage)
+    imp.load_graph(deconvolution_graph_path)
+    imp.impera()
+    imp.set_estimated_intensities()
+    return imp
