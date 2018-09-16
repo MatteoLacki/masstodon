@@ -31,6 +31,8 @@ o = masstodon_single(mz, intensity, fasta, charge, "Yani")
 p = masstodon_single(mz, intensity, fasta, charge, "Yani",
                      deconvolution_graph_path="dump/deconvolution_graph.gpickle")
 
+p.good_mols
+
 
 
 
