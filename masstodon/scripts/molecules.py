@@ -33,8 +33,14 @@ p = masstodon_single(mz, intensity, fasta, charge, "Yani",
 
 p.good_mols
 
+from masstodon.precursor.precursor import precursor
+
+prec = precursor(**p.precursors[0])
+mols = list(prec.molecules())
 
 
+
+p.ome.G.edges(data=True)
 
 # precursors = [
 #     dict(fasta = "AAAACCCKKK",
