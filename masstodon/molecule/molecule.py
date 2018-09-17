@@ -20,8 +20,8 @@ from masstodon.plot.spectrum   import plot_spectrum
 from masstodon.isotopes        import iso_calc
 from masstodon.formula.formula import as_formula
 
-# PROBLEM: have to free the molecules from the precursors.
-# in particular, we should not know, if a fragment is a c
+
+
 class Molecule(object):
     def __init__(self, formula, q=0, g=0, iso_calc=iso_calc):
         self.formula   = as_formula(formula)
@@ -31,17 +31,27 @@ class Molecule(object):
         self.iso_calc  = iso_calc
 
     # TODO generalize to abxy
-    # this function cannot get called when there are multiple sources.
-    # def _molType_position_cleavageSite(self):
-    #     mt = self.name[0]
-    #     if mt == 'p':
-    #         return None
-    #     else:
-    #         po = int(self.name[1:])
-    #         fasta_len = len(self.source.fasta)
-    #         cs = None if mt == 'p' else \
-    #                po if mt == 'c' else fasta_len - po
-    #         return mt, po, cs
+    def _molType_position_cleavageSite(self):
+        """Supply information necessary for the matching of the estimated intensities.
+
+        Parameters
+        ==========
+        mol_name : str
+            The name of the molecule as induced by the precursor.
+        Returns
+        =======
+        tuple : type of molecule (p-recursor, c-fragment, z-fragment),
+                position in the fasta file,
+                number of the c or z fragment or None for precursor.
+        """
+        mt = self.name[0]
+        if mt == 'p':
+            return None
+        else:
+            po = int(self.name[1:])
+            cs = None if mt == 'p' else \
+                   po if mt == 'c' else self.prec_fasta_len - po
+            return mt, po, cs
 
     @property
     def monoisotopic_mz(self):

@@ -17,30 +17,84 @@ min_prob          = .8
 isotopic_coverage = .999
 std_cnt           = 3
 
+# precursors = [{'fasta': fasta,
+#                'name' : 'Abudhabizine',
+#                'q'    : 24},
+#                {'fasta': fasta[0:10],
+#                'name' : 'Munichoson',
+#                'q'    : 10}]
+
 precursors = [{'fasta': fasta,
-               'name' : 'Abudhabizine',
+               'name' : '',
                'q'    : 24}]
 
-# m = masstodon_single(mz, intensity)
-m = masstodon_batch(mz, intensity, precursors, 
-                    isotopic_coverage=isotopic_coverage,
-                    min_prob=min_prob, 
-                    std_cnt=std_cnt)
-n = masstodon_load("dump")
-o = masstodon_single(mz, intensity, fasta, charge, "Yani")
-p = masstodon_single(mz, intensity, fasta, charge, "Yani",
-                     deconvolution_graph_path="dump/deconvolution_graph.gpickle")
+# m = masstodon_batch(mz, intensity, precursors, 
+#                     isotopic_coverage = isotopic_coverage,
+#                     min_prob = min_prob, 
+#                     std_cnt  = std_cnt)
 
-p.good_mols
-
-from masstodon.precursor.precursor import precursor
-
-prec = precursor(**p.precursors[0])
-mols = list(prec.molecules())
+m = masstodon_single(mz, intensity, fasta, charge, '', 
+                    isotopic_coverage = isotopic_coverage,
+                    min_prob = min_prob, 
+                    std_cnt  = std_cnt)
 
 
 
-p.ome.G.edges(data=True)
+m.dump('dump')
+m.restrict_good_mols()
+
+# %lprun -f masstodon_batch masstodon_batch(mz, intensity, precursors, isotopic_coverage=isotopic_coverage, min_prob=min_prob, std_cnt=std_cnt)
+# n = masstodon_load("dump")
+# o = masstodon_single(mz, intensity, fasta, charge, "Yani")
+# p = masstodon_single(mz, intensity, fasta, charge, "Yani",
+#                      deconvolution_graph_path="dump/deconvolution_graph.gpickle")
+
+# from masstodon.precursor.precursor import precursor
+# import intervaltree as iTree
+# m = Masstodon()
+# m.set_spectrum(mz, intensity)
+# m.set_isotopic_calculator()
+# t0 = time()
+# mols = frozenset(m for p_kwds in precursors 
+#                    for m in precursor(**p_kwds).molecules())
+# emp_tree = iTree.IntervalTree()
+# for subspec in m.subspectra:
+#     s, e = subspec.interval
+#     emp_tree[s:e] = subspec
+# good_mols = []
+# good_subspectra = set([])
+# for mol, name in mols:
+#     s, e = mol.interval(std_cnt = std_cnt)
+#     touched_spectra = emp_tree[s:e]
+#     if touched_spectra:
+#         status = 'ok'
+#         good_mols.append(mol)
+#         good_subspectra |= touched_spectra
+# t1 = time()
+from masstodon.estimates_matcher.cz_simple import SimpleCzMatch
+
+sources = m.ome.sources()
+prec = next(sources)
+try:
+    x = next(sources)
+    raise AttributeError("You supplied too many precursors for the c/z analysis.")
+except StopIteration:
+    pass
+
+for mol in m.ome.observables():
+    mol.name = m.ome.G[mol][prec]['name']
+    mol.prec_fasta_len = len(prec.fasta)
+
+m.good_mols[0].name
+m.good_mols[0].prec_fasta_len
+
+simple_cz = SimpleCzMatch(m.good_mols, charge)
+mol._molType_position_cleavageSite()
+
+simple_cz.intensities
+simple_cz.probabilities
+
+
 
 # precursors = [
 #     dict(fasta = "AAAACCCKKK",
@@ -73,8 +127,6 @@ m = masstodon_batch(mz, intensity, precursors,
                     isotopic_coverage=isotopic_coverage,
                     min_prob=min_prob, 
                     std_cnt=std_cnt)
-
-
 
 
 todon = Masstodon(mz        = mz, 

@@ -128,6 +128,16 @@ class Masstodon(object):
                                         self.isotopic_coverage)
 
     def match_estimates(self):
+        sources = self.ome.sources()
+        prec = next(sources)
+        try:
+            x = next(sources)
+            raise AttributeError("You supplied too many precursors for the c/z analysis.")
+        except StopIteration:
+            pass
+        for mol in self.ome.observables():
+            mol.name = self.ome.G[mol][prec]['name']
+            mol.prec_fasta_len = len(prec.fasta)
         self.cz_simple = SimpleCzMatch(self.good_mols,
                                        self.prec.q)
         self.cz = CzMatch(self.good_mols,
@@ -152,14 +162,15 @@ class Masstodon(object):
             self.ome.dump(pjoin(path,
                                 'sources_observables_graph.gpickle'))
 
+    def restrict_good_mols(self):
+        self.good_mols = [m for m in self.good_mols if m.intensity > 0.0]
+
 
 
 def masstodon_batch(mz, 
                     intensity, 
                     precursors          = [],
                     molecules           = [],
-                    all_molecules_kwds  = {},
-                    all_precursors_kwds = {},
                     std_cnt             = 3,
                     mz_digits           = None,
                     isotopic_coverage   = .999,
@@ -181,6 +192,8 @@ def masstodon_batch(mz,
         Arguments
     std_cnt : float
         Number of standard deviations around average theoretical m/z of a fragment to be considered in the trivial filtering.
+    mz_digits : int
+        Number of significant digits while rounding m/z values.
     isotopic_coverage : float
         The joint probability of the calculated isotopic distribution.
         Defaults to a decent '0.999'.
@@ -202,6 +215,8 @@ def masstodon_batch(mz,
         m.load_imperator(deconvolution_graph_path,
                          min_prob,
                          isotopic_coverage)
+    m.ome.filter_by_estimated_intensity()
+    m.restrict_good_mols()
     return m
 
 
@@ -243,35 +258,33 @@ def masstodon_single(mz, intensity, fasta, q,
     distance_charges :
         The minimal distance between charges on the fasta sequence.
         Defaults to charges being 4 amino acids apart.
+    std_cnt : float
+        Number of standard deviations around average theoretical m/z of a fragment to be considered in the trivial filtering.
+    mz_digits : int
+        Number of significant digits while rounding m/z values.
     isotopic_coverage : float
         The joint probability of the calculated isotopic distribution.
         Defaults to a decent '0.999'.
     min_prob : float
         The minimal probability an envelope has to scoop
         to be included in the deconvolution graph.
-    _verbose : boolean
-        Should we show the content in a verbose mode?
+    deconvolution_graph_path : str
+        A path to a valid premade deconvolution graph.
     """
-    m = Masstodon()
-    m.set_spectrum(mz, intensity)
-    if mz_digits is None:
-        mz_digits = m.mz_digits
-    m.set_isotopic_calculator()
-    precursor = [ {  "fasta":               fasta,
+    precursors = [ { "fasta":               fasta,
                      "q":                   q,
                      "name":                name,
                      "modifications":       modifications,
                      "blocked_fragments":   blocked_fragments,
                      "block_prolines":      block_prolines,
                      "distance_charges":    distance_charges } ]
-    m.set_ome(precursors = precursor,
-              std_cnt    = std_cnt)
-    if not deconvolution_graph_path:
-        m.divide_et_impera(min_prob, isotopic_coverage)
-    else:
-        m.load_imperator(deconvolution_graph_path,
-                         min_prob,
-                         isotopic_coverage)
+    m = masstodon_batch(mz, intensity, precursors,
+                        std_cnt             = std_cnt,
+                        mz_digits           = mz_digits,
+                        isotopic_coverage   = isotopic_coverage,
+                        min_prob            = min_prob,
+                        deconvolution_graph_path = deconvolution_graph_path)
+    m.match_estimates()
     return m
 
 
@@ -283,4 +296,6 @@ def masstodon_load(path):
     params['deconvolution_graph_path'] = pjoin(
         path, "deconvolution_graph.gpickle")
     m = masstodon_batch(mz, intensity, **params)
+    if len(params['precursors']) == 1:
+        m.match_estimates()
     return m

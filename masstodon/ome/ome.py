@@ -17,9 +17,9 @@ class Ome(object):
         self.G = nx.Graph()
         for p_kwds in precursors:
             prec = precursor(iso_calc = self.iso_calc, **p_kwds)
-            self.G.add_node(prec, type='source')
+            self.G.add_node(prec, s=True)
             for mol, name in prec.molecules():
-                self.G.add_node(mol, type='observable')
+                self.G.add_node(mol, s=False)
                 self.G.add_edge(mol, prec, name=name)
         for m_kwds in molecules:
             name = m_kwds['name']
@@ -29,9 +29,11 @@ class Ome(object):
             prec = FalsePrecursor(name=name,
                                   iso_calc=self.iso_calc,
                                   **m_kwds)
-            self.G.add_node(prec, type='source')
-            self.G.add_node(mol,  type='observable')
+            self.G.add_node(prec, s=True)
+            self.G.add_node(mol,  s=False)
             self.G.add_edge(mol, prec, name='precursor')
+        self.G_stats = {'nodes': len(self.G.nodes),
+                        'edges': len(self.G.edges)}
 
     def dump(self, path):
         """Save the computed sources-observables graph.
@@ -77,16 +79,16 @@ class Ome(object):
         if show:
             plt.show()
 
-    def iter_nodes(self, that_type):
+    def iter_nodes(self, source=True):
         for n in self.G:
-            if self.G.node[n]['type'] is that_type:
+            if self.G.node[n]['s'] is source:
                 yield n
 
     def observables(self):
-        yield from self.iter_nodes('observable')
+        yield from self.iter_nodes(False)
 
     def sources(self):
-        yield from self.iter_nodes('source')
+        yield from self.iter_nodes(True)
 
     def write(self, path):
         pass
@@ -105,6 +107,7 @@ class Ome(object):
             s, e = subspec.interval
             emp_tree[s:e] = subspec
         good_mols = []
+        bad_mols = []
         good_subspectra = set([])
         for mol in self.observables():
             s, e = mol.interval(std_cnt = std_cnt)
@@ -114,9 +117,23 @@ class Ome(object):
                 good_mols.append(mol)
                 good_subspectra |= touched_spectra
             else:
-                status = 'std_dev'
-            self.G.node[mol]['status'] = status
+                bad_mols.append(mol)
+        self.G.remove_nodes_from(bad_mols)
+        self.G_stats['nodes_std_dev_filter'] = len(self.G.nodes)
+        self.G_stats['edges_std_dev_filter'] = len(self.G.edges)
         return good_mols, good_subspectra
+
+    def filter_by_estimated_intensity(self):
+        good = []
+        bad  = []
+        for o in self.observables():
+            if o.intensity > 0.0:
+                good.append(o)
+            else:
+                bad.append(o)
+        self.G.remove_nodes_from(bad)
+        self.G_stats['nodes_nonzero_intensity'] = len(self.G.nodes)
+        self.G_stats['edges_nonzero_intensity'] = len(self.G.edges)
 
 
 def ome(iso_calc, precursors=[], molecules=[]):

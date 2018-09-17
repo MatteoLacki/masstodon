@@ -68,7 +68,7 @@ class SimpleCzMatch(object):
     def __init__(self,
                  molecules,
                  precursor_charge):
-        self._molecules = molecules
+        self._molecules   = molecules
         self._Q = int(precursor_charge)
         # we prepend _I_ for 'intensity'
         self._I_ETDorHTR_bond       = Counter()
