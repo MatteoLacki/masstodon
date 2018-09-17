@@ -24,6 +24,7 @@ from    networkx                            import  connected_component_subgraph
 from    networkx.algorithms.operators.all   import  union_all
 from    networkx.linalg.graphmatrix         import  incidence_matrix
 import  numpy                               as      np
+from    os.path                             import  join as pjoin
 from    scipy.optimize                      import  linprog
 
 from    masstodon.write.csv_tsv             import  write_rows
@@ -246,10 +247,12 @@ class SimpleCzMatch(object):
             for no, v in bonds:
                 yield ('', 'bond %d' % no, "{:10.3f}%".format(100 * v) )
 
-    def write(self, path=''):
+    def write(self, path):
         """Write intensities and probabilities to a given path."""
-        write_rows(self._iter_intensities(),   path+'simple_pairing_intensities.csv')
-        write_rows(self._iter_probabilities(), path+'simple_pairing_probabilities.csv')
+        write_rows(self._iter_intensities(),
+                   pjoin(path, 'simple_pairing_intensities.csv'))
+        write_rows(self._iter_probabilities(),
+                   pjoin(path, 'simple_pairing_probabilities.csv'))
 
     def _match(self):
         """Pair molecules minimizing the number of reactions and calculate the resulting probabilities."""

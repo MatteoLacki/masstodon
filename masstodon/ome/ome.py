@@ -2,12 +2,13 @@
 import intervaltree         as iTree
 import networkx             as nx
 import matplotlib.pyplot    as plt
+from math        import ceil
 from collections import defaultdict
 
 from masstodon.precursor.precursor  import precursor, FalsePrecursor
 from masstodon.molecule.molecule    import molecule
 from masstodon.formula.formula      import Formula, dict2string
-
+from masstodon.write.csv_tsv        import write_rows
 
 class Ome(object):
     def __init__(self, iso_calc):
@@ -90,8 +91,40 @@ class Ome(object):
     def sources(self):
         yield from self.iter_nodes(True)
 
+    def is_one_precursor(self):
+        """Check if there is only one precursor."""
+        sources = self.sources()
+        prec = next(sources)
+        try:
+            x = next(sources)
+            return False
+        except StopIteration:
+            return True
+
+    def iter_molecule_estimates(self, header=True):
+        """Iterate over molecules with positive estimates."""
+        if self.is_one_precursor:
+            if header:
+                yield ('formula', 'q', 'g',
+                       'formula with q and g',
+                       'intensity', 'name')
+            for m in self.observables():
+                yield (str(m.formula), m.q, m.g, 
+                       m.formula.str_with_charges(m.q, m.g), 
+                       ceil(m.intensity), m.name)
+        else:
+            if header:
+                yield ('formula', 'q', 'g', 
+                       'formula with q and g',
+                       'intensity')
+            for m in self.observables():
+                yield (str(m.formula), m.q, m.g,
+                       m.formula.str_with_charges(m.q, m.g),
+                       ceil(m.intensity))
+
     def write(self, path):
-        pass
+        """Write precise estimates."""
+        write_rows(self.iter_molecule_estimates(), path)
 
     def filter_by_deviations(self, 
                              subspectra,

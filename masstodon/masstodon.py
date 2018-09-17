@@ -128,6 +128,8 @@ class Masstodon(object):
                                         self.isotopic_coverage)
 
     def match_estimates(self):
+        """Match the fragment intensities to get the idea about 
+        the minimal number of precursor molecules."""
         sources = self.ome.sources()
         prec = next(sources)
         try:
@@ -138,17 +140,20 @@ class Masstodon(object):
         for mol in self.ome.observables():
             mol.name = self.ome.G[mol][prec]['name']
             mol.prec_fasta_len = len(prec.fasta)
-        self.cz_simple = SimpleCzMatch(self.good_mols,
-                                       self.prec.q)
-        self.cz = CzMatch(self.good_mols,
-                          self.prec.q)
+        self.cz_simple = SimpleCzMatch(self.good_mols, prec.q)
+        self.cz = CzMatch(self.good_mols, prec.q)
 
-    def write_csv(self, path):
+    def write(self, path):
         """Write results to path."""
+        self.ome.write(pjoin(path, 'estimates.csv'))
         self.cz.write(path)
         self.cz_simple.write(path)
 
     def dump(self, path, source_observables_graph=False):
+        """Dump the results of the fitting to locally stored files.
+
+        Function masstodon_load can then read them back.
+        """
         self.spec.dump(path)
         params = {"precursors": self.precursors,
                   "molecules" : self.molecules,
@@ -284,7 +289,7 @@ def masstodon_single(mz, intensity, fasta, q,
                         isotopic_coverage   = isotopic_coverage,
                         min_prob            = min_prob,
                         deconvolution_graph_path = deconvolution_graph_path)
-    m.match_estimates()
+    # m.match_estimates()
     return m
 
 

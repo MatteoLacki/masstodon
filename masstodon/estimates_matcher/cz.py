@@ -15,8 +15,9 @@
 #   Version 3 along with MassTodon.  If not, see
 #   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 from collections import Counter, namedtuple
+from os.path import join as pjoin
 
-from .cz_simple import SimpleCzMatch
+from .cz_simple       import SimpleCzMatch
 from ..write.csv_tsv  import write_rows
 
 
@@ -65,10 +66,12 @@ class CzMatch(SimpleCzMatch):
                                       PTR= Q-1 -C.g -Z.g -C.q -Z.q,
                                       ETnoD_PTR= Q -1 -C.q -Z.q)
 
-    def write(self, path=''):
+    def write(self, path):
         """Write intensities and probabilities to a given path."""
-        write_rows(self._iter_intensities(), path + 'pairing_intensities.csv')
-        write_rows(self._iter_probabilities(), path + 'pairing_probabilities.csv')
+        write_rows(self._iter_intensities(),
+                   pjoin(path, 'pairing_intensities.csv'))
+        write_rows(self._iter_probabilities(), 
+                   pjoin(path, 'pairing_probabilities.csv'))
 
     def _get_edge_labels_4_plot(self, G):
         return {n:f"${n.type}_"+"{"+f"{n.no}"+"}^{"+f"{n.q}+{n.g}"+"}$\n"+f"{d['intensity']}"

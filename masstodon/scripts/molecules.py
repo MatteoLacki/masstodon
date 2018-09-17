@@ -32,16 +32,15 @@ precursors = [{'fasta': fasta,
 #                     isotopic_coverage = isotopic_coverage,
 #                     min_prob = min_prob, 
 #                     std_cnt  = std_cnt)
+# m = masstodon_single(mz, intensity, fasta, charge, '', 
+#                     isotopic_coverage = isotopic_coverage,
+#                     min_prob = min_prob, 
+#                     std_cnt  = std_cnt)
+# m.dump('dump')
 
-m = masstodon_single(mz, intensity, fasta, charge, '', 
-                    isotopic_coverage = isotopic_coverage,
-                    min_prob = min_prob, 
-                    std_cnt  = std_cnt)
+n = masstodon_load("dump")
+n.write('dump')
 
-
-
-m.dump('dump')
-m.restrict_good_mols()
 
 # %lprun -f masstodon_batch masstodon_batch(mz, intensity, precursors, isotopic_coverage=isotopic_coverage, min_prob=min_prob, std_cnt=std_cnt)
 # n = masstodon_load("dump")
