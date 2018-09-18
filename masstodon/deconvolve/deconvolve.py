@@ -49,13 +49,6 @@ class DeconvolutionProblem(object):
     def __len__(self):
         return len(self.cc)
 
-    def l1(self):
-        return sum(np.abs(self.model.res()))
-
-    def l2(self):
-        """This is copying what I once complained to Ludi about :)"""
-        return self.model.l2()
-
     def spectrum(self):
         pred = self.model.fitted()
         Y    = self.model.Y

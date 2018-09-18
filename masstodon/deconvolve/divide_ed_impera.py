@@ -138,6 +138,26 @@ class Imperator(object):
     def __len__(self):
         return len(self.G)
 
+    def l1_abs(self):
+        """Summarize the l1 error for all the solutions"""
+        return sum(s.model.l1() for s in self.solutions)
+
+    def l2_abs(self):
+        """Summarize the l2 error for all the solutions"""
+        return sum(s.model.l2() for s in self.solutions)
+
+    def total_intensity(self):
+        return sum(s.model.total_intensity() for s in self.solutions)
+
+    def total_fitted(self):
+        return sum(s.model.total_fitted() for s in self.solutions)
+
+    def l1_rel(self):
+        return self.l1_abs()/(self.total_intensity() + self.total_fitted())
+
+    def l1_rel_response(self):
+        return self.l1_abs()/self.total_intensity()
+
 
 def imperator(molecules,
               clustering,

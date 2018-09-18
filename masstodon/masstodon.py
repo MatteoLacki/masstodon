@@ -222,6 +222,8 @@ def masstodon_batch(mz,
                          isotopic_coverage)
     m.ome.filter_by_estimated_intensity()
     m.restrict_good_mols()
+    if m.ome.is_one_precursor():
+        m.match_estimates()
     return m
 
 
@@ -289,7 +291,6 @@ def masstodon_single(mz, intensity, fasta, q,
                         isotopic_coverage   = isotopic_coverage,
                         min_prob            = min_prob,
                         deconvolution_graph_path = deconvolution_graph_path)
-    # m.match_estimates()
     return m
 
 
@@ -301,6 +302,4 @@ def masstodon_load(path):
     params['deconvolution_graph_path'] = pjoin(
         path, "deconvolution_graph.gpickle")
     m = masstodon_batch(mz, intensity, **params)
-    if len(params['precursors']) == 1:
-        m.match_estimates()
     return m

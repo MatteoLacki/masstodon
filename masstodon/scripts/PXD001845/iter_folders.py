@@ -24,9 +24,9 @@ def iter_scans(path,
     """
     for scan_dir, dirs, files in os.walk(path):
         try:
-            mz_path = pjoin(scan_dir, mz_file)
-            intensity_path = pjoin(scan_dir, intensity_file)
-            mz = np.load(mz_path)
+            mz_path           = pjoin(scan_dir, mz_file)
+            intensity_path    = pjoin(scan_dir, intensity_file)
+            mz                = np.load(mz_path)
             filepath, scan_no = psplit(scan_dir)
             experiment = psplit(filepath)[1]
             scan_no = int(scan_no)

@@ -14,11 +14,29 @@ class NNLS(Model):
         self.Y = Y
         self._coef, self._res = scipy.optimize.nnls(X, Y)
 
-    def l2(self):
+    def l1_abs(self):
+        return np.sum(np.abs(self.res()))
+
+    def l2_abs(self):
         return self._res
 
     def coef(self):
         return self._coef
+
+    def total_intensity(self):
+        return self.Y.sum()
+
+    def total_fitted(self):
+        return self.fitted().sum()
+
+    def l1_rel(self):
+        return self.l1()/(self.total_intensity() + self.total_fitted())
+
+    def l1_rel_response(self):
+        return self.l1()/self.total_intensity()
+
+    def l2_rel(self):
+        return self.l1()/(sum(self.Y**2) + sum(self.fitted()**2))
 
     def __call__(self, x):
         return np.dot(x, self._coef)
