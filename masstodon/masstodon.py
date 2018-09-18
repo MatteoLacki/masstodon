@@ -143,6 +143,7 @@ class Masstodon(object):
         self.cz_simple = SimpleCzMatch(self.good_mols, prec.q)
         self.cz = CzMatch(self.good_mols, prec.q)
 
+    # TODO: write also the errors.
     def write(self, path):
         """Write results to path."""
         self.ome.write(pjoin(path, 'estimates.csv'))

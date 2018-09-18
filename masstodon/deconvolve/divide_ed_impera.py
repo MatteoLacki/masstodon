@@ -57,7 +57,7 @@ class Imperator(object):
     def divide_iter(self):
         ls = self.clust.ls
         for M_cnt, M in enumerate(self.mols):
-            M_cnt = - M_cnt - 1 # it is quicker not to run the __hash__ for M, but use this count
+            M_cnt = - M_cnt - 1 # this counter is quicker than the __hash__ for M
             P_within_groups = 0.0
             # edge is an collection of merged isotopologues
             I = defaultdict(float) # values correspond to total probability on that edge. 
@@ -76,6 +76,8 @@ class Imperator(object):
 
     def impera(self):
         """List all conected components."""
+        # this set will contain all the indices of used mean_mzs.
+        self.used_idx = set([])
         self.solutions = [deconvolve(cc, 
                                      self.clust.groups.intensity,
                                      self.clust.groups.min_mz,
@@ -138,25 +140,41 @@ class Imperator(object):
     def __len__(self):
         return len(self.G)
 
-    def l1_abs(self):
+    def solutions_l1_error_abs(self):
         """Summarize the l1 error for all the solutions"""
         return sum(s.model.l1() for s in self.solutions)
 
-    def l2_abs(self):
-        """Summarize the l2 error for all the solutions"""
-        return sum(s.model.l2() for s in self.solutions)
+    def solutions_total_intensity(self):
+        return sum(s.model.total_intensity() for s in self.solutions)
 
     def total_intensity(self):
-        return sum(s.model.total_intensity() for s in self.solutions)
+        return sum(self.clust.groups.intensity)
+
+    def used_peak_groups(self):
+        """Get a mask selecting peak groups used in the fitting."""
+        used_idx = set()
+        used_idx = set([])
+        used_idx.update(p for s in M.imperator.solutions for p in s.idx)
+        used_idx = np.array(list(used_idx))
+        used = np.zeros(shape = self.clust.groups.intensity.shape,
+                        dtype = bool)
+        used[used_idx] = True
+        return used
+
+    def total_intensity_fitted_to(self):
+        return sum(self.clust.groups.intensity[self.used_peak_groups()])
 
     def total_fitted(self):
         return sum(s.model.total_fitted() for s in self.solutions)
 
+    def l1_abs(self):
+        intensity = self.clust.groups.intensity
+        intensity_beyond_theory = sum(intensity[~self.used_peak_groups()])
+        return intensity_beyond_theory + self.solutions_l1_error_abs()
+
     def l1_rel(self):
         return self.l1_abs()/(self.total_intensity() + self.total_fitted())
 
-    def l1_rel_response(self):
-        return self.l1_abs()/self.total_intensity()
 
 
 def imperator(molecules,

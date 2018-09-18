@@ -15,6 +15,7 @@ class DeconvolutionProblem(object):
             min_mz,
             max_mz,
             mean_mz,
+            used_idx,
             include_zero_intensities = False):
         self.cc     = connected_component
         mol_columns = np.array([N < 0  for N in self.cc])

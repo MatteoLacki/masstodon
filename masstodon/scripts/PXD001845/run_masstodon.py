@@ -63,9 +63,29 @@ dp.Y.sum()
 dp.plot()
 dp.l1_error()
 
+import numpy as np
+
+used = set([])
+used.update(p for s in M.imperator.solutions for p in s.idx)
+used = np.array(list(used))
+used.sort()
+
+group_intensity = M.spec.bc.groups.intensity
+
+
+used = np.zeros(shape=group_intensity.shape, dtype=bool)
+used[used_idx] = True
+
+group_intensity[used].sum() / group_intensity[~used].sum()
 
 
 
+len(M.spec.bc.groups.intensity)
+
+
+M.imperator.solutions[0].idx
+
+M.spec.plot(show=False)
 M.imperator.plot_solutions()
 M.spec.l1()
 M.spec.l2()
