@@ -3,9 +3,6 @@
     * providing the interval length
     * assure that different intervals do not intersect
         * if they do, make them shorter
-* quality of fit
-    * errors for each deconvolution problem
-    * writing down to csv
 * adjust bokeh library (before the weekend)
     * contact Kola
 * multiprocessing batch files
@@ -21,3 +18,10 @@
 * analysis of fitting sensitivity
 * l1 optimization algorithm  
 * get rid of the intervaltree (it generates hidden warnings)
+
+
+
+DONE:
+* quality of fit
+    * errors for each deconvolution problem
+    * writing down to csv

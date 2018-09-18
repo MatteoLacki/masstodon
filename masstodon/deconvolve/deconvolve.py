@@ -102,7 +102,18 @@ class DeconvolutionProblem(object):
         if show:
             plt.show()
 
-
+    def plot_fittings(self,
+                      plt_style = 'fast',
+                      peaks     = True,
+                      show      = True):
+        plt.style.use(plt_style)
+        x     = self.mean_mz
+        y_hat = self.model.fitted()
+        if peaks:
+            plt.vlines(x, [0], y_hat, color='red')
+        plt.scatter(x, y_hat, s = 16, color='red')
+        if show:
+            plt.show()
 
 def deconvolve(connected_component,
                total_intensities,

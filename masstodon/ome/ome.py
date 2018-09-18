@@ -76,8 +76,8 @@ class Ome(object):
         nx.draw_networkx_edges(self.G, pos=layout)
         edge_labels = {(a,b): self.G[a][b]['name'] for a,b in self.G.edges}
         nx.draw_networkx_edge_labels(self.G,
-                                     pos=layout,
-                                     edge_labels=edge_labels)
+                                     pos         = layout,
+                                     edge_labels = edge_labels)
         if show:
             plt.show()
 

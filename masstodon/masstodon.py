@@ -164,6 +164,7 @@ class Masstodon(object):
         with open(pjoin(path, 'params.json'), 'w') as f:
             json.dump(params, f)
         self.imperator.save_graph(pjoin(path, 'deconvolution_graph.gpickle'))
+        self.imperator.errors_to_json(pjoin(path, 'errors.json'))
         if source_observables_graph:
             self.ome.dump(pjoin(path,
                                 'sources_observables_graph.gpickle'))

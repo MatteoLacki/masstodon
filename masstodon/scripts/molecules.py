@@ -39,7 +39,11 @@ precursors = [{'fasta': fasta,
 # m.dump('dump')
 
 n = masstodon_load("dump")
-n.write('dump')
+# n.write('dump')
+
+n.imperator.solutions[20].plot_fittings()
+
+n.imperator.plot_solutions_simple()
 
 
 # %lprun -f masstodon_batch masstodon_batch(mz, intensity, precursors, isotopic_coverage=isotopic_coverage, min_prob=min_prob, std_cnt=std_cnt)

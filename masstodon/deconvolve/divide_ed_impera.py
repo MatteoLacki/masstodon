@@ -2,7 +2,11 @@
 
 Should be in principle replaced by a simple C++ code.
 Now, it really should."""
-
+try:
+    import bokeh
+    bokeh_available = True
+except ImportError:
+    bokeh_available = False
 import  json
 import  networkx            as      nx
 import  numpy               as      np
@@ -127,15 +131,36 @@ class Imperator(object):
         if show:
             plt.show()
 
-    def plot_solutions(self, fancy     = True,
-                             plt_style = 'fast',
+    def plot_solutions(self, plt_style = 'fast',
                              bar_color = 'grey',
                              bar_alpha = 0.5,
                              show      = True):
         plt.style.use(plt_style)
+        h   = self.clust.groups.intensity
+        x_l = self.clust.groups.min_mz
+        x_r = self.clust.groups.max_mz
+        plt.bar(x       = x_l,
+                height  = h,
+                bottom  = [0],
+                width   = x_r - x_l,
+                align   = 'edge',
+                alpha   = bar_alpha,
+                color   = bar_color)
         for sol in self.solutions:
-            plotter = sol.plot_fancy if fancy else sol.plot
-            plotter(plt_style, bar_color, bar_alpha, False)
+            sol.plot_fittings(plt_style, False)
+        if show:
+            plt.show()
+
+    def plot_solutions_simple(self, plt_style = 'fast',
+                              bar_color = 'grey',
+                              bar_alpha = 0.5,
+                              show      = True):
+        plt.style.use(plt_style)
+        h = self.clust.groups.intensity
+        x = self.clust.groups.mean_mz
+        plt.vlines(x, [0], h, color='grey')
+        for sol in self.solutions:
+            sol.plot_fittings(plt_style, False, False)
         if show:
             plt.show()
 

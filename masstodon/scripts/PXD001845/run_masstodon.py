@@ -43,8 +43,6 @@ for mz, intensity, q, path in islice(path_iter, 1):
         print(path)
         print(e)
 
-M.ome.G_stats
-
 
 M.dump("dump")
 M.imperator.errors_to_json("dump/errors.json")
