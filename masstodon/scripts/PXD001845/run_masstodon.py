@@ -1,3 +1,8 @@
+%load_ext autoreload
+%autoreload 2
+%load_ext line_profiler
+
+
 from itertools  import islice
 import os
 from os.path    import join as pjoin, exists as pexists
@@ -24,10 +29,11 @@ for mz, intensity, q, path in islice(path_iter, 1):
     try:
         t0 = time()
         M = masstodon_single(mz, intensity, fasta, q, '', 
-                             isotopic_coverage  = isotopic_coverage,
-                             min_prob           = min_prob, 
-                             std_cnt            = std_cnt)
-        local_dump_path = pjoin(dump_path, pjoin(*path.split('/')[-2:]))
+                             isotopic_coverage = isotopic_coverage,
+                             min_prob          = min_prob, 
+                             std_cnt           = std_cnt)
+        local_dump_path = pjoin(dump_path,
+                                pjoin(*path.split('/')[-2:]))
         if not pexists(local_dump_path):
             os.makedirs(local_dump_path)
         M.dump(local_dump_path)
@@ -37,19 +43,22 @@ for mz, intensity, q, path in islice(path_iter, 1):
         print(path)
         print(e)
 
-dp = M.imperator.solutions[1]
+M.ome.G_stats
 
 
-dp.model.l1()
-dp.model.l2()
-
-dp.model.l1_error()
-dp.model.l2_error()
+M.dump("dump")
+M.imperator.errors_to_json("dump/errors.json")
 
 
-dp.model.l1()/dp.model.Y.sum()
 
 import numpy as np
+
+dp = M.imperator.solutions[1]
+dp.model.l1()
+dp.model.l2()
+dp.model.l1_error()
+dp.model.l2_error()
+dp.model.l1()/dp.model.Y.sum()
 np.sum(np.abs(dp.model.res()))
 np.sum(np.abs(dp.model.res()))
 

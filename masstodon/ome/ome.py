@@ -1,5 +1,6 @@
 """Ome is more than proteome, or genome, or metalobome. It's simply ome."""
 import intervaltree         as iTree
+import json
 import networkx             as nx
 import matplotlib.pyplot    as plt
 from math        import ceil
@@ -167,6 +168,12 @@ class Ome(object):
         self.G.remove_nodes_from(bad)
         self.G_stats['nodes_nonzero_intensity'] = len(self.G.nodes)
         self.G_stats['edges_nonzero_intensity'] = len(self.G.edges)
+
+    def dump_stats(self, path):
+        with open(path, 'w') as f:
+            json.dump(self.G_stats, f)
+
+
 
 
 def ome(iso_calc, precursors=[], molecules=[]):

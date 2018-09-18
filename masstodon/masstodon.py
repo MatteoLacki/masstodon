@@ -143,12 +143,12 @@ class Masstodon(object):
         self.cz_simple = SimpleCzMatch(self.good_mols, prec.q)
         self.cz = CzMatch(self.good_mols, prec.q)
 
-    # TODO: write also the errors.
     def write(self, path):
         """Write results to path."""
         self.ome.write(pjoin(path, 'estimates.csv'))
         self.cz.write(path)
         self.cz_simple.write(path)
+        self.imperator.errors_to_json(pjoin(path, 'errors.json'))
 
     def dump(self, path, source_observables_graph=False):
         """Dump the results of the fitting to locally stored files.
@@ -167,6 +167,7 @@ class Masstodon(object):
         if source_observables_graph:
             self.ome.dump(pjoin(path,
                                 'sources_observables_graph.gpickle'))
+        self.ome.dump_stats(pjoin(path, 'deconvolution_graph_stats.json'))
 
     def restrict_good_mols(self):
         self.good_mols = [m for m in self.good_mols if m.intensity > 0.0]

@@ -3,7 +3,9 @@
 Should be in principle replaced by a simple C++ code.
 Now, it really should."""
 
+import  json
 import  networkx            as      nx
+import  numpy               as      np
 from    collections         import  defaultdict, Counter
 try:
     import matplotlib.pyplot as plt
@@ -142,10 +144,14 @@ class Imperator(object):
 
     def solutions_l1_error_abs(self):
         """Summarize the l1 error for all the solutions"""
-        return sum(s.model.l1() for s in self.solutions)
+        return sum(s.model.l1_abs() for s in self.solutions)
 
     def solutions_total_intensity(self):
         return sum(s.model.total_intensity() for s in self.solutions)
+
+    def solutions_l1_error_rel(self):
+        return self.solutions_l1_error_abs() /\
+              (self.total_fitted() + self.total_intensity_fitted_to())
 
     def total_intensity(self):
         return sum(self.clust.groups.intensity)
@@ -154,7 +160,7 @@ class Imperator(object):
         """Get a mask selecting peak groups used in the fitting."""
         used_idx = set()
         used_idx = set([])
-        used_idx.update(p for s in M.imperator.solutions for p in s.idx)
+        used_idx.update(p for s in self.solutions for p in s.idx)
         used_idx = np.array(list(used_idx))
         used = np.zeros(shape = self.clust.groups.intensity.shape,
                         dtype = bool)
@@ -175,6 +181,14 @@ class Imperator(object):
     def l1_rel(self):
         return self.l1_abs()/(self.total_intensity() + self.total_fitted())
 
+    def errors_to_json(self, path):
+        errors = {}
+        errors['l1_abs'] = self.l1_abs()
+        errors['l1_rel'] = self.l1_rel()
+        errors['solutions_l1_error_abs'] = self.solutions_l1_error_abs()
+        errors['solutions_l1_error_rel'] = self.solutions_l1_error_rel()
+        with open(path, 'w') as f:
+            json.dump(errors, f)
 
 
 def imperator(molecules,
