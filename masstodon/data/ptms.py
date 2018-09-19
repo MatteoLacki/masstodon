@@ -1,5 +1,5 @@
 ptms = {
-"phosphorylation" :     {"P":1, "O":3},
+"phosphorylation":      {"P":1, "H":1,  "O":3},
 "acetylation":          {"C":2, "H":2,  "O":1},
 "glycosylation_hexose": {"C":6, "H":10, "O":5},
 "amidation":            {"H":1, "N":1,  "O":-1},
@@ -10,3 +10,6 @@ ptms = {
 "sulfation":            {"S":1, "O":3},
 "gamma_carboxyglutamic_acid": {"C":1, "O":2}}
 
+typical_ptm_sites = {
+    "phosphorylation": ("S", "T", "Y")
+}
