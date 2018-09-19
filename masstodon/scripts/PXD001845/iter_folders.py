@@ -49,11 +49,9 @@ def iter_scans(path,
 
 
 def non_modified_scans(path):
-    for mz, intensity, scan_no, experiment in iter_scans(path):
-        if "AMB_Bora" in experiment and "precZ" in experiment :
-            # parsing out charge
-            charge = int(experiment.split("_")[-1].replace("precZ", ""))
-            if charge in (18, 19) and "ETD" in experiment:
-                yield mz, intensity, scan_no, experiment, charge
+    for mz, intensity, charge, experiment in iter_scans(path):
+        exp = experiment.split("/")[-2]
+        if "AMB_Bora" in exp and "precZ" in exp and "ETD" in exp:
+            yield mz, intensity, charge, experiment
 
 
