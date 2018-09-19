@@ -150,7 +150,7 @@ class Masstodon(object):
         self.cz_simple.write(path)
         self.imperator.errors_to_json(pjoin(path, 'errors.json'))
 
-    def dump(self, path, source_observables_graph=False):
+    def dump(self, path, source_observables_graph=False, indent=None):
         """Dump the results of the fitting to locally stored files.
 
         Function masstodon_load can then read them back.
@@ -162,13 +162,15 @@ class Masstodon(object):
                   "isotopic_coverage" : self.isotopic_coverage,
                   "min_prob"  : self.min_prob}
         with open(pjoin(path, 'params.json'), 'w') as f:
-            json.dump(params, f)
+            json.dump(params, f, indent=indent)
         self.imperator.save_graph(pjoin(path, 'deconvolution_graph.gpickle'))
-        self.imperator.errors_to_json(pjoin(path, 'errors.json'))
+        self.imperator.errors_to_json(pjoin(path, 'errors.json'),
+                                      indent=indent)
         if source_observables_graph:
             self.ome.dump(pjoin(path,
                                 'sources_observables_graph.gpickle'))
-        self.ome.dump_stats(pjoin(path, 'deconvolution_graph_stats.json'))
+        self.ome.dump_stats(pjoin(path, 'deconvolution_graph_stats.json'),
+                            indent=indent)
 
     def restrict_good_mols(self):
         self.good_mols = [m for m in self.good_mols if m.intensity > 0.0]
@@ -181,7 +183,8 @@ class Masstodon(object):
         path : str
             Output folder.
         """
-        self.imperator.plotly_solutions(pjoin(path, "spectrum.html"),
+        self.imperator.plotly_solutions(pjoin(path,
+                                             "spectrum.html"),
                                         show)
 
 
@@ -193,6 +196,7 @@ def masstodon_batch(mz,
                     mz_digits           = None,
                     isotopic_coverage   = .999,
                     min_prob            = .7,
+                    get_timings         = False,
                     deconvolution_graph_path = ''):
     """Run a session of masstodon with multiple sources.
 
@@ -221,23 +225,44 @@ def masstodon_batch(mz,
     deconvolution_graph_path : str
         A path to a valid premade deconvolution graph.
     """
+    t0 = time()
     m = Masstodon()
     m.set_spectrum(mz, intensity)
+    t1 = time()
     if mz_digits is None:
         mz_digits = m.mz_digits
     m.set_isotopic_calculator()
+    t2 = time()
     m.set_ome(precursors, molecules, std_cnt)
+    t3 = time()
     if not deconvolution_graph_path:
         m.divide_et_impera(min_prob, isotopic_coverage)
     else:
         m.load_imperator(deconvolution_graph_path,
                          min_prob,
                          isotopic_coverage)
+    t4 = time()
     m.ome.filter_by_estimated_intensity()
+    t5 = time()
     m.restrict_good_mols()
+    t6 = time()
     if m.ome.is_one_precursor():
         m.match_estimates()
-    return m
+        t7 = time()
+    timings = (
+        ("spectrum", t1-t0),
+        ("isotopic_calculator", t2-t1),
+        ("ome", t3-t2),
+        ("imperator", t4-t3),
+        ("filter_by_estimated_intensity", t5-t4),
+        ("restrict_good_mols", t6-t5),
+        ("match_estimates", t7-t6),
+        ("total", t7-t0)
+    )
+    if get_timings:
+        return m, timings
+    else:
+        return m
 
 
 def masstodon_single(mz, intensity, fasta, q,
@@ -251,6 +276,7 @@ def masstodon_single(mz, intensity, fasta, q,
                      mz_digits         = None,
                      isotopic_coverage = .999,
                      min_prob          = .7,
+                     get_timings       = False,
                      deconvolution_graph_path = ''):
     """Run a basic session of the MassTodon.
 
@@ -298,13 +324,13 @@ def masstodon_single(mz, intensity, fasta, q,
                      "blocked_fragments":   blocked_fragments,
                      "block_prolines":      block_prolines,
                      "distance_charges":    distance_charges } ]
-    m = masstodon_batch(mz, intensity, precursors,
-                        std_cnt             = std_cnt,
-                        mz_digits           = mz_digits,
-                        isotopic_coverage   = isotopic_coverage,
-                        min_prob            = min_prob,
-                        deconvolution_graph_path = deconvolution_graph_path)
-    return m
+    return masstodon_batch(mz, intensity, precursors,
+                           std_cnt                  = std_cnt,
+                           mz_digits                = mz_digits,
+                           isotopic_coverage        = isotopic_coverage,
+                           min_prob                 = min_prob,
+                           get_timings              = get_timings,
+                           deconvolution_graph_path = deconvolution_graph_path)
 
 
 

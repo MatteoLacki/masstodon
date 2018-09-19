@@ -39,7 +39,8 @@ precursors = [{'fasta': fasta,
 # m.dump('dump')
 
 n = masstodon_load("dump")
-n.plotly("spectrum.html")
+n.dump("dump", indent=4)
+n.plotly("dump")
 
 
 # %lprun -f masstodon_batch masstodon_batch(mz, intensity, precursors, isotopic_coverage=isotopic_coverage, min_prob=min_prob, std_cnt=std_cnt)
@@ -70,6 +71,7 @@ n.plotly("spectrum.html")
 #         good_mols.append(mol)
 #         good_subspectra |= touched_spectra
 # t1 = time()
+
 from masstodon.estimates_matcher.cz_simple import SimpleCzMatch
 
 

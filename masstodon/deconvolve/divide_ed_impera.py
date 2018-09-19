@@ -272,14 +272,14 @@ class Imperator(object):
     def l1_rel(self):
         return self.l1_abs()/(self.total_intensity() + self.total_fitted())
 
-    def errors_to_json(self, path):
+    def errors_to_json(self, path, indent=None):
         errors = {}
         errors['l1_abs'] = self.l1_abs()
         errors['l1_rel'] = self.l1_rel()
         errors['solutions_l1_error_abs'] = self.solutions_l1_error_abs()
         errors['solutions_l1_error_rel'] = self.solutions_l1_error_rel()
         with open(path, 'w') as f:
-            json.dump(errors, f)
+            json.dump(errors, f, indent=indent)
 
 
 def imperator(molecules,

@@ -169,9 +169,9 @@ class Ome(object):
         self.G_stats['nodes_nonzero_intensity'] = len(self.G.nodes)
         self.G_stats['edges_nonzero_intensity'] = len(self.G.edges)
 
-    def dump_stats(self, path):
+    def dump_stats(self, path, indent=None):
         with open(path, 'w') as f:
-            json.dump(self.G_stats, f)
+            json.dump(self.G_stats, f, indent=indent)
 
 
 
