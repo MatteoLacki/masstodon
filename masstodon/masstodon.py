@@ -150,7 +150,7 @@ class Masstodon(object):
         self.cz_simple.write(path)
         self.imperator.errors_to_json(pjoin(path, 'errors.json'))
 
-    def dump(self, path, source_observables_graph=False, indent=None):
+    def dump(self, path, source_observables_graph=False, indent=4):
         """Dump the results of the fitting to locally stored files.
 
         Function masstodon_load can then read them back.
@@ -183,9 +183,20 @@ class Masstodon(object):
         path : str
             Output folder.
         """
-        self.imperator.plotly_solutions(pjoin(path,
-                                             "spectrum.html"),
-                                        show)
+        self.imperator.plotly(pjoin(path,"spectrum.html"),
+                              show=show)
+
+    def plotlygl(self, path, shape='triangles', show=True):
+        """Save the html plotly visual output files.
+
+        Paramaters
+        ==========
+        path : str
+            Output folder.
+        """
+        self.imperator.plotlygl(pjoin(path,"spectrum.html"),
+                                shape = shape,
+                                show  = show)
 
 
 def masstodon_batch(mz, 

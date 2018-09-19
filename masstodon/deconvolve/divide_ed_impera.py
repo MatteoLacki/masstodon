@@ -20,6 +20,28 @@ except RuntimeError:
 from masstodon.deconvolve.deconvolve import deconvolve 
 
 
+def rectangles(l, r, h):
+    X = []
+    Y = []
+    for a,b,c in zip(l, r, h):
+        X.append(a); Y.append(0)
+        X.append(a); Y.append(c)
+        X.append(b); Y.append(c)
+        X.append(b); Y.append(0)
+    return np.array(X), np.array(Y)
+
+def triangles(l, r, h):
+    X = []
+    Y = []
+    for a,b,c in zip(l, r, h):
+        X.append(a); Y.append(0)
+        X.append((a+b)/2.0); Y.append(c)
+        X.append(b); Y.append(0)
+    X, Y = np.array(X), np.array(Y)
+    i = np.argsort(X)
+    return X[i], Y[i]
+
+
 class Imperator(object):
     def __init__(self, molecules,
                        clustering,
@@ -165,7 +187,48 @@ class Imperator(object):
         if show:
             plt.show()
 
-    def plotly_solutions(self, path, show=True):
+    def __get_xhlr(self):
+        x = self.clust.groups.mean_mz
+        h = self.clust.groups.intensity.astype(int)
+        l = self.clust.groups.min_mz
+        r = self.clust.groups.max_mz
+        return x, h, l, r
+
+    def __get_fitted(self):
+        fitted_int = []
+        fitted_mzs = []
+        fitted_to_int = []
+        for s in self.solutions:
+            fitted_mzs.extend(list(s.mean_mz))
+            fitted_int.extend(list(s.model.fitted()))
+            fitted_to_int.extend(list(s.model.Y))
+        fitted_int      = np.array(fitted_int).astype(int)
+        fitted_mzs      = np.array(fitted_mzs)
+        fitted_to_int   = np.array(fitted_to_int).astype(int)
+        text_annotation = np.array([f"fit {fit_int:.0f}<br>obs {fit2int:.0f}"
+                       for fit_int, fit2int in zip(fitted_int, fitted_to_int)])
+        return fitted_int, fitted_mzs, fitted_to_int, text_annotation
+
+    def __get_black_layout(self):
+        layout = go.Layout(title = "Observed versus Fitted Spectrum",
+                           font = dict(
+                               color = "white"
+                           ),
+                           yaxis = dict(
+                               title = "Intensity",
+                               color = "white",
+                               showline = False,
+                               zeroline = False
+                           ),
+                           xaxis = dict(
+                               title = "mass/charge [Th]",
+                               color = "white",
+                           ),
+                           plot_bgcolor = "black",
+                           paper_bgcolor= "black")
+        return layout
+
+    def plotly(self, path, show=True):
         """Make a plotly plot of the fittings.
 
         The plot overlays scatterplot of fitted intensities
@@ -180,22 +243,8 @@ class Imperator(object):
         # some simplifications
         if plotly_available:
             # data 4 plot
-            x = self.clust.groups.mean_mz
-            h = self.clust.groups.intensity.astype(int)
-            l = self.clust.groups.min_mz
-            r = self.clust.groups.max_mz
-            fitted_int = []
-            fitted_mzs = []
-            fitted_to_int = []
-            for s in self.solutions:
-                fitted_mzs.extend(list(s.mean_mz))
-                fitted_int.extend(list(s.model.fitted()))
-                fitted_to_int.extend(list(s.model.Y))
-            fitted_int      = np.array(fitted_int).astype(int)
-            fitted_mzs      = np.array(fitted_mzs)
-            fitted_to_int   = np.array(fitted_to_int).astype(int)
-            text_annotation = np.array([f"fit {fit_int:.0f}<br>obs {fit2int:.0f}"
-                           for fit_int, fit2int in zip(fitted_int, fitted_to_int)])
+            x, h, l, r = self.__get_xhlr()
+            fitted_int, fitted_mzs, fitted_to_int, text_annotation = self.__get_fitted()
             # plot elements
             spectrum_bars = go.Bar(x=x, y=h, width=r-l, name="Peak Group")
             fitted_dots = go.Scatter(x = fitted_mzs,
@@ -206,22 +255,7 @@ class Imperator(object):
                                      marker    = {"color" : "orange"},
                                      name      = "Fitted")
             data = [spectrum_bars, fitted_dots]
-            layout = go.Layout(
-                title = "Observed versus Fitted Spectrum",
-                font  =dict(
-                    color="white"
-                ),
-                yaxis = dict(
-                    title = "Intensity",
-                    color = "white"
-                ),
-                xaxis = dict(
-                    title = "mass/charge [Th]",
-                    color = "white"
-                ),
-                plot_bgcolor = "black",
-                paper_bgcolor= "black"
-            )
+            layout = self.__get_black_layout()
             fig = go.Figure(data=data, layout=layout)
             plotly.offline.plot(fig,
                                 filename  = path,
@@ -229,6 +263,42 @@ class Imperator(object):
         else:
             raise ImportError("You must install plotly seperately! We want you, the 'enlighted coder', to have the possibility to run masstodon with pypy out-of-the-box.")
 
+    def plotlygl(self, path, shape="rectangles", show=True):
+        """Make a plotly WebGL plot of the fittings.
+
+        The plot overlays scatterplot of fitted intensities
+        over the bars corresponding to total intensities in peak groups.
+
+        Parameters
+        ==========
+        path : str
+            Where to save the plot.
+            The file should have 'html' extension to avoid warnings.
+        """
+        # some simplifications
+        if plotly_available:
+            # data 4 plot
+            x, h, l, r = self.__get_xhlr()
+            shape = rectangles if shape == 'rectangles' else triangles
+            X, Y = shape(l, r, h)
+            fitted_int, fitted_mzs, fitted_to_int, text_annotation = self.__get_fitted()
+            # plot elements
+            spectrum_bars = go.Scattergl(x = X, y = Y, name = "Peak Group")
+            fitted_dots = go.Scattergl(x = fitted_mzs,
+                                       y = fitted_int,
+                                       text      = text_annotation, # maps to labels
+                                       hoverinfo = "text",          # show only labels
+                                       mode      = "markers",       # default='lines'
+                                       marker    = {"color" : "orange"},
+                                       name      = "Fitted")
+            data   = [spectrum_bars, fitted_dots]
+            layout = self.__get_black_layout()
+            fig    = go.Figure(data=data, layout=layout)
+            plotly.offline.plot(fig,
+                                filename  = path,
+                                auto_open = show)
+        else:
+            raise ImportError("You must install plotly seperately! We want you, the 'enlighted coder', to have the possibility to run masstodon with pypy out-of-the-box.")
 
     def __len__(self):
         return len(self.G)
