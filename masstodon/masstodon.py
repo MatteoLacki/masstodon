@@ -173,6 +173,16 @@ class Masstodon(object):
     def restrict_good_mols(self):
         self.good_mols = [m for m in self.good_mols if m.intensity > 0.0]
 
+    def plotly(self, path, show=True):
+        """Save the html plotly visual output files.
+
+        Paramaters
+        ==========
+        path : str
+            Output folder.
+        """
+        self.imperator.plotly_solutions(pjoin(path, "spectrum.html"),
+                                        show)
 
 
 def masstodon_batch(mz, 

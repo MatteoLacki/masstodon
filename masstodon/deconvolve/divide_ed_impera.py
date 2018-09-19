@@ -165,7 +165,7 @@ class Imperator(object):
         if show:
             plt.show()
 
-    def plotly_solutions(self, path):
+    def plotly_solutions(self, path, show=True):
         """Make a plotly plot of the fittings.
 
         The plot overlays scatterplot of fitted intensities
@@ -191,8 +191,8 @@ class Imperator(object):
                 fitted_mzs.extend(list(s.mean_mz))
                 fitted_int.extend(list(s.model.fitted()))
                 fitted_to_int.extend(list(s.model.Y))
-            fitted_int      = np.array(fitted_int)
-            fitted_mzs      = np.array(fitted_mzs).astype(int)
+            fitted_int      = np.array(fitted_int).astype(int)
+            fitted_mzs      = np.array(fitted_mzs)
             fitted_to_int   = np.array(fitted_to_int).astype(int)
             text_annotation = np.array([f"fit {fit_int:.0f}<br>obs {fit2int:.0f}"
                            for fit_int, fit2int in zip(fitted_int, fitted_to_int)])
@@ -223,7 +223,9 @@ class Imperator(object):
                 paper_bgcolor= "black"
             )
             fig = go.Figure(data=data, layout=layout)
-            plotly.offline.plot(fig, filename=path)
+            plotly.offline.plot(fig,
+                                filename  = path,
+                                auto_open = show)
         else:
             raise ImportError("You must install plotly seperately! We want you, the 'enlighted coder', to have the possibility to run masstodon with pypy out-of-the-box.")
 

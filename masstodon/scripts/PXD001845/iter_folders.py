@@ -57,6 +57,3 @@ def non_modified_scans(path):
                 yield mz, intensity, scan_no, experiment, charge
 
 
-
-
-

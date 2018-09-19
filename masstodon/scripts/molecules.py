@@ -39,7 +39,7 @@ precursors = [{'fasta': fasta,
 # m.dump('dump')
 
 n = masstodon_load("dump")
-n.imperator.plotly_solutions('spectrum.html')
+n.plotly("spectrum.html")
 
 
 # %lprun -f masstodon_batch masstodon_batch(mz, intensity, precursors, isotopic_coverage=isotopic_coverage, min_prob=min_prob, std_cnt=std_cnt)

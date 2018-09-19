@@ -23,9 +23,10 @@ std_cnt           = 3
 dump_path         = "/Users/matteo/Projects/masstodon/dumps/one_process"
 
 
+stop = None
 # the simplest case: no multiple threads yet.
 # mz, intensity, q, path = next(path_iter)
-for mz, intensity, q, path in islice(path_iter, 1):
+for mz, intensity, q, path in islice(path_iter, stop):
     try:
         t0 = time()
         M = masstodon_single(mz, intensity, fasta, q, '', 
@@ -38,70 +39,9 @@ for mz, intensity, q, path in islice(path_iter, 1):
             os.makedirs(local_dump_path)
         M.dump(local_dump_path)
         M.write(local_dump_path)
+        M.plotly(local_dump_path, show=False)
         t1 = time()
     except Exception as e:
         print(path)
         print(e)
-
-
-M.dump("dump")
-M.imperator.errors_to_json("dump/errors.json")
-
-
-
-import numpy as np
-
-dp = M.imperator.solutions[1]
-dp.model.l1()
-dp.model.l2()
-dp.model.l1_error()
-dp.model.l2_error()
-dp.model.l1()/dp.model.Y.sum()
-np.sum(np.abs(dp.model.res()))
-np.sum(np.abs(dp.model.res()))
-
-
-
-dp.model.l1()
-
-dp.l2()
-dp.Y
-dp.Y.sum()
-dp.plot()
-dp.l1_error()
-
-import numpy as np
-
-used = set([])
-used.update(p for s in M.imperator.solutions for p in s.idx)
-used = np.array(list(used))
-used.sort()
-
-group_intensity = M.spec.bc.groups.intensity
-
-
-used = np.zeros(shape=group_intensity.shape, dtype=bool)
-used[used_idx] = True
-
-group_intensity[used].sum() / group_intensity[~used].sum()
-
-
-
-len(M.spec.bc.groups.intensity)
-
-
-M.imperator.solutions[0].idx
-
-M.spec.plot(show=False)
-M.imperator.plot_solutions()
-M.spec.l1()
-M.spec.l2()
-
-sum(dp.l1() for dp in M.imperator.solutions)/M.spec.l1()
-sum(dp.l2() for dp in M.imperator.solutions)/M.spec.l2()
-
-M.ome.G_stats
-
-[n for n in M.ome.G]
-[e for e in M.ome.G.edges]
 
