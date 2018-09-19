@@ -257,19 +257,19 @@ def masstodon_batch(mz,
     t5 = time()
     m.restrict_good_mols()
     t6 = time()
+    timings = [ ("spectrum", t1-t0),
+                ("isotopic_calculator", t2-t1),
+                ("ome", t3-t2),
+                ("imperator", t4-t3),
+                ("filter_by_estimated_intensity", t5-t4),
+                ("restrict_good_mols", t6-t5) ]
     if m.ome.is_one_precursor():
         m.match_estimates()
         t7 = time()
-    timings = (
-        ("spectrum", t1-t0),
-        ("isotopic_calculator", t2-t1),
-        ("ome", t3-t2),
-        ("imperator", t4-t3),
-        ("filter_by_estimated_intensity", t5-t4),
-        ("restrict_good_mols", t6-t5),
-        ("match_estimates", t7-t6),
-        ("total", t7-t0)
-    )
+        timings.append(("match_estimates", t7-t6))
+        timings.append(("total", t7-t0))
+    else:
+        timings.append(("total", t6-t0))
     if get_timings:
         return m, timings
     else:

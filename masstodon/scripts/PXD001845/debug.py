@@ -38,8 +38,8 @@ m = masstodon_batch(mz, intensity, precursors,
                     min_prob = min_prob, 
                     std_cnt  = std_cnt)
 
-m.dump('dump')
-m.plotlygl("dump", shape='triangles')
+m.dump('dump/phospho_search')
+m.plotlygl("dump/phospho_search", shape='triangles')
 
 # typical phosphorylation sites
 prec = {'fasta': fasta, 'q': charge, 'name': 'pBora'}
@@ -50,6 +50,13 @@ for i, aa in enumerate(fasta):
         prec_mod['name'] += f"_phosphorylated_{i+1}"
         prec_mod['modifications'] = {i+1: {'C_carbo': ptms['phosphorylation'].copy()}}
         precursors.append(prec_mod)
+n = masstodon_batch(mz, intensity, precursors, 
+                    isotopic_coverage = isotopic_coverage,
+                    min_prob = min_prob, 
+                    std_cnt  = std_cnt)
+
+n.dump('dump/phospho_search_targetted')
+n.plotlygl("dump/phospho_search_targetted", shape='triangles')
 
 # 20141202_AMB_pBora_PLK_10x_40MeOH_1FA_OT_120k_10uscans_928_EThcD_6ms_10CE_19precZ/1
 # strange peak plotting around 925.4-925.5
