@@ -29,3 +29,5 @@ dist
 
 # VIM
 *.swo
+
+*.zip

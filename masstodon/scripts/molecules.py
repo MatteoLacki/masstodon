@@ -39,11 +39,7 @@ precursors = [{'fasta': fasta,
 # m.dump('dump')
 
 n = masstodon_load("dump")
-# n.write('dump')
-
-n.imperator.solutions[20].plot_fittings()
-
-n.imperator.plot_solutions_simple()
+n.imperator.plotly_solutions('spectrum.html')
 
 
 # %lprun -f masstodon_batch masstodon_batch(mz, intensity, precursors, isotopic_coverage=isotopic_coverage, min_prob=min_prob, std_cnt=std_cnt)
@@ -76,27 +72,6 @@ n.imperator.plot_solutions_simple()
 # t1 = time()
 from masstodon.estimates_matcher.cz_simple import SimpleCzMatch
 
-sources = m.ome.sources()
-prec = next(sources)
-try:
-    x = next(sources)
-    raise AttributeError("You supplied too many precursors for the c/z analysis.")
-except StopIteration:
-    pass
-
-for mol in m.ome.observables():
-    mol.name = m.ome.G[mol][prec]['name']
-    mol.prec_fasta_len = len(prec.fasta)
-
-m.good_mols[0].name
-m.good_mols[0].prec_fasta_len
-
-simple_cz = SimpleCzMatch(m.good_mols, charge)
-mol._molType_position_cleavageSite()
-
-simple_cz.intensities
-simple_cz.probabilities
-
 
 
 # precursors = [
@@ -124,77 +99,3 @@ simple_cz.probabilities
 #          formula= 'C100H202',
 #          q      =  2)
 # ]
-
-
-m = masstodon_batch(mz, intensity, precursors, 
-                    isotopic_coverage=isotopic_coverage,
-                    min_prob=min_prob, 
-                    std_cnt=std_cnt)
-
-
-todon = Masstodon(mz        = mz, 
-                  intensity = intensity, 
-                  mz_digits = 4,
-                  precursors= precursors,
-                  # molecules = molecules,
-                  # fasta     = fasta,
-                  # charge    = charge,
-                  # name             = "", 
-                  # modifications    = {},
-                  # fragments        = "cz",
-                  # blocked_fragments= ['c0'],
-                  # block_prolines   = True,
-                  # distance_charges = 5.,
-                  std_cnt          = 3,
-                  isotopic_coverage= .999,
-                  min_prob         = .7,
-                  deconvolution_graph_path = '')
-
-todon.set_spectrum()
-todon.set_isotopic_calculator()
-todon.set_ome()
-# todon.ome.plot()
-
-
-t0 = time()
-ome = Ome(todon.iso_calc)
-ome.make_graph(precursors)
-t1 = time()
-
-good_mols, good_subspectra = ome.filter_by_deviations(todon.subspectra, todon.std_cnt)
-
-
-
-
-
-ome = Ome(todon.iso_calc)
-ome.make_graph(precursors, molecules)
-ome.plot()
-list(ome.observables())
-list(ome.sources())
-
-molecules = [
-    dict(name   = 'saliva',
-         formula= 'C100H202',
-         q      =  2),
-    dict(name   = 'lipstick',
-         formula= 'C100H202',
-         q      =  2),
-    dict(name   = "startrek's leather underwear",
-         formula= 'C100H202',
-         q      =  2)
-]
-ome = Ome(todon.iso_calc)
-ome.make_graph([], molecules)
-ome.plot()
-
-
-
-# still doesn't work. 
-# we need to be able to distinguish the source nodes.
-
-
-for n in ome.G:
-    print(n)
-    print(n.__hash__())
-

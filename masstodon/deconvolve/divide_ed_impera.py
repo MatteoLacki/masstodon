@@ -3,14 +3,15 @@
 Should be in principle replaced by a simple C++ code.
 Now, it really should."""
 try:
-    import bokeh
-    bokeh_available = True
+    import plotly
+    import plotly.graph_objs as go
+    plotly_available = True
 except ImportError:
-    bokeh_available = False
-import  json
-import  networkx            as      nx
-import  numpy               as      np
-from    collections         import  defaultdict, Counter
+    plotly_available = False
+import json
+import networkx            as      nx
+import numpy               as      np
+from   collections         import  defaultdict, Counter
 try:
     import matplotlib.pyplot as plt
 except RuntimeError:
@@ -163,6 +164,69 @@ class Imperator(object):
             sol.plot_fittings(plt_style, False, False)
         if show:
             plt.show()
+
+    def plotly_solutions(self, path):
+        """Make a plotly plot of the fittings.
+
+        The plot overlays scatterplot of fitted intensities
+        over the bars corresponding to total intensities in peak groups.
+
+        Parameters
+        ==========
+        path : str
+            Where to save the plot.
+            The file should have 'html' extension to avoid warnings.
+        """
+        # some simplifications
+        if plotly_available:
+            # data 4 plot
+            x = self.clust.groups.mean_mz
+            h = self.clust.groups.intensity.astype(int)
+            l = self.clust.groups.min_mz
+            r = self.clust.groups.max_mz
+            fitted_int = []
+            fitted_mzs = []
+            fitted_to_int = []
+            for s in self.solutions:
+                fitted_mzs.extend(list(s.mean_mz))
+                fitted_int.extend(list(s.model.fitted()))
+                fitted_to_int.extend(list(s.model.Y))
+            fitted_int      = np.array(fitted_int)
+            fitted_mzs      = np.array(fitted_mzs).astype(int)
+            fitted_to_int   = np.array(fitted_to_int).astype(int)
+            text_annotation = np.array([f"fit {fit_int:.0f}<br>obs {fit2int:.0f}"
+                           for fit_int, fit2int in zip(fitted_int, fitted_to_int)])
+            # plot elements
+            spectrum_bars = go.Bar(x=x, y=h, width=r-l, name="Peak Group")
+            fitted_dots = go.Scatter(x = fitted_mzs,
+                                     y = fitted_int,
+                                     text      = text_annotation, # maps to labels
+                                     hoverinfo = "text",          # show only labels
+                                     mode      = "markers",       # default='lines'
+                                     marker    = {"color" : "orange"},
+                                     name      = "Fitted")
+            data = [spectrum_bars, fitted_dots]
+            layout = go.Layout(
+                title = "Observed versus Fitted Spectrum",
+                font  =dict(
+                    color="white"
+                ),
+                yaxis = dict(
+                    title = "Intensity",
+                    color = "white"
+                ),
+                xaxis = dict(
+                    title = "mass/charge [Th]",
+                    color = "white"
+                ),
+                plot_bgcolor = "black",
+                paper_bgcolor= "black"
+            )
+            fig = go.Figure(data=data, layout=layout)
+            plotly.offline.plot(fig, filename=path)
+        else:
+            raise ImportError("You must install plotly seperately! We want you, the 'enlighted coder', to have the possibility to run masstodon with pypy out-of-the-box.")
+
 
     def __len__(self):
         return len(self.G)
