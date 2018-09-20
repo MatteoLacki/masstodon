@@ -41,6 +41,8 @@ m = masstodon_batch(mz, intensity, precursors,
 m.dump('dump/phospho_search')
 m.plotlygl("dump/phospho_search", shape='triangles')
 
+
+
 # typical phosphorylation sites
 prec = {'fasta': fasta, 'q': charge, 'name': 'pBora'}
 precursors = [prec]
@@ -60,3 +62,45 @@ n.plotlygl("dump/phospho_search_targetted", shape='triangles')
 
 # 20141202_AMB_pBora_PLK_10x_40MeOH_1FA_OT_120k_10uscans_928_EThcD_6ms_10CE_19precZ/1
 # strange peak plotting around 925.4-925.5
+n = masstodon_load("dump/phospho_search_targetted")
+
+
+len(n.ome.G.nodes)
+len(n.ome.G.edges)
+
+import networkx as nx
+from networkx.algorithms.flow import min_cost_flow
+
+
+ome = m.ome
+
+DG = nx.DiGraph()
+demand = 0
+for o in ome.observables():
+    i = int(o.intensity)
+    DG.add_node(o, demand=-i)
+    demand += i
+    for s in ome.G[o]:
+        DG.add_edge(o,s,cost=len(s.modifications))
+DG.add_node("sink", demand=demand)
+for s in ome.sources():
+    DG.add_edge(s,"sink")
+res = min_cost_flow(DG, weight='cost')
+minimal_intensity = {}
+for s in ome.sources():
+    s.intensity = res[s]["sink"]
+
+for s in ome.sources():
+    if s.intensity > 0:
+        if s.modifications:
+            i,p = list(s.modifications)[0]
+            mes = "AA: {}\tAA_no: {}\tPTM: {}\tI: {}".format(s.fasta[i], i+1, s.modifications[(i,p)], s.intensity)
+            
+        else:
+            mes = "non-modified\t\t\t\tI: {}".format(s.intensity)
+        print(mes)
+
+
+for o in ome.observables():
+    o.name
+

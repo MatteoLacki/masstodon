@@ -6,11 +6,18 @@ except RuntimeError:
 import numpy             as np
 from   os.path import join as pjoin
 import json
+try:
+    import plotly
+    import plotly.graph_objs as go
+    from masstodon.plot.plotly import get_black_layout
+    plotly_available = True
+except ImportError:
+    plotly_available = False
 
 from masstodon.arrays.operations import dedup_sort
 from masstodon.measure.measure   import Measure
 from masstodon.plot.spectrum     import plot_spectrum
-from masstodon.readers.from_npy  import spectrum_from_npy
+from masstodon.read.npy          import spectrum_from_npy
 from masstodon.spectrum.cluster  import min_diff_clust, bitonic_clust
 from masstodon.stats.gaussian    import mean, sd, skewness
 

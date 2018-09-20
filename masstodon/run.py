@@ -11,7 +11,7 @@ except RuntimeError:
 from   time         import  time
 from   math         import  log10, floor
 
-from masstodon.readers.from_npy            import spectrum_from_npy
+from masstodon.read.npy                    import spectrum_from_npy
 from masstodon.precursor.precursor         import precursor
 from masstodon.isotopes                    import isotope_calculator
 from masstodon.spectrum.spectrum           import spectrum

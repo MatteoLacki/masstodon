@@ -46,8 +46,8 @@ setup(
     install_requires=[
         'numpy',
         'scipy',
-        # 'pyteomics>=3.4.1',
-        # 'lxml',
+        'lxml',
+        'pyteomics>=3.4.1',
         'cffi',
         'IsoSpecPy<2.0',
         'networkx>=2.0',

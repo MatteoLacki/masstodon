@@ -5,6 +5,7 @@ Now, it really should."""
 try:
     import plotly
     import plotly.graph_objs as go
+    from masstodon.plot.plotly import get_black_layout
     plotly_available = True
 except ImportError:
     plotly_available = False
@@ -29,6 +30,7 @@ def rectangles(l, r, h):
         X.append(b); Y.append(c)
         X.append(b); Y.append(0)
     return np.array(X), np.array(Y)
+
 
 def triangles(l, r, h):
     X = []
@@ -209,25 +211,6 @@ class Imperator(object):
                        for fit_int, fit2int in zip(fitted_int, fitted_to_int)])
         return fitted_int, fitted_mzs, fitted_to_int, text_annotation
 
-    def __get_black_layout(self):
-        layout = go.Layout(title = "Observed versus Fitted Spectrum",
-                           font = dict(
-                               color = "white"
-                           ),
-                           yaxis = dict(
-                               title = "Intensity",
-                               color = "white",
-                               showline = False,
-                               zeroline = False
-                           ),
-                           xaxis = dict(
-                               title = "mass/charge [Th]",
-                               color = "white",
-                           ),
-                           plot_bgcolor = "black",
-                           paper_bgcolor= "black")
-        return layout
-
     def plotly(self, path, show=True):
         """Make a plotly plot of the fittings.
 
@@ -255,7 +238,7 @@ class Imperator(object):
                                      marker    = {"color" : "orange"},
                                      name      = "Fitted")
             data = [spectrum_bars, fitted_dots]
-            layout = self.__get_black_layout()
+            layout = self.get_black_layout()
             fig = go.Figure(data=data, layout=layout)
             plotly.offline.plot(fig,
                                 filename  = path,
@@ -292,7 +275,7 @@ class Imperator(object):
                                        marker    = {"color" : "orange"},
                                        name      = "Fitted")
             data   = [spectrum_bars, fitted_dots]
-            layout = self.__get_black_layout()
+            layout = self.get_black_layout()
             fig    = go.Figure(data=data, layout=layout)
             plotly.offline.plot(fig,
                                 filename  = path,

@@ -2,9 +2,10 @@
 import intervaltree         as iTree
 import json
 import networkx             as nx
+from   networkx.algorithms.flow import min_cost_flow
 import matplotlib.pyplot    as plt
-from math        import ceil
-from collections import defaultdict
+from   math                 import ceil
+from   collections          import defaultdict
 
 from masstodon.precursor.precursor  import precursor, FalsePrecursor
 from masstodon.molecule.molecule    import molecule
@@ -172,6 +173,41 @@ class Ome(object):
     def dump_stats(self, path, indent=None):
         with open(path, 'w') as f:
             json.dump(self.G_stats, f, indent=indent)
+
+    def attribute_intensity_to_sources(self):
+        """Attribute estimated intensity of molecules to their sources.
+
+        This is done by solving a min_cost_flow problem.
+        Estimated intensities are treated as supply points,
+        sources (proteins) are treated as demand points.
+        An additional directed graph is created here temporarily.
+        """
+        DG = nx.DiGraph()
+        demand = 0
+        for o in self.observables():
+            i = int(o.intensity)
+            DG.add_node(o, demand=-i)
+            demand += i
+            for s in self.G[o]:
+                DG.add_edge(o,s,cost=len(s.modifications))
+        DG.add_node("sink", demand=demand)
+        for s in self.sources():
+            DG.add_edge(s,"sink")
+        res = min_cost_flow(DG, weight='cost')
+        minimal_intensity = {}
+        for s in n.ome.sources():
+            s.intensity = res[s]["sink"]
+
+    def print_PTM_intensities(self):
+        """Print out the intensities of different PTMs."""
+        for s in n.ome.sources():
+            if s.intensity > 0:
+                if s.modifications:
+                    i,p = list(s.modifications)[0]
+                    mes = "AA: {}\tAA_no: {}\tPTM: {}\tI: {}".format(s.fasta[i], i+1, s.modifications[(i,p)], s.intensity)
+                    
+                else:
+                    mes = "non-modified\t\t\t\tI: {}".format(s.intensity)
 
 
 

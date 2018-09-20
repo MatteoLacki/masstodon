@@ -229,10 +229,13 @@ class Precursor(Molecule):
                      flatten_modification(self.modifications)))
 
     def __eq__(self, other):
-        A = self.name == other.name
-        B = self.fasta == other.fasta
-        C = self.q == other.q
-        return A and B and C
+        if isinstance(other, self.__class__):
+            A = self.name == other.name
+            B = self.fasta == other.fasta
+            C = self.q == other.q
+            return A and B and C
+        else:
+            return False
 
 
 

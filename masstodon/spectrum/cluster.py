@@ -133,6 +133,18 @@ class Bitonic(PeakClustering):
         self.sd_model.plot(plt_style = plt_style,
                            show      = show)
 
+SimpleGroups = namedtuple('SimpleGroups',
+                          'min_mz max_mz mean_mz intensity')
+SimpleGroups.__new__.__defaults__ = tuple([] for _ in range(7))
+
+def ThresholdClustering(Bitonic):
+    def fit(self, x, w, threshold):
+        l = x - threshold
+        r = x + threshold
+        self.groups = SimpleGroups(l, r, x, w)
+
+
+
 def bitonic_clust(x, w, 
                   min_mz_diff          = .15,
                   abs_perc_dev         = .2,
