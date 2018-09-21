@@ -248,8 +248,17 @@ class Spectrum(Measure):
 
 def spectrum(mz        = np.array([]),
              intensity = np.array([]),
+             threshold = None,
              sort      = True):
     spec = Spectrum(mz, intensity, sort)
+    if threshold is not None:
+        self.spec.bitonic_clustering()
+        self.groups = self.bc.groups
+        self.ls     = self.bc.ls
+    else:
+        self.spec.threshold_spectrum()
+        self.groups = self.ts.groups
+        self.ls     = self.ls
     return spec
 
 

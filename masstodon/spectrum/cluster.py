@@ -1,6 +1,6 @@
-from collections import Counter, namedtuple
-from   math      import floor, log10
-import numpy     as np
+from   collections import Counter, namedtuple
+from   math        import floor, log10, inf
+import numpy       as np
 
 
 from masstodon.models.polynomial import polynomial
@@ -133,17 +133,6 @@ class Bitonic(PeakClustering):
         self.sd_model.plot(plt_style = plt_style,
                            show      = show)
 
-SimpleGroups = namedtuple('SimpleGroups',
-                          'min_mz max_mz mean_mz intensity')
-SimpleGroups.__new__.__defaults__ = tuple([] for _ in range(7))
-
-def ThresholdClustering(Bitonic):
-    def fit(self, x, w, threshold):
-        l = x - threshold
-        r = x + threshold
-        self.groups = SimpleGroups(l, r, x, w)
-
-
 
 def bitonic_clust(x, w, 
                   min_mz_diff          = .15,
@@ -170,5 +159,3 @@ def bitonic_clust(x, w,
                        *model_sd_args,
                       **model_sd_kwds)
     return bc
-
-

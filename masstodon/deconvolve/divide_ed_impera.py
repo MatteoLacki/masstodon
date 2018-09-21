@@ -46,7 +46,8 @@ def triangles(l, r, h):
 
 class Imperator(object):
     def __init__(self, molecules,
-                       clustering,
+                       groups,
+                       lightweight_spectrum,
                        min_prob = 0.8,
                        isotopic_coverage = .99):
         """Long live the Empire."""
@@ -54,7 +55,8 @@ class Imperator(object):
             assert prob > 0.0 and prob <= 1.0
         self.min_prob = min_prob
         self.isotopic_coverage = isotopic_coverage
-        self.clust    = clustering
+        self.groups   = groups
+        self.ls       = lightweight_spectrum
         self.mols     = molecules
 
     def divide(self):
@@ -86,14 +88,13 @@ class Imperator(object):
         self.G = nx.read_gpickle(path)
 
     def divide_iter(self):
-        ls = self.clust.ls
         for M_cnt, M in enumerate(self.mols):
             M_cnt = - M_cnt - 1 # this counter is quicker than the __hash__ for M
             P_within_groups = 0.0
             # edge is an collection of merged isotopologues
             I = defaultdict(float) # values correspond to total probability on that edge. 
             for I_mz, I_prob in M.isotopologues(self.isotopic_coverage, True):
-                E = ls[I_mz]
+                E = self.ls[I_mz]
                 if E > 0:
                     I[(M_cnt, E)]   += I_prob
                     P_within_groups += I_prob
@@ -110,10 +111,10 @@ class Imperator(object):
         # this set will contain all the indices of used mean_mzs.
         self.used_idx = set([])
         self.solutions = [deconvolve(cc, 
-                                     self.clust.groups.intensity,
-                                     self.clust.groups.min_mz,
-                                     self.clust.groups.max_mz,
-                                     self.clust.groups.mean_mz) for cc in self.impera_iter()]
+                                     self.groups.intensity,
+                                     self.groups.min_mz,
+                                     self.groups.max_mz,
+                                     self.groups.mean_mz) for cc in self.impera_iter()]
 
     def set_estimated_intensities(self):
         for sol in self.solutions:
@@ -161,9 +162,9 @@ class Imperator(object):
                              bar_alpha = 0.5,
                              show      = True):
         plt.style.use(plt_style)
-        h   = self.clust.groups.intensity
-        x_l = self.clust.groups.min_mz
-        x_r = self.clust.groups.max_mz
+        h   = self.groups.intensity
+        x_l = self.groups.min_mz
+        x_r = self.groups.max_mz
         plt.bar(x       = x_l,
                 height  = h,
                 bottom  = [0],
@@ -181,8 +182,8 @@ class Imperator(object):
                               bar_alpha = 0.5,
                               show      = True):
         plt.style.use(plt_style)
-        h = self.clust.groups.intensity
-        x = self.clust.groups.mean_mz
+        h = self.groups.intensity
+        x = self.groups.mean_mz
         plt.vlines(x, [0], h, color='grey')
         for sol in self.solutions:
             sol.plot_fittings(plt_style, False, False)
@@ -190,10 +191,10 @@ class Imperator(object):
             plt.show()
 
     def __get_xhlr(self):
-        x = self.clust.groups.mean_mz
-        h = self.clust.groups.intensity.astype(int)
-        l = self.clust.groups.min_mz
-        r = self.clust.groups.max_mz
+        x = self.groups.mean_mz
+        h = self.groups.intensity.astype(int)
+        l = self.groups.min_mz
+        r = self.groups.max_mz
         return x, h, l, r
 
     def __get_fitted(self):
@@ -298,7 +299,7 @@ class Imperator(object):
               (self.total_fitted() + self.total_intensity_fitted_to())
 
     def total_intensity(self):
-        return sum(self.clust.groups.intensity)
+        return sum(self.groups.intensity)
 
     def used_peak_groups(self):
         """Get a mask selecting peak groups used in the fitting."""
@@ -306,19 +307,19 @@ class Imperator(object):
         used_idx = set([])
         used_idx.update(p for s in self.solutions for p in s.idx)
         used_idx = np.array(list(used_idx))
-        used = np.zeros(shape = self.clust.groups.intensity.shape,
+        used = np.zeros(shape = self.groups.intensity.shape,
                         dtype = bool)
         used[used_idx] = True
         return used
 
     def total_intensity_fitted_to(self):
-        return sum(self.clust.groups.intensity[self.used_peak_groups()])
+        return sum(self.groups.intensity[self.used_peak_groups()])
 
     def total_fitted(self):
         return sum(s.model.total_fitted() for s in self.solutions)
 
     def l1_abs(self):
-        intensity = self.clust.groups.intensity
+        intensity = self.groups.intensity
         intensity_beyond_theory = sum(intensity[~self.used_peak_groups()])
         return intensity_beyond_theory + self.solutions_l1_error_abs()
 
@@ -336,10 +337,15 @@ class Imperator(object):
 
 
 def imperator(molecules,
-              clustering,
+              groups,
+              lightweight_spectrum,
               min_prob          = .8,
               isotopic_coverage = .99):
-    imp = Imperator(molecules, clustering, min_prob, isotopic_coverage)
+    imp = Imperator(molecules,
+                    groups,
+                    lightweight_spectrum,
+                    min_prob,
+                    isotopic_coverage)
     imp.divide()
     imp.impera()
     imp.set_estimated_intensities()
@@ -347,11 +353,16 @@ def imperator(molecules,
 
 
 def load_imperator(molecules,
-                   clustering,
+                   groups,
+                   lightweight_spectrum,
                    deconvolution_graph_path,
                    min_prob          = .8,
                    isotopic_coverage = .99):
-    imp = Imperator(molecules, clustering, min_prob, isotopic_coverage)
+    imp = Imperator(molecules,
+                    groups,
+                    lightweight_spectrum,
+                    min_prob,
+                    isotopic_coverage)
     imp.load_graph(deconvolution_graph_path)
     imp.impera()
     imp.set_estimated_intensities()

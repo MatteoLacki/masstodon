@@ -210,8 +210,6 @@ class Ome(object):
                     mes = "non-modified\t\t\t\tI: {}".format(s.intensity)
 
 
-
-
 def ome(iso_calc, precursors=[], molecules=[]):
     """Generate an ome. """
     _ome = Ome(iso_calc)

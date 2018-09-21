@@ -75,15 +75,17 @@ from masstodon.estimates_matcher.cz_simple import SimpleCzMatch
 from masstodon.isotopes                    import isotope_calculator
 from masstodon.precursor.precursor         import precursor
 from masstodon.preprocessing.filters       import filter_subspectra_molecules
-from masstodon.readers.from_npy            import spectrum_from_npy
+from masstodon.read.npy                    import spectrum_from_npy
 from masstodon.spectrum.spectrum           import spectrum
 from masstodon.ome.ome                     import ome
 
 class Masstodon(object):
-    def set_spectrum(self, mz, intensity):
-        self.spec = spectrum(mz, intensity)
-        self.spec.bitonic_clustering()
-        self.mz_digits = self.spec.bc.get_smallest_diff_digits()
+    def set_spectrum(self, mz, intensity, threshold=None):
+        self.threshold = threshold
+        self.spec = spectrum(mz, intensity, self.threshold)
+        # self.spec.bitonic_clustering()
+        # self.mz_digits = self.spec.bc.get_smallest_diff_digits()
+        self.mz_digits = self.spec.get_smallest_diff_digits()
         self.spec.min_mz_diff_clustering()
         self.subspectra = list(self.spec.iter_min_mz_diff_subspectra())
 
@@ -122,7 +124,8 @@ class Masstodon(object):
         self.min_prob                 = min_prob
         self.isotopic_coverage        = isotopic_coverage
         self.imperator = load_imperator(self.good_mols,
-                                        self.spec.bc,
+                                        self.groups,
+                                        self.ls,
                                         self.deconvolution_graph_path,
                                         self.min_prob,
                                         self.isotopic_coverage)
@@ -160,7 +163,8 @@ class Masstodon(object):
                   "molecules" : self.molecules,
                   "std_cnt"   : self.std_cnt,
                   "isotopic_coverage" : self.isotopic_coverage,
-                  "min_prob"  : self.min_prob}
+                  "min_prob"  : self.min_prob,
+                  "threshold" : self.threshold}
         with open(pjoin(path, 'params.json'), 'w') as f:
             json.dump(params, f, indent=indent)
         self.imperator.save_graph(pjoin(path, 'deconvolution_graph.gpickle'))
