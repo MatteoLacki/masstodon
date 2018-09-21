@@ -5,7 +5,7 @@ import numpy       as np
 
 from masstodon.models.polynomial import polynomial
 from masstodon.models.spline     import spline
-from masstodon.spectrum.orbitrap.peak_clustering import bitonic_clustering,\
+from masstodon.spectrum.peak_clustering import bitonic_clustering,\
                                                         iter_cluster_ends,\
                                                         min_diff_clustering
 from masstodon.spectrum.lightweight import lightweight_spectrum
@@ -95,9 +95,9 @@ class Bitonic(PeakClustering):
         self.groups = Groups(*O)
 
     def get_lightweight_spectrum(self):
-        self.ls = lightweight_spectrum(self.groups.min_mz,
-                                       self.groups.max_mz,
-                                       self.groups.intensity)
+        return lightweight_spectrum(self.groups.min_mz,
+                                    self.groups.max_mz,
+                                    self.groups.intensity)
 
     def get_smallest_diff_digits(self):
         """Return the number of digits of the smallest difference within the first bitonic cluster."""
@@ -134,7 +134,8 @@ class Bitonic(PeakClustering):
                            show      = show)
 
 
-def bitonic_clust(x, w, 
+def bitonic_clust(x,
+                  w, 
                   min_mz_diff          = .15,
                   abs_perc_dev         = .2,
                   out_trivial_intervals= True,
@@ -159,3 +160,4 @@ def bitonic_clust(x, w,
                        *model_sd_args,
                       **model_sd_kwds)
     return bc
+

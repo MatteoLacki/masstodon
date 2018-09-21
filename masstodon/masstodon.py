@@ -80,14 +80,24 @@ from masstodon.spectrum.spectrum           import spectrum
 from masstodon.ome.ome                     import ome
 
 class Masstodon(object):
-    def set_spectrum(self, mz, intensity, threshold=None):
+    def set_spectrum(self,
+                     mz,
+                     intensity,
+                     min_mz_diff = 1.1,
+                     orbitrap    = False,
+                     threshold   = 0.0):
         self.threshold = threshold
-        self.spec = spectrum(mz, intensity, self.threshold)
-        # self.spec.bitonic_clustering()
-        # self.mz_digits = self.spec.bc.get_smallest_diff_digits()
+        self.orbitrap  = orbitrap
+        self.min_mz_diff = min_mz_diff
+        self.spec      = spectrum(mz,
+                                  intensity,
+                                  self.min_mz_diff,
+                                  self.orbitrap,
+                                  self.threshold)
         self.mz_digits = self.spec.get_smallest_diff_digits()
-        self.spec.min_mz_diff_clustering()
-        self.subspectra = list(self.spec.iter_min_mz_diff_subspectra())
+        self.ls        = self.spec.get_lightweight_spectrum()
+        self.subspectra= self.spec.get_min_mz_diff_subspectra()
+        self.groups    = self.spec.get_groups()
 
     def set_isotopic_calculator(self):
         self.iso_calc = isotope_calculator(digits=self.mz_digits)
@@ -112,7 +122,8 @@ class Masstodon(object):
         self.min_prob          = min_prob
         self.isotopic_coverage = isotopic_coverage
         self.imperator = imperator(self.good_mols,
-                                   self.spec.bc,
+                                   self.groups,
+                                   self.ls,
                                    self.min_prob,
                                    self.isotopic_coverage)
 
@@ -159,12 +170,14 @@ class Masstodon(object):
         Function masstodon_load can then read them back.
         """
         self.spec.dump(path)
-        params = {"precursors": self.precursors,
-                  "molecules" : self.molecules,
-                  "std_cnt"   : self.std_cnt,
+        params = {"precursors":         self.precursors,
+                  "molecules" :         self.molecules,
+                  "std_cnt"   :         self.std_cnt,
                   "isotopic_coverage" : self.isotopic_coverage,
-                  "min_prob"  : self.min_prob,
-                  "threshold" : self.threshold}
+                  "min_prob"  :         self.min_prob,
+                  "threshold" :         self.threshold,
+                  "orbitrap"  :         self.orbitrap,
+                  "min_mz_diff":        self.min_mz_diff}
         with open(pjoin(path, 'params.json'), 'w') as f:
             json.dump(params, f, indent=indent)
         self.imperator.save_graph(pjoin(path, 'deconvolution_graph.gpickle'))
@@ -204,9 +217,12 @@ class Masstodon(object):
 
 
 def masstodon_batch(mz, 
-                    intensity, 
+                    intensity,
                     precursors          = [],
                     molecules           = [],
+                    min_mz_diff         = 1.1,
+                    orbitrap            = False,
+                    threshold           = 0.0,
                     std_cnt             = 3,
                     mz_digits           = None,
                     isotopic_coverage   = .999,
@@ -242,7 +258,7 @@ def masstodon_batch(mz,
     """
     t0 = time()
     m = Masstodon()
-    m.set_spectrum(mz, intensity)
+    m.set_spectrum(mz, intensity, min_mz_diff, orbitrap, threshold)
     t1 = time()
     if mz_digits is None:
         mz_digits = m.mz_digits
@@ -287,6 +303,9 @@ def masstodon_single(mz, intensity, fasta, q,
                      blocked_fragments = ['c0'],
                      block_prolines    = True,
                      distance_charges  = 5.,
+                     min_mz_diff       = 1.1,
+                     orbitrap          = False,
+                     threshold         = 0.0,
                      std_cnt           = 3,
                      mz_digits         = None,
                      isotopic_coverage = .999,
@@ -338,22 +357,28 @@ def masstodon_single(mz, intensity, fasta, q,
                      "modifications":       modifications,
                      "blocked_fragments":   blocked_fragments,
                      "block_prolines":      block_prolines,
-                     "distance_charges":    distance_charges } ]
-    return masstodon_batch(mz, intensity, precursors,
-                           std_cnt                  = std_cnt,
-                           mz_digits                = mz_digits,
-                           isotopic_coverage        = isotopic_coverage,
-                           min_prob                 = min_prob,
-                           get_timings              = get_timings,
-                           deconvolution_graph_path = deconvolution_graph_path)
+                     "distance_charges":    distance_charges} ]
+    return masstodon_batch(mz,
+                           intensity,
+                           precursors,
+                           [],
+                           min_mz_diff,
+                           orbitrap,
+                           threshold,
+                           std_cnt,
+                           mz_digits,
+                           isotopic_coverage,
+                           min_prob,
+                           get_timings,
+                           deconvolution_graph_path)
 
 
 
-def masstodon_load(path):
+def load_masstodon(path):
     mz, intensity = spectrum_from_npy(path)
     with open(pjoin(path, 'params.json'), 'r') as f:
         params = json.load(f)
-    params['deconvolution_graph_path'] = pjoin(
-        path, "deconvolution_graph.gpickle")
+    params['deconvolution_graph_path'] = pjoin(path,
+                                               "deconvolution_graph.gpickle")
     m = masstodon_batch(mz, intensity, **params)
     return m

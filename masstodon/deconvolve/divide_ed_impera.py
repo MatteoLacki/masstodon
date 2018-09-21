@@ -239,7 +239,7 @@ class Imperator(object):
                                      marker    = {"color" : "orange"},
                                      name      = "Fitted")
             data = [spectrum_bars, fitted_dots]
-            layout = self.get_black_layout()
+            layout = get_black_layout()
             fig = go.Figure(data=data, layout=layout)
             plotly.offline.plot(fig,
                                 filename  = path,
@@ -276,7 +276,7 @@ class Imperator(object):
                                        marker    = {"color" : "orange"},
                                        name      = "Fitted")
             data   = [spectrum_bars, fitted_dots]
-            layout = self.get_black_layout()
+            layout = get_black_layout()
             fig    = go.Figure(data=data, layout=layout)
             plotly.offline.plot(fig,
                                 filename  = path,
