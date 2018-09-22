@@ -268,8 +268,8 @@ class Imperator(object):
             fitted_int, fitted_mzs, fitted_to_int, text_annotation = self.__get_fitted()
             # plot elements
             spectrum_bars = go.Scattergl(x = X, y = Y, name = "Peak Group")
-            fitted_dots = go.Scattergl(x = fitted_mzs,
-                                       y = fitted_int,
+            fitted_dots = go.Scattergl(x         = fitted_mzs,
+                                       y         = fitted_int,
                                        text      = text_annotation, # maps to labels
                                        hoverinfo = "text",          # show only labels
                                        mode      = "markers",       # default='lines'

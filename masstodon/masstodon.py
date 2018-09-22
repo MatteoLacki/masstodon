@@ -65,10 +65,11 @@
 # .7.......7....OOOOO....ZOZI....:ZOZ......Z.....ZOZ7.....OZZ.....7ZOZ....Z....Z..
 # ................................................................................
 import json
-import numpy  as      np
+import numpy   as     np
 from   os.path import join as pjoin
-from   time   import  time
+from   time    import time
 
+from masstodon.data.constants              import infinity
 from masstodon.deconvolve.divide_ed_impera import imperator, load_imperator
 from masstodon.estimates_matcher.cz        import CzMatch
 from masstodon.estimates_matcher.cz_simple import SimpleCzMatch
@@ -78,6 +79,7 @@ from masstodon.preprocessing.filters       import filter_subspectra_molecules
 from masstodon.read.npy                    import spectrum_from_npy
 from masstodon.spectrum.spectrum           import spectrum
 from masstodon.ome.ome                     import ome
+
 
 class Masstodon(object):
     def set_spectrum(self,
@@ -89,15 +91,16 @@ class Masstodon(object):
         self.threshold = threshold
         self.orbitrap  = orbitrap
         self.min_mz_diff = min_mz_diff
-        self.spec      = spectrum(mz,
-                                  intensity,
-                                  self.min_mz_diff,
-                                  self.orbitrap,
-                                  self.threshold)
+        self.spec = spectrum(mz,
+                             intensity,
+                             self.min_mz_diff,
+                             self.orbitrap,
+                             self.threshold)
         self.mz_digits = self.spec.get_smallest_diff_digits()
         self.ls        = self.spec.get_lightweight_spectrum()
-        self.subspectra= self.spec.get_min_mz_diff_subspectra()
         self.groups    = self.spec.get_groups()
+        if min_mz_diff < infinity:
+            self.subspectra = self.spec.get_min_mz_diff_subspectra()
 
     def set_isotopic_calculator(self):
         self.iso_calc = isotope_calculator(digits=self.mz_digits)
@@ -112,9 +115,12 @@ class Masstodon(object):
         self.ome = ome(self.iso_calc,
                        self.precursors,
                        self.molecules)
-        self.good_mols, self.good_subspectra = \
-            self.ome.filter_by_deviations(self.subspectra,
-                                          self.std_cnt)
+        if self.min_mz_diff < infinity:
+            self.good_mols, self.subspectra_within_mz_deviations = \
+                self.ome.filter_by_deviations(self.subspectra,
+                                              self.std_cnt)
+        else:
+            self.good_mols = list(self.ome.observables())
 
     def divide_et_impera(self, 
                          min_prob,
@@ -169,15 +175,17 @@ class Masstodon(object):
 
         Function masstodon_load can then read them back.
         """
-        self.spec.dump(path)
+        self.spec.dump(path) # dumping spectrum
+
         params = {"precursors":         self.precursors,
                   "molecules" :         self.molecules,
                   "std_cnt"   :         self.std_cnt,
-                  "isotopic_coverage" : self.isotopic_coverage,
+                  "isotopic_coverage":  self.isotopic_coverage,
                   "min_prob"  :         self.min_prob,
                   "threshold" :         self.threshold,
                   "orbitrap"  :         self.orbitrap,
                   "min_mz_diff":        self.min_mz_diff}
+
         with open(pjoin(path, 'params.json'), 'w') as f:
             json.dump(params, f, indent=indent)
         self.imperator.save_graph(pjoin(path, 'deconvolution_graph.gpickle'))

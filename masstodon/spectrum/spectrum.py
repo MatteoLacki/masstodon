@@ -1,6 +1,7 @@
 import numpy as np
 
-from masstodon.read.npy           import spectrum_from_npy
+from masstodon.data.constants import infinity
+from masstodon.read.npy       import spectrum_from_npy
 from .orbitrap  import OrbitrapSpectrum
 from .threshold import ThresholdSpectrum
 
@@ -13,11 +14,13 @@ def spectrum(mz        = np.array([]),
              sort      = True):
     if orbitrap:
         spec = OrbitrapSpectrum(mz, intensity, sort)
-        spec.min_mz_diff_clustering(min_mz_diff)
+        if min_mz_diff < infinity:
+            spec.min_mz_diff_clustering(min_mz_diff)
         spec.bitonic_clustering()
     else:
         spec = ThresholdSpectrum(mz, intensity, threshold, sort)
-        spec.min_mz_diff_clustering(min_mz_diff)
+        if min_mz_diff < infinity:
+            spec.min_mz_diff_clustering(min_mz_diff)
     return spec
 
 

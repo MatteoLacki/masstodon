@@ -1,3 +1,4 @@
+from   bisect  import   bisect_left, bisect_right
 from   collections import   namedtuple
 import numpy       as       np
 from   math        import   inf, floor, log10
@@ -11,17 +12,6 @@ SimpleGroups = namedtuple('SimpleGroups',
 SimpleGroups.__new__.__defaults__ = tuple([] for _ in range(7))
 
 
-def smart_iter(x):
-    X = iter(list(x))
-    prev_ = -inf
-    curr_ = next(X)
-    next_ = next(X)
-    yield prev_, curr_, next_
-    for next_ in X:
-        prev_, curr_ = curr_, next_
-        yield prev_, curr_, next_
-    prev_, curr_ = curr_, next_
-    yield prev_, curr_, inf
 
 
 class ThresholdSpectrum(Spectrum):
@@ -34,11 +24,16 @@ class ThresholdSpectrum(Spectrum):
         assert threshold > 0.0, "Provide non-zero threshold."
         self.threshold = threshold
         super().__init__(mz, intensity, sort, drop_duplicates, mdc)
-        l = []
+        X = iter(list(self.mz))
+        x = next(X)
+        l = [x - self.threshold]
         r = []
-        for p, c, n in smart_iter(self.mz):
-            l.append(c-min((c-p)/2.0, self.threshold))
-            r.append(c+min((n-p)/2.0, self.threshold))
+        for x_next in X:
+            d = min(self.threshold, (x_next - x)/2.0)
+            r.append(x + d)
+            l.append(x_next - d)
+            x = x_next
+        r.append(x + self.threshold)
         l = np.array(l)
         r = np.array(r)
         self.groups = SimpleGroups(l, r, self.mz, self.intensity)
@@ -64,3 +59,16 @@ class ThresholdSpectrum(Spectrum):
                                  sort            = False,
                                  drop_duplicates = True,
                                  mdc             = self.mdc.clusters[s:e])
+
+    def __getitem__(self, interval):
+        """Similar to filter, but return a class."""
+        id_s = bisect_left(self.mz, interval.start)
+        id_e = bisect_right(self.mz, interval.stop)
+        return self.__class__(self.mz[id_s:id_e], 
+                              self.intensity[id_s:id_e],
+                              self.threshold,
+                              False,
+                              False,
+                              self.mdc)
+
+
