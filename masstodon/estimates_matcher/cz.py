@@ -25,16 +25,19 @@ Node = namedtuple('Node', 'type no bp q g')
 
 
 class CzMatch(SimpleCzMatch):
-    def __init__(self, molecules, precursor_charge):
-        """Match c and z ions' intensities.
+    """Match c and z ions' intensities.
 
-        Parameters
-        ==========
-        molecules : list of Molecule objects
-            A list containing reaction products from one precusor.
-        precursor_charge : int
-            The charge of the precursor molecule.
-        """
+    Parameters
+    ==========
+    molecules : list of Molecule objects
+        A list containing reaction products from one precusor.
+    precursor_charge : int
+        The charge of the precursor molecule.
+    """
+    def __init__(self,
+                 molecules,
+                 precursor_charge):
+
         self._I_ETnoD_fragments = 0
         self._I_PTR_fragments   = 0
         super().__init__(molecules, precursor_charge)
@@ -42,7 +45,15 @@ class CzMatch(SimpleCzMatch):
     def _get_node(self, molecule):
         """Define what should be hashed as graph node."""
         mt, po, cs = molecule._molType_position_cleavageSite()
-        return Node(mt, po, cs, molecule.q, molecule.g)
+        # TODO: this is a hack to never distinguish between HTR and ETD.
+        # THIS HAS TO BE REPLACED ONCE I WILL GET RID OF TIME PRESSURE.
+        if molecule.g == -1:
+            g = 0
+        elif molecule.g == self._Q:
+            g = self._Q - 1
+        else:
+            g = molecule.g
+        return Node(mt, po, cs, molecule.q, g)
 
     def _add_edge(self, C, Z):
         """Add edge between a 'c' fragment and a 'z' fragment."""
@@ -62,9 +73,9 @@ class CzMatch(SimpleCzMatch):
         #       C.q + Z.q + C.g + Z.g < precursor.q
         Q = self._Q
         if C.bp == Z.bp and C.q + Z.q + C.g + Z.g < Q:
-            self.graph.add_edge(C, Z, ETnoD= C.g + Z.g,
-                                      PTR= Q-1 -C.g -Z.g -C.q -Z.q,
-                                      ETnoD_PTR= Q -1 -C.q -Z.q)
+            self.graph.add_edge(C, Z, ETnoD=C.g+Z.g,
+                                      PTR=Q-1-C.g-Z.g-C.q-Z.q,
+                                      ETnoD_PTR=Q-1-C.q-Z.q)
 
     def write(self, path):
         """Write intensities and probabilities to a given path."""

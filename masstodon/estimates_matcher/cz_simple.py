@@ -19,6 +19,7 @@ try:
     import matplotlib.pyplot as plt
 except RuntimeError:
     pass
+from    math                                import  ceil
 import  networkx                            as      nx
 from    networkx                            import  connected_component_subgraphs as get_ccs
 from    networkx.algorithms.operators.all   import  union_all
@@ -102,21 +103,16 @@ class SimpleCzMatch(object):
         """Add edge between a 'c' fragment and a 'z' fragment."""
         self.graph.add_edge(N, N, ETnoD_PTR=self._Q - 1 - N.q)
 
-    def _make_graph(self, round_estimates=True):
+    def _make_graph(self):
         """Prepare the matching graph.
 
-        Parameters
-        ==========
-        round_estimates : boolean
-            Should we round the estimates down to the nearest integer (take the 'floor' of the estimate)?
-            This seems to make the simplex method more stable.
+        The estimates are rounded up to the closest integer for
+        the sake of stability of the simplex algorithm.
         """
         Q = self._Q
         self.graph = nx.Graph()
         for mol in self._molecules:
-            estimate = mol.intensity
-            if round_estimates:
-                estimate = int(estimate)
+            estimate = ceil(mol.intensity)
             if estimate > 0:
                 if mol.name == 'precursor':
                     g = mol.g
@@ -131,6 +127,7 @@ class SimpleCzMatch(object):
                         # the next line must be one indentation lower!!!
                         # don't you forget about it!!!
                     self.graph.node[frag]['intensity'] += estimate
+        # adding edges (considering all pairs c-z: bilinear)
         for C in self.graph:
             if C.type == 'c':
                 for Z in self.graph:

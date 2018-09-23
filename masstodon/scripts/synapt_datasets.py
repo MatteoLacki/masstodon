@@ -27,33 +27,43 @@ def iter_data(path, folders):
 
 dump_folder = "/Users/matteo/Projects/masstodon/dumps/belgian/synapt"
 
-threshold         = 0.05
+threshold         = 0.025
 fasta             = 'RPKPQQFFGLM'
 modifications     = {'11': {'C_carbo': {'H': 1, 'N': 1, 'O': -1}}}
 q                 = 3
 min_prob          = .8
 isotopic_coverage = .999
 std_cnt           = 3
+timings           = True
+include_zero_intensities = True
+
+bad = []
 
 def res_with_figs():
     for i, (cff, (mz, intensity)) in enumerate(iter_data(common_path, folders)):
-        m, t = masstodon_single(mz, intensity, fasta, q,
-                             min_mz_diff        = infinity,
-                             modifications      = modifications,
-                             orbitrap           = False,
-                             threshold          = threshold,
-                             isotopic_coverage  = isotopic_coverage,
-                             min_prob           = min_prob, 
-                             std_cnt            = std_cnt,
-                             get_timings        = True)
-        df = pjoin(dump_folder, f"{i}_" + cff)
-        if not pexists(df):
-            makedirs(df)
-        m.dump(df)
-        m.write(df)
-        m.plotlygl(df, shape='rectangles', show=False)
-        print(f'Finished with {cff}')
+        try:
+            m, t = masstodon_single(mz, intensity, fasta, q,
+                                 min_mz_diff        = infinity,
+                                 modifications      = modifications,
+                                 orbitrap           = False,
+                                 threshold          = threshold,
+                                 isotopic_coverage  = isotopic_coverage,
+                                 min_prob           = min_prob, 
+                                 std_cnt            = std_cnt,
+                                 get_timings        = timings,
+                                 include_zero_intensities = include_zero_intensities)
+            df = pjoin(dump_folder, f"{i}_" + cff)
+            if not pexists(df):
+                makedirs(df)
+            m.dump(df)
+            m.write(df)
+            m.plotlygl(df, shape='rectangles', show=False)
+            print(f'Finished with {cff}')
+        except AssertionError:
+            bad.append((cff, mz, intensity))
 
+res_with_figs()
+bad
 
 
 def get_WH_WV(f):
@@ -68,7 +78,6 @@ def get_WH_WV(f):
     WV = int(WV[2:])
     return WH, WV
 
-
 def iter_outcomes():
     for i, (cff, (mz, intensity)) in enumerate(iter_data(common_path, folders)):
         WH, WV = get_WH_WV(cff)
@@ -80,7 +89,8 @@ def iter_outcomes():
                              isotopic_coverage  = isotopic_coverage,
                              min_prob           = min_prob, 
                              std_cnt            = std_cnt,
-                             get_timings        = True)
+                             get_timings        = timings,
+                             include_zero_intensities = include_zero_intensities)
         row = {"i":i, "exp": cff, "WH": WH, "WV": WV}
         row.update(m.imperator.errors())
         row.update({f"t_{n}": T for n,T in t})
@@ -111,7 +121,8 @@ def iter_outcomes_raw():
                              isotopic_coverage  = isotopic_coverage,
                              min_prob           = min_prob, 
                              std_cnt            = std_cnt,
-                             get_timings        = True)
+                             get_timings        = timings,
+                             include_zero_intensities = include_zero_intensities)
         yield m, t, cff, WH, WV, mz, intensity
 
 D = list(iter_outcomes_raw())

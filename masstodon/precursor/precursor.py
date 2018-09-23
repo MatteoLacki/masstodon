@@ -142,20 +142,20 @@ class Precursor(Molecule):
         return len(self.fasta)
 
     def _protonate(self, frag):
-        a, b, c = {'p': (1, 0, 1),
+        a, b, c = {'p': (1,  0, 1),
                    'c': (0, -1, 0),
-                   'z': (0, 0, 1)}[frag]
+                   'z': (0,  0, 1)}[frag]
         for q in range(1, self.q + a):
             for g in range(b, self.q - q + c):
                 yield (q, g)
 
     def a_fragments(self):
         """Generate a fragments."""
-        pass
+        raise NotImplementedError
 
     def b_fragments(self):
         """Generate b fragments."""
-        pass
+        raise NotImplementedError
 
     def c_fragments(self):
         """Generate c fragments."""
@@ -171,11 +171,11 @@ class Precursor(Molecule):
 
     def x_fragments(self):
         """Generate x fragments."""
-        pass
+        raise NotImplementedError
 
     def y_fragments(self):
         """Generate y fragments."""
-        pass
+        raise NotImplementedError
 
     def z_fragments(self):
         """Generate z fragments."""
@@ -204,7 +204,7 @@ class Precursor(Molecule):
                 side_chain_len = int(name[1:])
             else:
                 side_chain_len = len(self)
-            #TODO: derive rules for protonation of fragments other than cz
+            #TODO: protonation rules other than for cz
             for q, g in self._protonate(name[0]):
                 potential_charges_cnt = \
                     side_chain_len // self.distance_charges
@@ -238,7 +238,7 @@ class Precursor(Molecule):
             return False
 
 
-
+# todo: a fishy class. Have to do something about it.
 class FalsePrecursor(Molecule):
     """This is a class needed only for the Molecules class.
 

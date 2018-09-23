@@ -18,14 +18,12 @@ class DeconvolutionProblem(object):
             used_idx,
             include_zero_intensities = False):
         self.cc     = connected_component
-        # This order does not correspond
-        mol_columns = np.array([N < 0  for N in self.cc])
-        peak_rows   = np.array([N >= 0 for N in self.cc])
-        # to this ordering
         X, ordering = attr_matrix(self.cc, edge_attr='prob')
-        X           = X[:,mol_columns][peak_rows,:]
         ordering    = np.array(ordering)
-        self.idx    = ordering[ordering >= 0]
+        mol_columns = ordering < 0
+        peak_rows   = ordering >= 0
+        X           = X[:,mol_columns][peak_rows,:]
+        self.idx    = ordering[peak_rows]
         self.total_intensities = total_intensities[self.idx]
         self.mz_s   = min_mz[self.idx]
         self.mz_e   = max_mz[self.idx]
