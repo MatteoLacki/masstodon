@@ -3,7 +3,7 @@
 %load_ext line_profiler
 
 from masstodon.read.txt import spectrum_from_txt
-from masstodon.masstodon import masstodon_single
+from masstodon.masstodon import masstodon_single, load_masstodon
 
 datapath = "/Users/matteo/Projects/masstodon/data/Belgian/2013_05_01/SUBP/wave_height_1.5/FRL-010513-SUBP-WH 1,5-WV 10.txt"
 mz, intensity = spectrum_from_txt(datapath)
@@ -22,6 +22,7 @@ min_prob          = .8
 isotopic_coverage = .999
 std_cnt           = 3
 
+
 m = masstodon_single(mz, intensity, fasta, q,
                      min_mz_diff   = infinity,
                      modifications = modifications,
@@ -30,6 +31,10 @@ m = masstodon_single(mz, intensity, fasta, q,
                      isotopic_coverage = isotopic_coverage,
                      min_prob = min_prob, 
                      std_cnt  = std_cnt)
+
+m.dump("dump")
+
+
 # m.plotly("dump")
 # m.plotlygl("dump", shape='rectangles')
 # m.good_mols
@@ -39,7 +44,7 @@ m = masstodon_single(mz, intensity, fasta, q,
 # m.imperator.solutions[0].plot_fittings()
 # xx = m.imperator.used_peak_groups()
 
-# m.groups.min_mz[xx]
+# m.groups.min_mz[xx] 
 # m.groups.max_mz[xx]
 
 prec = list(m.ome.sources())[0]
@@ -93,33 +98,9 @@ for mol in m.ome.observables():
 m.spec.plot()
 # all seems to fall in correct positions.
 
-import numpy as np
-np.diff(m.groups.min_mz) >= 0
 
-
-def smarter_iter(x):
-    X = iter(list(x))
-    curr_ = next(X)
-    for next_ in X:
-        yield curr_, next_
-        curr_ = next_
-    curr_ = next_
-    yield curr_, infinity
-
-# mz must be sorted
-X = iter(list(mz))
-x = next(X)
-l = [x - threshold]
-r = []
-for x_next in X:
-    d = min(threshold, (x_next - x)/2.0)
-    r.append(x + d)
-    l.append(x_next - d)
-    x = x_next
-
-
-
-
+for o in m.ome.observables():
+    print(m.ome.G[prec][o]['name'], o, o.isotopologues().mz)
 
 
 

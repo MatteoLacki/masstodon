@@ -106,7 +106,7 @@ class Imperator(object):
         """Iterate over connected components of the deconvolution graph."""
         return nx.connected_component_subgraphs(self.G)
 
-    def impera(self):
+    def impera(self, include_zero_intensities=False):
         """List all conected components."""
         # this set will contain all the indices of used mean_mzs.
         self.used_idx = set([])
@@ -114,7 +114,8 @@ class Imperator(object):
                                      self.groups.intensity,
                                      self.groups.min_mz,
                                      self.groups.max_mz,
-                                     self.groups.mean_mz) for cc in self.impera_iter()]
+                                     self.groups.mean_mz,
+                                     include_zero_intensities) for cc in self.impera_iter()]
 
     def set_estimated_intensities(self):
         for sol in self.solutions:
@@ -326,12 +327,16 @@ class Imperator(object):
     def l1_rel(self):
         return self.l1_abs()/(self.total_intensity() + self.total_fitted())
 
-    def errors_to_json(self, path, indent=None):
+    def errors(self):
         errors = {}
         errors['l1_abs'] = self.l1_abs()
         errors['l1_rel'] = self.l1_rel()
         errors['solutions_l1_error_abs'] = self.solutions_l1_error_abs()
         errors['solutions_l1_error_rel'] = self.solutions_l1_error_rel()
+        return errors
+
+    def errors_to_json(self, path, indent=None):
+        errors = self.errors()
         with open(path, 'w') as f:
             json.dump(errors, f, indent=indent)
 
@@ -340,14 +345,15 @@ def imperator(molecules,
               groups,
               lightweight_spectrum,
               min_prob          = .8,
-              isotopic_coverage = .99):
+              isotopic_coverage = .99,
+              include_zero_intensities = False):
     imp = Imperator(molecules,
                     groups,
                     lightweight_spectrum,
                     min_prob,
                     isotopic_coverage)
     imp.divide()
-    imp.impera()
+    imp.impera(include_zero_intensities)
     imp.set_estimated_intensities()
     return imp
 
@@ -356,14 +362,15 @@ def load_imperator(molecules,
                    groups,
                    lightweight_spectrum,
                    deconvolution_graph_path,
-                   min_prob          = .8,
-                   isotopic_coverage = .99):
+                   min_prob                 = .8,
+                   isotopic_coverage        = .99,
+                   include_zero_intensities = False):
     imp = Imperator(molecules,
                     groups,
                     lightweight_spectrum,
                     min_prob,
                     isotopic_coverage)
     imp.load_graph(deconvolution_graph_path)
-    imp.impera()
+    imp.impera(include_zero_intensities)
     imp.set_estimated_intensities()
     return imp

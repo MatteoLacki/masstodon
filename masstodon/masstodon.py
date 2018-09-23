@@ -124,14 +124,17 @@ class Masstodon(object):
 
     def divide_et_impera(self, 
                          min_prob,
-                         isotopic_coverage):
-        self.min_prob          = min_prob
+                         isotopic_coverage,
+                         include_zero_intensities = False):
+        self.min_prob = min_prob
         self.isotopic_coverage = isotopic_coverage
+        self.include_zero_intensities = include_zero_intensities
         self.imperator = imperator(self.good_mols,
                                    self.groups,
                                    self.ls,
                                    self.min_prob,
-                                   self.isotopic_coverage)
+                                   self.isotopic_coverage,
+                                   include_zero_intensities)
 
     def load_imperator(self, 
                        deconvolution_graph_path,
@@ -184,7 +187,8 @@ class Masstodon(object):
                   "min_prob"  :         self.min_prob,
                   "threshold" :         self.threshold,
                   "orbitrap"  :         self.orbitrap,
-                  "min_mz_diff":        self.min_mz_diff}
+                  "min_mz_diff":        self.min_mz_diff,
+                  "include_zero_intensities": self.include_zero_intensities}
 
         with open(pjoin(path, 'params.json'), 'w') as f:
             json.dump(params, f, indent=indent)
@@ -236,6 +240,7 @@ def masstodon_batch(mz,
                     isotopic_coverage   = .999,
                     min_prob            = .7,
                     get_timings         = False,
+                    include_zero_intensities = False,
                     deconvolution_graph_path = ''):
     """Run a session of masstodon with multiple sources.
 
@@ -275,7 +280,7 @@ def masstodon_batch(mz,
     m.set_ome(precursors, molecules, std_cnt)
     t3 = time()
     if not deconvolution_graph_path:
-        m.divide_et_impera(min_prob, isotopic_coverage)
+        m.divide_et_impera(min_prob, isotopic_coverage, include_zero_intensities)
     else:
         m.load_imperator(deconvolution_graph_path,
                          min_prob,
@@ -319,6 +324,7 @@ def masstodon_single(mz, intensity, fasta, q,
                      isotopic_coverage = .999,
                      min_prob          = .7,
                      get_timings       = False,
+                     include_zero_intensities = False,
                      deconvolution_graph_path = ''):
     """Run a basic session of the MassTodon.
 
@@ -378,6 +384,7 @@ def masstodon_single(mz, intensity, fasta, q,
                            isotopic_coverage,
                            min_prob,
                            get_timings,
+                           include_zero_intensities,
                            deconvolution_graph_path)
 
 

@@ -26,8 +26,15 @@ class NegativeAtomCount(Exception):
 def dict2string(d):
     return "".join(element + str(count) for element, count in sorted(d.items()))
 
+
 def dict2string_readable(d):
     return " ".join(element + "_"+ str(count) for element, count in sorted(d.items()))
+
+
+def dict2tex(d):
+    f = "".join(f"{element}_{{{count}}}" if count > 1 else element
+                for element, count in sorted(d.items()))
+    return f"${f}$"
 
 
 class Formula(LinearDict):
@@ -50,9 +57,8 @@ class Formula(LinearDict):
             formula = parse(formula, self.pattern)
         super().__init__(formula)
 
-    def __str__(self, readable=False):
-        foo = dict2string_readable if readable else dict2string
-        return foo(self._storage)
+    def __str__(self):
+        return dict2string(self._storage)
 
     def __repr__(self):
         return str(self)
@@ -69,6 +75,14 @@ class Formula(LinearDict):
         out = self._storage.copy()
         out['H'] += q + g
         return dict2string(out)
+
+    def tex_with_charges(self, q=0, g=0):
+        out = self._storage.copy()
+        out['H'] += q + g
+        return dict2tex(out)
+
+    def tex(self):
+        return dict2tex(out)
 
 
 def as_formula(f):

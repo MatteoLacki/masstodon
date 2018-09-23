@@ -58,11 +58,11 @@ class NNLS(Model):
              lines_col = 'grey',
              show      = True):
         plt.style.use(plt_style)
-        x = range(len(self.Y))
+        x = np.arange(len(self.Y))
         fitted = self.fitted()
         plt.vlines(x = x, ymin=[0], ymax=self.Y, colors=lines_col)
-        plt.scatter(x, fitted, color = 'blue')
-        plt.scatter(x, self.Y, color = 'red')
+        plt.scatter(x-.05, fitted, color = 'blue')
+        plt.scatter(x+.05, self.Y, color = 'red')
         plt.title("Analysis of fitting:\nRed: real Y, Blue: fitted values.")
         plt.xlabel("Index")
         plt.ylabel("Y values")
