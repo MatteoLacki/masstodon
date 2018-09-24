@@ -3,6 +3,7 @@
 %load_ext line_profiler
 
 from time import time
+from collections import Counter
 
 from masstodon.masstodon import Masstodon, masstodon_batch, masstodon_single, load_masstodon
 from masstodon.ome.ome   import Ome
@@ -12,16 +13,6 @@ data_path = '/Users/matteo/Projects/masstodon/data/PXD001845/numpy_files/2014120
 # data_path = "/Users/matteo/Projects/masstodon/data/PXD001845/numpy_files/20141202_AMB_Bora_10x_40MeOH_1FA_OT_120k_10uscans_920_ETD_4ms_19precZ/6"
 
 mz, intensity = spectrum_from_npy(data_path)
-
-fasta = "GAASMMGDVKESKMQITPETPGRIPVLNPFESPSDYSNLHEQTLASPSVFKSTKLPTPGKFRWSIDQLAVINPVEIDPEDIHRQALYLSHSRIDKDVEDKRQKAIEEFFTKDVIVPSPWTDHEGKQLSQCHSSKCTNINSDSPVGKKLTIHSEKSD"
-from collections import Counter
-Counter(fasta)
-
-from masstodon.data.amino_acids import amino_acids
-
-all_aas = set([a[0] for a in amino_acids])
-
-
 fasta             = "GAASMMGDVKESKMQITPETPGRIPVLNPFESPSDYSNLHEQTLASPSVFKSTKLPTPGKFRWSIDQLAVINPVEIDPEDIHRQALYLSHSRIDKDVEDKRQKAIEEFFTKDVIVPSPWTDHEGKQLSQCHSSKCTNINSDSPVGKKLTIHSEKSD"
 charge            = 24
 min_prob          = .8
@@ -32,7 +23,8 @@ m = masstodon_single(mz, intensity, fasta, charge, '',
                      orbitrap = True,
                      isotopic_coverage = isotopic_coverage,
                      min_prob = min_prob, 
-                     std_cnt  = std_cnt)
+                     std_cnt  = std_cnt,
+                     include_zero_intensities = True)
 # m.dump('dump')
 m.plotlygl("dump")
 

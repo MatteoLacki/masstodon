@@ -55,9 +55,6 @@ def modify_fasta(fasta):
     return fasta, modifications
 
 
-mz, intensity, charge, experiment = next(iter_data(path))
-
-
 bad = []
 if __name__ == "__main__":
     min_prob          = .8

@@ -100,4 +100,6 @@ results_for_plot.to_csv(
     "/Users/matteo/Projects/masstodon/dumps/belgian/synapt_results.csv",
     index = False)
 results_for_plot_ohne000 = results_for_plot.copy()
-results_for_plot
+
+pd.DataFrame({'ohne':results_for_plot_ohne000['nodes_nonzero_intensity'],
+              'with':results_for_plot_with000['nodes_nonzero_intensity']})
