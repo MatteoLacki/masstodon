@@ -4,7 +4,7 @@
 
 from time import time
 
-from masstodon.masstodon import Masstodon, masstodon_batch, masstodon_single, masstodon_load
+from masstodon.masstodon import Masstodon, masstodon_batch, masstodon_single, load_masstodon
 from masstodon.ome.ome   import Ome
 from masstodon.read.npy  import spectrum_from_npy
 
@@ -13,35 +13,31 @@ data_path = '/Users/matteo/Projects/masstodon/data/PXD001845/numpy_files/2014120
 
 mz, intensity = spectrum_from_npy(data_path)
 
+fasta = "GAASMMGDVKESKMQITPETPGRIPVLNPFESPSDYSNLHEQTLASPSVFKSTKLPTPGKFRWSIDQLAVINPVEIDPEDIHRQALYLSHSRIDKDVEDKRQKAIEEFFTKDVIVPSPWTDHEGKQLSQCHSSKCTNINSDSPVGKKLTIHSEKSD"
+from collections import Counter
+Counter(fasta)
+
+from masstodon.data.amino_acids import amino_acids
+
+all_aas = set([a[0] for a in amino_acids])
+
+
 fasta             = "GAASMMGDVKESKMQITPETPGRIPVLNPFESPSDYSNLHEQTLASPSVFKSTKLPTPGKFRWSIDQLAVINPVEIDPEDIHRQALYLSHSRIDKDVEDKRQKAIEEFFTKDVIVPSPWTDHEGKQLSQCHSSKCTNINSDSPVGKKLTIHSEKSD"
 charge            = 24
 min_prob          = .8
 isotopic_coverage = .999
 std_cnt           = 3
 
-# precursors = [{'fasta': fasta,
-#                'name' : 'Abudhabizine',
-#                'q'    : 24},
-#                {'fasta': fasta[0:10],
-#                'name' : 'Munichoson',
-#                'q'    : 10}]
-
-precursors = [{'fasta': fasta,
-               'name' : '',
-               'q'    : 24}]
-
-# m = masstodon_batch(mz, intensity, precursors, 
-#                     isotopic_coverage = isotopic_coverage,
-#                     min_prob = min_prob, 
-#                     std_cnt  = std_cnt)
-# m = masstodon_single(mz, intensity, fasta, charge, '', 
-#                     isotopic_coverage = isotopic_coverage,
-#                     min_prob = min_prob, 
-#                     std_cnt  = std_cnt)
+m = masstodon_single(mz, intensity, fasta, charge, '',
+                     orbitrap = True,
+                     isotopic_coverage = isotopic_coverage,
+                     min_prob = min_prob, 
+                     std_cnt  = std_cnt)
 # m.dump('dump')
+m.plotlygl("dump")
 
-n = masstodon_load("dump")
-n.plotlygl("dump", shape='triangles')
+# n = masstodon_load("dump")
+# n.plotlygl("dump", shape='triangles')
 
 
 
