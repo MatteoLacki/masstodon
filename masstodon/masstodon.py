@@ -134,7 +134,7 @@ class Masstodon(object):
                                    self.ls,
                                    self.min_prob,
                                    self.isotopic_coverage,
-                                   include_zero_intensities)
+                                   self.include_zero_intensities)
 
     def load_imperator(self, 
                        deconvolution_graph_path,
