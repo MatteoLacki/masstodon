@@ -64,7 +64,7 @@ if __name__ == "__main__":
     stop              = 100
     for mz, intensity, q, path in islice(iter_data(path), stop):
         exp = path.split('/')[-2:]
-        print(f"Starting {exp}")
+        print("Starting " + str(exp))
         try:
             fasta = read_fasta(experiment, csv2fasta)
             fasta, modifications = modify_fasta(fasta)

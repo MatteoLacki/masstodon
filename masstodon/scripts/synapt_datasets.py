@@ -52,7 +52,7 @@ def res_with_figs():
                                  std_cnt            = std_cnt,
                                  get_timings        = timings,
                                  include_zero_intensities = include_zero_intensities)
-            df = pjoin(dump_folder, f"{i}_" + cff)
+            df = pjoin(dump_folder, "{i}_".format(i=i) + cff)
             if not pexists(df):
                 makedirs(df)
             m.dump(df)
@@ -93,13 +93,13 @@ def iter_outcomes():
                              include_zero_intensities = include_zero_intensities)
         row = {"i":i, "exp": cff, "WH": WH, "WV": WV}
         row.update(m.imperator.errors())
-        row.update({f"t_{n}": T for n,T in t})
+        row.update({"t_"+str(n): T for n,T in t})
         for s in ('ETDorHTR', 'ETnoD_PTR_fragments', 'ETnoD_precursor', 'PTR_precursor'):
-            row[f"cz_simple.{s}"] = int(m.cz_simple.intensities[s])
-            row[f"cz.{s}"]        = int(m.cz.intensities[s])
+            row["cz_simple."+str(s)] = int(m.cz_simple.intensities[s])
+            row["cz."+str(s)]        = int(m.cz.intensities[s])
         for i in range(11):
-            row[f"cz_simple.prob.{i}"] = m.cz_simple.probabilities["fragmentation_bond"].get(i, 0.0)
-            row[f"cz.prob.{i}"] = m.cz.probabilities["fragmentation_bond"].get(i, 0.0)
+            row["cz_simple.prob."+str(i)] = m.cz_simple.probabilities["fragmentation_bond"].get(i, 0.0)
+            row["cz.prob.".str(i)] = m.cz.probabilities["fragmentation_bond"].get(i, 0.0)
         yield row
         print(f'Finished with {cff}')
 

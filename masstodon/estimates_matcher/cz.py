@@ -85,5 +85,10 @@ class CzMatch(SimpleCzMatch):
                    pjoin(path, 'pairing_probabilities.csv'))
 
     def _get_edge_labels_4_plot(self, G):
-        return {n:f"${n.type}_"+"{"+f"{n.no}"+"}^{"+f"{n.q}+{n.g}"+"}$\n"+f"{d['intensity']}"
+        return {n:"${ntype}_{{{nno}}}^{{{nq}+,{ng}}}$\n{intensity}".format(
+                    ntype     = n.type,
+                    nno       = n.no,
+                    nq        = n.q,
+                    ng        = n.g,
+                    intensity = d['intensity'])
                 for n, d in G.nodes(data=True)}

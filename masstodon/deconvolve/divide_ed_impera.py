@@ -209,7 +209,9 @@ class Imperator(object):
         fitted_int      = np.array(fitted_int).astype(int)
         fitted_mzs      = np.array(fitted_mzs)
         fitted_to_int   = np.array(fitted_to_int).astype(int)
-        text_annotation = np.array([f"fit {fit_int:.0f}<br>obs {fit2int:.0f}" for fit_int, fit2int in zip(fitted_int, fitted_to_int)])
+        text_annotation = np.array(["fit {fit_int:.0f}<br>obs {fit2int:.0f}".format(fit_int=fit_int,
+                                                                                    fit2int=fit2int)
+                                    for fit_int, fit2int in zip(fitted_int, fitted_to_int)])
         return fitted_int, fitted_mzs, fitted_to_int, text_annotation
 
     def plotly(self, path, show=True):

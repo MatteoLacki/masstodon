@@ -32,9 +32,9 @@ def dict2string_readable(d):
 
 
 def dict2tex(d):
-    f = "".join(f"{element}_{{{count}}}" if count > 1 else element
+    f = "".join("{element}_{{{count}}}".format(element=element, count=count) if count > 1 else element
                 for element, count in sorted(d.items()))
-    return f"${f}$"
+    return "$"+f+"$"
 
 
 class Formula(LinearDict):

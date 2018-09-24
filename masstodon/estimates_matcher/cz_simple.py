@@ -257,7 +257,11 @@ class SimpleCzMatch(object):
             self._optimize(G)
 
     def _get_edge_labels_4_plot(self, G):
-        return {n:f"${n.type}_"+"{"+f"{n.no}"+"}^{"+f"{n.q}"+"}$\n"+f"{d['intensity']}"
+        return {n:"${ntype}_{{{nno}}}^{{{nq}+}}$\n{intensity}".format(
+                    ntype     = n.type,
+                    nno       = n.no,
+                    nq        = n.q,
+                    intensity = d['intensity'])
                 for n, d in G.nodes(data=True)}
 
     def plot(self, plt_style       = 'seaborn-poster',

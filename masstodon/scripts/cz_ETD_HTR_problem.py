@@ -62,7 +62,7 @@ def res_with_figs():
                                  std_cnt            = std_cnt,
                                  get_timings        = timings,
                                  include_zero_intensities = include_zero_intensities)
-            df = pjoin(dump_folder, f"{i}_" + cff)
+            df = pjoin(dump_folder, "{i}_".format(i=i) + cff)
             if not pexists(df):
                 makedirs(df)
             m.dump(df)

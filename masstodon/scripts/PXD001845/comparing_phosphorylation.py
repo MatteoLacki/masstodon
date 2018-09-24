@@ -25,7 +25,7 @@ prec = {'fasta': fasta, 'q': charge, 'name': 'pBora'}
 precursors = [prec]
 for i, aa in enumerate(fasta):
     prec_mod = prec.copy()
-    prec_mod['name'] += f"_phosphorylated_{i+1}"
+    prec_mod['name'] += "_phosphorylated_" + str(i+1)
     prec_mod['modifications'] = {i+1: {'C_carbo': ptms['phosphorylation'].copy()}}
     precursors.append(prec_mod)
 
@@ -49,7 +49,7 @@ precursors = [prec]
 for i, aa in enumerate(fasta):
     if aa in ("S", "T", "Y"):
         prec_mod = prec.copy()
-        prec_mod['name'] += f"_phosphorylated_{i+1}"
+        prec_mod['name'] += "_phosphorylated_" + str(i+1)
         prec_mod['modifications'] = {i+1: {'C_carbo': ptms['phosphorylation'].copy()}}
         precursors.append(prec_mod)
 n = masstodon_batch(mz, intensity, precursors, 
