@@ -29,12 +29,14 @@ class DeconvolutionProblem(object):
         self.mean_mz= mean_mz[self.idx]
         Y           = self.total_intensities
         if include_zero_intensities:
-            Y = np.concatenate((Y, np.zeros(X.shape[1])))
-            x = 1.0 - np.array(X.sum(axis=0)).flatten()
-            X = np.concatenate((X, np.diag(x)))
+            Y1 = np.concatenate((Y, np.zeros(X.shape[1])))
+            x  = 1.0 - np.array(X.sum(axis=0)).flatten()
+            X1 = np.concatenate((X, np.diag(x)))
+            self.model = nnls(X1, Y1)
+        else:
+            self.model = nnls(X, Y)
         self.X = X
         self.Y = Y
-        self.model = nnls(X, Y)
 
     def XY(self):
         """Return contingency matrix and response vector."""
@@ -51,7 +53,8 @@ class DeconvolutionProblem(object):
 
     def spectrum(self):
         pred = self.model.fitted()
-        Y    = self.model.Y
+        # Y    = self.model.Y
+        Y = self.Y
         return self.mz_s, self.mz_e, self.mean_mz, pred, Y[Y > 0]
 
     def plot(self, plt_style = 'fast',
@@ -71,6 +74,11 @@ class DeconvolutionProblem(object):
         plt.scatter(self.mean_mz, Y, c = 'red', s = 8)
         if show:
             plt.show()
+
+    def l1_abs(self):
+        return self.model.l1_abs()
+
+    
 
     def plot_fancy(self,
                    plt_style = 'fast',
@@ -113,6 +121,7 @@ class DeconvolutionProblem(object):
         plt.scatter(x, y_hat, s = 16, color='red')
         if show:
             plt.show()
+
 
 
 def deconvolve(connected_component,

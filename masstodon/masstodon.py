@@ -126,9 +126,11 @@ class Masstodon(object):
                          min_prob,
                          isotopic_coverage,
                          include_zero_intensities = False):
-        self.min_prob = min_prob
-        self.isotopic_coverage = isotopic_coverage
+        # store parameters
+        self.min_prob                 = min_prob
+        self.isotopic_coverage        = isotopic_coverage
         self.include_zero_intensities = include_zero_intensities
+        # divide and rule
         self.imperator = imperator(self.good_mols,
                                    self.groups,
                                    self.ls,
@@ -282,7 +284,9 @@ def masstodon_batch(mz,
     m.set_ome(precursors, molecules, std_cnt)
     t3 = time()
     if not deconvolution_graph_path:
-        m.divide_et_impera(min_prob, isotopic_coverage, include_zero_intensities)
+        m.divide_et_impera(min_prob,
+                           isotopic_coverage,
+                           include_zero_intensities)
     else:
         m.load_imperator(deconvolution_graph_path,
                          min_prob,

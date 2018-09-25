@@ -85,3 +85,23 @@ def single_run(mz, intensity, q, path):
     except Exception as e:
         row['success'] = False
     return row
+
+
+# debug error calculation for a dp
+model = sol.model
+model.X
+model.Y
+model._coef
+
+model.l1_abs()
+model.res()
+
+model.plot()
+sol
+
+cc = sol.cc
+groups = M.imperator.groups
+
+
+
+
