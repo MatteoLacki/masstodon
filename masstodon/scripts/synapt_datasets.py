@@ -101,7 +101,7 @@ def iter_outcomes():
             row["cz_simple.prob."+str(i)] = m.cz_simple.probabilities["fragmentation_bond"].get(i, 0.0)
             row["cz.prob.".str(i)] = m.cz.probabilities["fragmentation_bond"].get(i, 0.0)
         yield row
-        print(f'Finished with {cff}')
+        print('Finished with {cff}'.format(cff=cff))
 
 results_for_plot = pd.DataFrame(iter_outcomes())
 results_for_plot.to_csv(

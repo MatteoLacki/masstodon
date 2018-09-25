@@ -15,7 +15,6 @@ class DeconvolutionProblem(object):
             min_mz,
             max_mz,
             mean_mz,
-            used_idx,
             include_zero_intensities = False):
         self.cc     = connected_component
         X, ordering = attr_matrix(self.cc, edge_attr='prob')
@@ -114,6 +113,7 @@ class DeconvolutionProblem(object):
         plt.scatter(x, y_hat, s = 16, color='red')
         if show:
             plt.show()
+
 
 def deconvolve(connected_component,
                total_intensities,
