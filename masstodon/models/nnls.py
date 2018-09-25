@@ -23,9 +23,6 @@ class NNLS(Model):
     def coef(self):
         return self._coef
 
-    def total_intensity(self):
-        return self.Y.sum()
-
     def total_fitted(self):
         return self.fitted().sum()
 

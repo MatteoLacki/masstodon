@@ -205,7 +205,7 @@ class Imperator(object):
         for s in self.solutions:
             fitted_mzs.extend(list(s.mean_mz))
             fitted_int.extend(list(s.model.fitted()))
-            fitted_to_int.extend(list(s.model.Y))
+            fitted_to_int.extend(list(s.Y))
         fitted_int      = np.array(fitted_int).astype(int)
         fitted_mzs      = np.array(fitted_mzs)
         fitted_to_int   = np.array(fitted_to_int).astype(int)
@@ -291,10 +291,10 @@ class Imperator(object):
 
     def solutions_l1_error_abs(self):
         """Summarize the l1 error for all the solutions"""
-        return sum(s.model.l1_abs() for s in self.solutions)
+        return sum(s.l1_abs() for s in self.solutions)
 
     def solutions_total_intensity(self):
-        return sum(s.model.total_intensity() for s in self.solutions)
+        return sum(s.total_intensity() for s in self.solutions)
 
     def solutions_l1_error_rel(self):
         return self.solutions_l1_error_abs() /\

@@ -1,3 +1,6 @@
+"""This needs revisiting. But the question is rather more about using
+different error function altogether."""
+
 from masstodon.masstodon import masstodon_single
 from masstodon.data.substance_p import substance_p
 from masstodon.data.constants import infinity
@@ -21,7 +24,7 @@ m = masstodon_single(mz, intensity, fasta, q,
                      isotopic_coverage  = isotopic_coverage,
                      min_prob           = min_prob, 
                      std_cnt            = std_cnt,
-                     include_zero_intensities = True)
+                     include_zero_intensities = False)
 
 m.dump("")
 m.plotlygl("", show=True)
@@ -29,7 +32,8 @@ m.plotlygl("", show=True)
 sol = m.imperator.solutions[12]
 [(i, sol.mean_mz) for i, sol in enumerate(m.imperator.solutions)]
 
-
+sol.plot()
+sol.model.fitted()
 
 
 

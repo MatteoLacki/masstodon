@@ -16,6 +16,7 @@ class DeconvolutionProblem(object):
             max_mz,
             mean_mz,
             include_zero_intensities = False):
+        self.include_000 = include_zero_intensities
         self.cc     = connected_component
         X, ordering = attr_matrix(self.cc, edge_attr='prob')
         ordering    = np.array(ordering)
@@ -28,7 +29,7 @@ class DeconvolutionProblem(object):
         self.mz_e   = max_mz[self.idx]
         self.mean_mz= mean_mz[self.idx]
         Y           = self.total_intensities
-        if include_zero_intensities:
+        if self.include_000:
             Y1 = np.concatenate((Y, np.zeros(X.shape[1])))
             x  = 1.0 - np.array(X.sum(axis=0)).flatten()
             X1 = np.concatenate((X, np.diag(x)))
@@ -78,7 +79,15 @@ class DeconvolutionProblem(object):
     def l1_abs(self):
         return self.model.l1_abs()
 
-    
+    def total_intensity(self):
+        return sum(self.Y)
+
+    def fitted(self):
+        if self.include_000:
+            fitted = self.model.fitted()
+            return fitted
+        else:
+            return self.model.fitted()
 
     def plot_fancy(self,
                    plt_style = 'fast',
