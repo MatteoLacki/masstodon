@@ -8,6 +8,7 @@ import json
 import os
 from os.path import join as pjoin, exists as pexists, split as psplit
 from sys import platform
+import multiprocessing as mp
 
 # Project specific
 from masstodon.scripts.PXD001845.iter_folders import get_charge, iter_scans, non_modified_scans
@@ -26,10 +27,12 @@ if platform == "darwin":
     # check if you have your latte on skimmed soya milk with you
     data_path = "/Users/matteo/Projects/masstodon/data/PXD001845/numpy_files/"
     dump_path = "/Users/matteo/Projects/masstodon/dumps/many_processes/"
+    processes_no = 4
 elif platform == "linux":
     # check if you have long dirty hair
     data_path = "/home/matteo/masstodon/review_answer/numpy_files/"
     dump_path = "/mnt/disk/masstodon/dumps/many_processes/"
+    processes_no = 24
 elif "win" in platform:
     # don't check anything. no use.
     data_path = "C:/"
@@ -42,10 +45,9 @@ else:
 min_prob          = .8
 isotopic_coverage = .999
 std_cnt           = 3
-stop              = 100
-# for mz, intensity, q, path in islice(iter_data(path), stop):
-
-mz, intensity, q, path =next(iter_scans(data_path))
+stop              = None
+# for mz, intensity, q, path in islice(iter_scans(data_path), stop):
+# mz, intensity, q, path = next(iter_scans(data_path))
 
 def single_run(mz, intensity, q, path):
     exp, scan = path.split('/')[-2:]
@@ -61,7 +63,7 @@ def single_run(mz, intensity, q, path):
                                       std_cnt           = std_cnt,
                                       orbitrap          = True,
                                       get_timings       = True)
-        local_dump_path = pjoin(dump_path, pjoin(exp))
+        local_dump_path = pjoin(dump_path, pjoin(exp), str(scan))
         if not pexists(local_dump_path):
             os.makedirs(local_dump_path)
         M.dump(local_dump_path, indent=4)
@@ -75,33 +77,22 @@ def single_run(mz, intensity, q, path):
 
         # timings
         row.update({"t_"+str(n): T for n,T in timings})
-        
+
         # intensities
         for s in ('ETDorHTR', 'ETnoD_PTR_fragments', 'ETnoD_precursor', 'PTR_precursor'):
             row["cz_simple."+str(s)] = int(M.cz_simple.intensities[s])
             row["cz."+str(s)]        = int(M.cz.intensities[s])
 
+        # estimates
+        row['estimates'] = list(M.ome.iter_molecule_estimates())
         row['success'] = True
     except Exception as e:
         row['success'] = False
     return row
 
 
-# debug error calculation for a dp
-model = sol.model
-model.X
-model.Y
-model._coef
-
-model.l1_abs()
-model.res()
-
-model.plot()
-sol
-
-cc = sol.cc
-groups = M.imperator.groups
-
+with mp.Pool(processes_no) as p:
+    stats = p.starmap(single_run, islice(iter_scans(data_path), stop))
 
 
 

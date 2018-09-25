@@ -7,7 +7,7 @@ except RuntimeError:
 
 from masstodon.models.nnls import nnls
 
-
+# TODO: sort out the interpretation of betas problem.
 class DeconvolutionProblem(object):
     def fit(self, 
             connected_component,
@@ -78,6 +78,9 @@ class DeconvolutionProblem(object):
 
     def l1_abs(self):
         return self.model.l1_abs()
+
+    def l1_rel(self):
+        return self.model.l1_rel()
 
     def total_intensity(self):
         return sum(self.Y)

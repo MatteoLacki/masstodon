@@ -27,10 +27,10 @@ class NNLS(Model):
         return self.fitted().sum()
 
     def l1_rel(self):
-        return self.l1_abs()/(self.total_intensity() + self.total_fitted())
+        return self.l1_abs()/(self.Y.sum() + self.total_fitted())
 
     def l1_rel_response(self):
-        return self.l1_abs()/self.total_intensity()
+        return self.l1_abs()/self.Y.sum()
 
     def l2_rel(self):
         return self.l2_abs()/(sum(self.Y**2) + sum(self.fitted()**2))

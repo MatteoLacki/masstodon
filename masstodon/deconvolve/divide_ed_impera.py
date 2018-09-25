@@ -293,6 +293,14 @@ class Imperator(object):
         """Summarize the l1 error for all the solutions"""
         return sum(s.l1_abs() for s in self.solutions)
 
+    def solutions_l1_errors_abs(self):
+        """Summarize the l1 error for all the solutions"""
+        return np.array([s.l1_abs() for s in self.solutions])
+
+    def solutions_l1_errors_rel(self):
+        """Summarize the l1 error for all the solutions"""
+        return np.array([s.l1_rel() for s in self.solutions])
+
     def solutions_total_intensity(self):
         return sum(s.total_intensity() for s in self.solutions)
 
