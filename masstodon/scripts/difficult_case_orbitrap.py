@@ -1,6 +1,8 @@
 from os.path import join as pjoin
 from sys import platform
+import matplotlib.pyplot as plt
 
+from masstodon.plot.spectrum import plot_spectrum
 from masstodon.masstodon import masstodon_single, Masstodon
 from masstodon.read.npy  import spectrum_from_npy
 from masstodon.scripts.PXD001845.get_fasta import read_fasta
@@ -25,9 +27,10 @@ elif platform == "linux":
     data_path = "/home/matteo/masstodon/review_answer/numpy_files/"
     dump_path = "/mnt/disk/masstodon/dumps/tests/"
 
-full_data_path = pjoin(data_path, "20141202_AMB_Bora_10x_40MeOH_1FA_OT_120k_10uscans_920_EThcD_8ms_15CE_19precZ/4/")
-# folder = "20141202_AMB_Bora_10x_40MeOH_1FA_OT_120k_10uscans_728_ETD_4ms_24precZ"
+"20141202_AMB_Bora_10x_40MeOH_1FA_OT_120k_10uscans_920_EThcD_8ms_15CE_19precZ/4/"
 folder = "20141202_AMB_Bora_10x_40MeOH_1FA_OT_120k_10uscans_920_EThcD_8ms_15CE_19precZ"
+scan = 1
+full_data_path = pjoin(data_path, folder, str(scan))
 
 mz, intensity = spectrum_from_npy(full_data_path)
 # from masstodon.plot.spectrum import plot_spectrum
@@ -53,6 +56,19 @@ m = masstodon_single(mz, intensity, fasta, q, '',
 m.dump(dump_path)
 m.plotlygl(dump_path, show=False)
 # m.plotlygl(dump_path)
+
+
+mz1, intensity1 = spectrum_from_npy("/Users/matteo/duch/many_processes/20141202_AMB_Bora_10x_40MeOH_1FA_OT_120k_10uscans_920_EThcD_8ms_15CE_19precZ/1")
+mz2, intensity2 = spectrum_from_npy("/Users/matteo/duch/many_processes/")
+
+
+plt.subplot(3, 1, 1)
+plot_spectrum(mz1, intensity1, show=False)
+plt.subplot(3, 1, 2)
+plot_spectrum(mz, intensity, show=False)
+plt.subplot(3, 1, 3)
+plot_spectrum(mz, intensity, show=True)
+# so the data on czczmiel and here are the same!
 
 
 

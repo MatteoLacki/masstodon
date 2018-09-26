@@ -2,12 +2,13 @@
 # %autoreload 2
 # %load_ext line_profiler
 
-from itertools   import islice
+from itertools import islice
 import json
 import os
 from os.path import join as pjoin, exists as pexists, split as psplit
 from sys import platform
 import multiprocessing as mp
+from time import time
 
 # Project specific
 from masstodon.scripts.PXD001845.iter_folders import get_charge, iter_scans, non_modified_scans
@@ -90,10 +91,12 @@ def single_run(mz, intensity, q, path):
         row['success'] = False
     return row
 
-
+T0 = time()
 with mp.Pool(processes_no) as p:
     stats = p.starmap(single_run, islice(iter_scans(data_path), stop))
+T1 = time()
 
 with open(pjoin(dump_path, "fit_stats.json"), "w") as f:
     json.dump(stats, f, indent=4)
 
+print("Total fit time for all 2103 spectra: {t}".format(t=T1-T0))

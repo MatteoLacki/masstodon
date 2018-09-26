@@ -65,6 +65,6 @@ def iter_models():
             row["perc_{dec}".format(dec=dec)] = val
         yield row
 
-models_stats = pd.DataFrame(iter_models())
+models_stats = pd.DataFrame(list(islice(iter_models(), 100)))
 models_stats.to_csv(pjoin(dump_path, "models_stats"), index=False)
 
