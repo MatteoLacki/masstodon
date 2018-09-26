@@ -32,7 +32,7 @@ elif platform == "linux":
     # check if you have long dirty hair
     data_path = "/home/matteo/masstodon/review_answer/numpy_files/"
     dump_path = "/mnt/disk/masstodon/dumps/many_processes/"
-    processes_no = 24
+    processes_no = 25
 elif "win" in platform:
     # don't check anything. no use.
     data_path = "C:/"
