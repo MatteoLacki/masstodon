@@ -58,6 +58,7 @@ def single_run(mz, intensity, q, path):
         fasta = read_fasta(path, csv2fasta)
         fasta, modifications = modify_fasta(fasta)
         M, timings = masstodon_single(mz, intensity, fasta, q, '',
+                                      modifications     = modifications,
                                       isotopic_coverage = isotopic_coverage,
                                       min_prob          = min_prob,
                                       std_cnt           = std_cnt,
