@@ -24,6 +24,10 @@ class PeakClustering(object):
         for s, e in self._iter_cluster_ends():
             yield self.x[s:e], self.w[s:e]
 
+    def __len__(self):
+        """Return the number of clusters."""
+        return self.clusters[-1] + 1
+
     def left_ends_and_diffs(self):
         """Get left ends and widths of the clusters of basic peaks."""
         # the total number of diffs within clusters

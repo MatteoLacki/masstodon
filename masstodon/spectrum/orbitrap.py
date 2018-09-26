@@ -40,10 +40,11 @@ class OrbitrapSpectrum(Spectrum):
                  intensity       = np.array([]),
                  sort            = True,
                  drop_duplicates = True,
+                 drop_zeros      = True,
                  bc              = None,
                  mdc             = None):
         """Initialize the Spectrum."""
-        super().__init__(mz, intensity, sort, drop_duplicates, mdc)
+        super().__init__(mz, intensity, sort, drop_duplicates, drop_zeros, mdc)
         # parameters for spectra spawned as subspectra: needeed for convenience mainly.
         self.bc              = bc
 
@@ -53,6 +54,7 @@ class OrbitrapSpectrum(Spectrum):
         id_e = bisect_right(self.mz, interval.stop)
         return self.__class__(self.mz[id_s:id_e], 
                               self.intensity[id_s:id_e],
+                              False,
                               False,
                               False,
                               self.bc,
@@ -92,7 +94,8 @@ class OrbitrapSpectrum(Spectrum):
             yield self.__class__(mz              = self.mz[s:e],
                                  intensity       = self.intensity[s:e],
                                  sort            = False,
-                                 drop_duplicates = True,
+                                 drop_duplicates = False,
+                                 drop_zeros      = False,
                                  bc              = self.bc.clusters[s:e],
                                  mdc             = self.mdc.clusters[s:e])
 

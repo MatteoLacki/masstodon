@@ -29,13 +29,17 @@ class Spectrum(object):
                          intensity       = np.array([]),
                          sort            = True,
                          drop_duplicates = True,
+                         drop_zeros      = True,
                          mdc             = None):
         """Initialize the Spectrum."""
-        mz        = mz[intensity > 0]
-        intensity = intensity[intensity > 0]
+        self.drop_duplicates = drop_duplicates
+        self.drop_zeros      = drop_zeros
+        if self.drop_zeros:
+            mz        = mz[intensity > 0]
+            intensity = intensity[intensity > 0]
         self.mz, self.intensity = dedup_sort(mz,
                                              intensity,
-                                             drop_duplicates,
+                                             self.drop_duplicates,
                                              sort)
         self.mdc = mdc
 
@@ -69,7 +73,10 @@ class Spectrum(object):
         id_e = bisect_right(self.mz, interval.stop)
         return self.__class__(self.mz[id_s:id_e], 
                               self.intensity[id_s:id_e],
-                              sort = False)
+                              False,
+                              False,
+                              False,
+                              self.mdc)
 
     @property
     def min_mz(self):
@@ -135,7 +142,8 @@ class Spectrum(object):
             yield self.__class__(mz              = self.mz[s:e],
                                  intensity       = self.intensity[s:e],
                                  sort            = False,
-                                 drop_duplicates = True,
+                                 drop_duplicates = False,
+                                 drop_zeros      = False,
                                  mdc             = self.mdc.clusters[s:e])
 
     def get_min_mz_diff_subspectra(self):

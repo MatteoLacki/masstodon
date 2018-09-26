@@ -20,10 +20,11 @@ class ThresholdSpectrum(Spectrum):
                          threshold       = 0.0,
                          sort            = True,
                          drop_duplicates = True,
+                         drop_zeros      = True,
                          mdc             = None):
         assert threshold > 0.0, "Provide non-zero threshold."
         self.threshold = threshold
-        super().__init__(mz, intensity, sort, drop_duplicates, mdc)
+        super().__init__(mz, intensity, sort, drop_duplicates, drop_zeros, mdc)
         X = iter(list(self.mz))
         x = next(X)
         l = [x - self.threshold]
@@ -58,6 +59,7 @@ class ThresholdSpectrum(Spectrum):
                                  threshold       = self.threshold,
                                  sort            = False,
                                  drop_duplicates = True,
+                                 drop_zeros      = False,
                                  mdc             = self.mdc.clusters[s:e])
 
     def __getitem__(self, interval):

@@ -2,6 +2,7 @@
 %autoreload 2
 %load_ext line_profiler
 
+from collections import Counter
 from os.path import join as pjoin
 from sys import platform
 
@@ -34,8 +35,8 @@ folder = "20141202_AMB_Bora_10x_40MeOH_1FA_OT_120k_10uscans_920_EThcD_8ms_15CE_1
 
 # folder = "20141202_AMB_pBora_PLK_10x_40MeOH_1FA_OT_120k_10uscans_928_ETciD_8ms_15SA_19precZ"
 # scan = 1
-folder = "20141202_AMB_pBora_PLK_10x_40MeOH_1FA_OT_120k_10uscans_928_ETciD_8ms_15SA_19precZ"
-scan   = 1
+# folder = "20141202_AMB_pBora_PLK_10x_40MeOH_1FA_OT_120k_10uscans_928_ETciD_8ms_15SA_19precZ"
+# scan   = 1
 
 full_data_path = pjoin(
     data_path, 
@@ -91,11 +92,24 @@ from masstodon.models.polynomial import polynomial
 from masstodon.stats.descriptive import mad_denoising
 
 bc.fit_diff_model(model = polynomial,
-                  degree= 2,
+                  degree= 3,
                   denoise_refit = {'denoiser': mad_denoising,
                                    'std_cnt' : 100})
 bc.diff_model.plot()
 bc.diff_model.coef()
+
+import matplotlib.pyplot as plt
+Z = np.array([(np.median(lmz), len(lmz)) for lmz, lintensity in bc])
+
+plt.scatter(Z[:,0], Z[:,1])
+
+plt.plot(np.arange(Z.shape[0]), Z[:,1])
+plt.show()
+
+Counter(Z[:,1])
+
+
+
 
 # len(lefts)
 # len(bc.clusters)

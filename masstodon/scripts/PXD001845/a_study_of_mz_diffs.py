@@ -58,13 +58,13 @@ def iter_models():
         deg   = len(coefs)
         row = {"C_" + str(deg - i - 1): v for i, v in enumerate(coefs)}
         row[q] = q
-        row[path] = path
+        row["path"] = path
         RANGE = np.arange(0,101,10)
         deciles = np.percentile(np.abs(bc.diff_model.res()), RANGE)
         for dec, val in zip(RANGE, deciles):
             row["perc_{dec}".format(dec=dec)] = val
         yield row
 
-models_stats = pd.DataFrame(list(islice(iter_models(), 100)))
-models_stats.to_csv(pjoin(dump_path, "models_stats"), index=False)
-
+models_stats = list(islice(iter_models(), 100))
+# models_stats.to_csv(pjoin(dump_path, "models_stats"), index=False)
+pd.DataFrame(models_stats).to_csv(pjoin(dump_path, "models_stats"), index=False)

@@ -96,8 +96,9 @@ class Masstodon(object):
                              self.min_mz_diff,
                              self.orbitrap,
                              self.threshold,
-                             sort = True,
-                             drop_duplicates = True)
+                             sort            = True,
+                             drop_duplicates = True,
+                             drop_zeros      = False)
         self.mz_digits = self.spec.get_smallest_diff_digits()
         self.ls        = self.spec.get_lightweight_spectrum()
         self.groups    = self.spec.get_groups()
