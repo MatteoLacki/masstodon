@@ -1,8 +1,7 @@
-%load_ext autoreload
-%autoreload 2
-%load_ext line_profiler
+# %load_ext autoreload
+# %autoreload 2
+# %load_ext line_profiler
 
-from collections import Counter
 from itertools   import islice
 import json
 import os
@@ -32,7 +31,7 @@ elif platform == "linux":
     # check if you have long dirty hair
     data_path = "/home/matteo/masstodon/review_answer/numpy_files/"
     dump_path = "/mnt/disk/masstodon/dumps/many_processes/"
-    processes_no = 24
+    processes_no = 1
 elif "win" in platform:
     # don't check anything. no use.
     data_path = "C:/"
@@ -45,7 +44,7 @@ else:
 min_prob          = .8
 isotopic_coverage = .999
 std_cnt           = 3
-stop              = None
+stop              = 10
 # for mz, intensity, q, path in islice(iter_scans(data_path), stop):
 # mz, intensity, q, path = next(iter_scans(data_path))
 
@@ -95,5 +94,6 @@ def single_run(mz, intensity, q, path):
 with mp.Pool(processes_no) as p:
     stats = p.starmap(single_run, islice(iter_scans(data_path), stop))
 
-
+with open(pjoin(dump_path, "fit_stats.json"), "w") as f:
+    json.dump(stats, f, indent=4)
 

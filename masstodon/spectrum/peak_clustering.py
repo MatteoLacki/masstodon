@@ -169,9 +169,11 @@ def iter_clusters(x, w, assignments):
 
 
 def fix_local_clustering(x, s, e, c,
-                         abs_perc_dev = .2,
-                         verbose      = False):
+                         abs_perc_dev = .2):
     """Fix bitonic clustering.
+
+    Assigns the end of a cluster to the next cluster based on 
+    the median of distances between peaks.
 
     Parameters
     ----------
@@ -185,9 +187,6 @@ def fix_local_clustering(x, s, e, c,
         The number of current cluster of peaks.
     abs_perc_dev : float
         How big m/z deviation is tolerable.
-    verbose : logical
-        That's for the devel mode, which is not in place anyway.
-
     Yields
     ------
     np.array: assignment into clusters.
@@ -196,17 +195,16 @@ def fix_local_clustering(x, s, e, c,
     x_local = x[s:e]
     # differences of consecutive m/z values
     x_diffs = np.diff(x_local)
-    # the median should be a stable values to compare to
-    # as there are vastly more similar diffs than other.
-    me_x_diff = np.median(x_diffs)
-    cc = c
-    signal_border = abs_perc_dev * me_x_diff
-    for i, x_diff in enumerate(x_diffs):
-        if abs(x_diff - me_x_diff) > signal_border:
-            cc += 1
-            if verbose:
-                print('Found poor clustering between {} and {}'.format(s,e))
-        clusters[i+1] = cc
+    if len(x_diffs) >= 4:
+        # the median should be a stable values to compare to
+        # as there are vastly more similar diffs than other.
+        me_x_diff = np.median(x_diffs)
+        cc = c
+        signal_border = abs_perc_dev * me_x_diff
+        for i, x_diff in enumerate(x_diffs):
+            if abs(x_diff - me_x_diff) > signal_border:
+                cc += 1
+            clusters[i+1] = cc
     return clusters
 
 

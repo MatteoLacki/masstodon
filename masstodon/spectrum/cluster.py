@@ -25,7 +25,7 @@ class PeakClustering(object):
             yield self.x[s:e], self.w[s:e]
 
     def left_ends_and_diffs(self):
-        """Get the left ends of histogramed data and lengths of bases of the bins."""
+        """Get left ends and widths of the clusters of basic peaks."""
         # the total number of diffs within clusters
         clusters_no = self.clusters[-1] - self.clusters[0]
         diffs_no    = len(self.x) - clusters_no - 1
@@ -34,10 +34,9 @@ class PeakClustering(object):
         i_ = _i = 0
         for s, e in self._iter_cluster_ends():
             x = self.x[s:e]
-            diff = np.diff(x)
             _i += len(x) - 1
             lefts[i_:_i] = x[:-1]
-            diffs[i_:_i] = diff
+            diffs[i_:_i] = np.diff(x)
             i_ = _i
         return lefts, diffs
 

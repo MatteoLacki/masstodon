@@ -11,9 +11,10 @@ def spectrum(mz        = np.array([]),
              min_mz_diff = 1.1,
              orbitrap  = False,
              threshold = 0.0,
-             sort      = True):
+             sort      = True,
+             drop_duplicates = True):
     if orbitrap:
-        spec = OrbitrapSpectrum(mz, intensity, sort)
+        spec = OrbitrapSpectrum(mz, intensity, sort, drop_duplicates)
         if min_mz_diff < infinity:
             spec.min_mz_diff_clustering(min_mz_diff)
         spec.bitonic_clustering()
