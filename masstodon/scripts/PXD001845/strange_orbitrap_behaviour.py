@@ -2,6 +2,7 @@
 %autoreload 2
 %load_ext line_profiler
 
+from os.path import join as pjoin
 
 from masstodon.masstodon import masstodon_single
 
@@ -31,17 +32,37 @@ def fit(scan_no):
 		                     std_cnt  			= std_cnt,
 		                     get_timings       	= True)
 
-	m_dump = pjoin(main_dump, str(1))
+	m_dump = pjoin(main_dump, str(scan_no))
 	return m, tm, m_dump
 
 
 m_scan = 1
 m, tm, m_dump = fit(m_scan)
 m.plotlygl(m_dump)
+m.dump(m_dump)
+m.write(m_dump)
 
 
 n_scan = 2
 n, tn, n_dump = fit(n_scan)
 n.plotlygl(n_dump)
+n.dump(n_dump)
+n.write(n_dump)
 
 
+len(m.iso_calc._isotope_DB)
+len(n.iso_calc._isotope_DB)
+
+
+
+o_scan = 3
+o, to, o_dump = fit(o_scan)
+o.plotlygl(n_dump)
+o.spec.plot()
+o.dump(o_dump)
+o.write(o_dump)
+
+
+n.spec.plot()
+m.spec.plot()
+o.spec.plot()

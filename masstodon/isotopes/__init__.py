@@ -17,4 +17,4 @@
 #   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 from .calculator import isotope_calculator
 
-iso_calc = isotope_calculator()
+# iso_calc = isotope_calculator()
