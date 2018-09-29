@@ -57,13 +57,14 @@ q                 = 19
 matching_csv = [f for f in csv2fasta if folder in f]
 fasta = csv2fasta[matching_csv[0]]
 fasta, modifications = modify_fasta(fasta)
-m = masstodon_single(mz, intensity, fasta, q, '',
+m,t = masstodon_single(mz, intensity, fasta, q, '',
                      modifications = modifications,
                      orbitrap = True,
                      isotopic_coverage = isotopic_coverage,
                      min_prob = min_prob, 
                      std_cnt  = std_cnt,
-                     include_zero_intensities = False)
+                     include_zero_intensities = False,
+                     get_timings = True)
 m.dump(dump_path)
 m.plotlygl(dump_path)
 

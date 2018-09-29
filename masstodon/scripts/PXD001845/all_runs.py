@@ -14,7 +14,6 @@ from time import time
 from masstodon.scripts.PXD001845.iter_folders import get_charge, iter_scans, non_modified_scans
 from masstodon.scripts.PXD001845.get_fasta import read_fasta
 from masstodon.scripts.PXD001845.hecks_custom_ptms import modify_fasta
-from masstodon.scripts.PXD001845.csv2fasta import csv2fasta
 
 from masstodon.masstodon import masstodon_single
 
@@ -55,7 +54,8 @@ def single_run(mz, intensity, q, path):
     print("start: {exp}\tscan: {scan}".format(exp=exp, scan=scan))
     row = {"q":q, "exp":exp, "scan":scan}
     try:
-        fasta = read_fasta(path, csv2fasta)
+        folder = experiment.split('/')[-2] # check this!!!
+        fasta = read_fasta(folder)
         fasta, modifications = modify_fasta(fasta)
         M, timings = masstodon_single(mz, intensity, fasta, q, '',
                                       modifications     = modifications,

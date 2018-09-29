@@ -11,6 +11,7 @@ mz, intensity = substance_p['spectrum']
 threshold         = 0.025
 fasta             = 'RPKPQQFFGLM'
 modifications     = {'11': {'C_carbo': {'H': 1, 'N': 1, 'O': -1}}}
+# modifications = {}
 q                 = 3
 min_prob          = .8
 isotopic_coverage = .999
@@ -25,6 +26,11 @@ m = masstodon_single(mz, intensity, fasta, q,
                      min_prob           = min_prob, 
                      std_cnt            = std_cnt,
                      include_zero_intensities = False)
+# prec = next(m.ome.sources())
+# for n in m.ome.observables():
+#     print(m.ome.G[prec][n]["name"])
+#     print(n.formula.tex_with_charges(ce=True))
+#     print()
 
 m.dump("")
 m.plotlygl("", show=True)

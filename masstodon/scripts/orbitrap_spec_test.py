@@ -19,11 +19,11 @@ m = masstodon_single(mz, intensity, fasta, charge,
                      min_prob = min_prob, 
                      std_cnt  = std_cnt)
 
-# m.plotlygl("dump")
+m.plotlygl("/Users/matteo/Projects/masstodon/masstodon/dump")
 m.dump("dump")
 
-n = load_masstodon("dump")
-path = "dump"
+# n = load_masstodon("dump")
+# path = "dump"
 
-from masstodon.deconvolve.divide_ed_impera import load_imperator
-load_imperator('dump/deconvolution_graph.gpickle')
+# from masstodon.deconvolve.divide_ed_impera import load_imperator
+# load_imperator('dump/deconvolution_graph.gpickle')

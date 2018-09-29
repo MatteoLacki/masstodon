@@ -4,9 +4,9 @@
 
 from time import time
 
-from masstodon.masstodon import Masstodon, masstodon_batch, masstodon_single, masstodon_load
+from masstodon.masstodon import Masstodon, masstodon_batch, masstodon_single, load_masstodon
 from masstodon.ome.ome   import Ome
-from masstodon.readers.from_npy import spectrum_from_npy
+from masstodon.read.npy import spectrum_from_npy
 from masstodon.data.ptms import ptms
 
 dp = "/Users/matteo/Projects/masstodon/data/PXD001845/numpy_files/"
@@ -29,10 +29,14 @@ for i, aa in enumerate(fasta):
     prec_mod['modifications'] = {i+1: {'C_carbo': ptms['phosphorylation'].copy()}}
     precursors.append(prec_mod)
 
-# m = masstodon_single(mz, intensity, fasta, charge, '', 
-#                     isotopic_coverage = isotopic_coverage,
-#                     min_prob = min_prob, 
-#                     std_cnt  = std_cnt)
+m = masstodon_single(mz, intensity, fasta, charge, '', 
+                    orbitrap = True,
+                    isotopic_coverage = isotopic_coverage,
+                    min_prob = min_prob, 
+                    std_cnt  = std_cnt)
+m.plotlygl("/Users/matteo/Projects/masstodon/masstodon/dump", shape='triangles')
+m.imperator.plot_ccs(plt_style = "default")
+
 m = masstodon_batch(mz, intensity, precursors, 
                     isotopic_coverage = isotopic_coverage,
                     min_prob = min_prob, 

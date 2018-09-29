@@ -31,10 +31,13 @@ def dict2string_readable(d):
     return " ".join(element + "_"+ str(count) for element, count in sorted(d.items()))
 
 
-def dict2tex(d):
+def dict2tex(d, ce=False):
     f = "".join("{element}_{{{count}}}".format(element=element, count=count) if count > 1 else element
                 for element, count in sorted(d.items()))
-    return "$"+f+"$"
+    if ce:
+        return "\ce{" + f + "}"
+    else:
+        return "$"+f+"$"
 
 
 class Formula(LinearDict):
@@ -76,10 +79,21 @@ class Formula(LinearDict):
         out['H'] += q + g
         return dict2string(out)
 
-    def tex_with_charges(self, q=0, g=0):
+    def tex_with_charges(self, q=0, g=0, ce=False):
+        """Generate a LaTeX string from the given formula.
+
+        Parameters
+        ----------
+        q : int
+            Charges
+        g : int
+            Quenched charges or additional hydrogen atoms.
+        ce : boolean
+            Should the string be compatible with the LaTeX mhchem library.
+        """
         out = self._storage.copy()
         out['H'] += q + g
-        return dict2tex(out)
+        return dict2tex(out, ce)
 
     def tex(self):
         return dict2tex(out)
