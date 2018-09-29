@@ -8,8 +8,6 @@ from sys import platform
 
 from masstodon.data.ptms import ptms
 
-class WrongSystem(Exception):
-    pass
 
 def get_folder2ptms(datapath):
     csvs = listdir(datapath)
