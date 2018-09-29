@@ -30,7 +30,7 @@ elif platform == "linux":
     data_path = "/home/matteo/masstodon/review_answer/numpy_files/"
     dump_path = "/mnt/disk/masstodon/dumps/many_processes/"
     csvpath = "/home/matteo/masstodon/review_answer/csv_files"
-    processes_no = 8
+    processes_no = 24
 elif "win" in platform:
     # don't check anything. no use.
     data_path = "C:/"
@@ -42,7 +42,7 @@ else:
 min_prob          = .8
 isotopic_coverage = .999
 std_cnt           = 3
-stop              = 12
+stop              = None
 fasta             = "GAASMMGDVKESKMQITPETPGRIPVLNPFESPSDYSNLHEQTLASPSVFKSTKLPTPGKFRWSIDQLAVINPVEIDPEDIHRQALYLSHSRIDKDVEDKRQKAIEEFFTKDVIVPSPWTDHEGKQLSQCHSSKCTNINSDSPVGKKLTIHSEKSD"
 folder2ptms       = get_folder2ptms(csvpath)
 # for mz, intensity, q, path in islice(iter_scans(data_path), stop):
