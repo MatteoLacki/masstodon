@@ -11,19 +11,7 @@ from masstodon.data.ptms import ptms
 class WrongSystem(Exception):
     pass
 
-def get_folder2ptms():
-    if platform == "darwin":
-        # check if you have your latte on skimmed soya milk with you
-        datapath = "/Users/matteo/Projects/masstodon/data/PXD001845/csv_files"
-    elif platform == "linux":
-        # check if you have long dirty hair
-        data_path = "/home/matteo/masstodon/review_answer/csv_files"
-    elif "win" in platform:
-        # don't check anything. no use.
-        data_path = "C:/"
-        raise WrongSystem(":D")
-    else:
-        raise WrongSystem("Path not specified correctly.")
+def get_folder2ptms(datapath):
     csvs = listdir(datapath)
     folder2ptms = defaultdict(list)
     for csv in csvs:

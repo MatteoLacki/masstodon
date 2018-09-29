@@ -23,11 +23,13 @@ if platform == "darwin":
     # check if you have your latte on skimmed soya milk with you
     data_path = "/Users/matteo/Projects/masstodon/data/PXD001845/numpy_files/"
     dump_path = "/Users/matteo/Projects/masstodon/dumps/many_processes/"
+    csvpath   = "/Users/matteo/Projects/masstodon/data/PXD001845/csv_files"
     processes_no = 1
 elif platform == "linux":
     # check if you have long dirty hair
     data_path = "/home/matteo/masstodon/review_answer/numpy_files/"
     dump_path = "/mnt/disk/masstodon/dumps/many_processes/"
+    csvpath = "/home/matteo/masstodon/review_answer/csv_files"
     processes_no = 8
 elif "win" in platform:
     # don't check anything. no use.
@@ -36,14 +38,13 @@ elif "win" in platform:
 else:
     raise WrongSystem("Path not specified correctly.")
 
-
 # running fittings
 min_prob          = .8
 isotopic_coverage = .999
 std_cnt           = 3
 stop              = 12
 fasta             = "GAASMMGDVKESKMQITPETPGRIPVLNPFESPSDYSNLHEQTLASPSVFKSTKLPTPGKFRWSIDQLAVINPVEIDPEDIHRQALYLSHSRIDKDVEDKRQKAIEEFFTKDVIVPSPWTDHEGKQLSQCHSSKCTNINSDSPVGKKLTIHSEKSD"
-folder2ptms       = get_folder2ptms()
+folder2ptms       = get_folder2ptms(csvpath)
 # for mz, intensity, q, path in islice(iter_scans(data_path), stop):
 # mz, intensity, q, path = next(iter_scans(data_path))
 # mz, intensity, q, path = next(filter(lambda x: len(folder2ptms[x[3].split("/")[-2]]) > 1, iter_scans(data_path)))
