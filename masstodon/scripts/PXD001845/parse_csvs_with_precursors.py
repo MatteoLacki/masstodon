@@ -51,3 +51,8 @@ csv2fasta = dict(zip(csvs, fastas))
 with open("/Users/matteo/Projects/masstodon/data/PXD001845/csv2fasta.json", 'w') as f:
     json.dump(csv2fasta, f, indent=4)
 
+# compare file names with csv2fasta keys...
+file_names = listdir("/Users/matteo/Projects/masstodon/data/PXD001845/numpy_files/")
+
+for fn in file_names:
+    print(fn in csv2fasta)

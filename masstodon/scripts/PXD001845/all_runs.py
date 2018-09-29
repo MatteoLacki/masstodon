@@ -10,12 +10,9 @@ from sys import platform
 import multiprocessing as mp
 from time import time
 
-# Project specific
-from masstodon.scripts.PXD001845.iter_folders import get_charge, iter_scans, non_modified_scans
-from masstodon.scripts.PXD001845.get_fasta import read_fasta
-from masstodon.scripts.PXD001845.hecks_custom_ptms import modify_fasta
-
-from masstodon.masstodon import masstodon_single
+from masstodon.scripts.PXD001845.iter_folders import iter_scans
+from masstodon.scripts.PXD001845.parse_csvs_with_precursors2 import get_folder2ptms
+from masstodon.masstodon import masstodon_single, masstodon_batch
 
 
 # data paths
@@ -26,12 +23,12 @@ if platform == "darwin":
     # check if you have your latte on skimmed soya milk with you
     data_path = "/Users/matteo/Projects/masstodon/data/PXD001845/numpy_files/"
     dump_path = "/Users/matteo/Projects/masstodon/dumps/many_processes/"
-    processes_no = 4
+    processes_no = 1
 elif platform == "linux":
     # check if you have long dirty hair
     data_path = "/home/matteo/masstodon/review_answer/numpy_files/"
     dump_path = "/mnt/disk/masstodon/dumps/many_processes/"
-    processes_no = 25
+    processes_no = 8
 elif "win" in platform:
     # don't check anything. no use.
     data_path = "C:/"
@@ -44,9 +41,15 @@ else:
 min_prob          = .8
 isotopic_coverage = .999
 std_cnt           = 3
-stop              = None
+stop              = 12
+fasta             = "GAASMMGDVKESKMQITPETPGRIPVLNPFESPSDYSNLHEQTLASPSVFKSTKLPTPGKFRWSIDQLAVINPVEIDPEDIHRQALYLSHSRIDKDVEDKRQKAIEEFFTKDVIVPSPWTDHEGKQLSQCHSSKCTNINSDSPVGKKLTIHSEKSD"
+folder2ptms       = get_folder2ptms()
 # for mz, intensity, q, path in islice(iter_scans(data_path), stop):
 # mz, intensity, q, path = next(iter_scans(data_path))
+# mz, intensity, q, path = next(filter(lambda x: len(folder2ptms[x[3].split("/")[-2]]) > 1, iter_scans(data_path)))
+# it = iter_scans(data_path)
+# mz, intensity, q, path = next(it)
+# print(path)
 
 def single_run(mz, intensity, q, path):
     exp, scan = path.split('/')[-2:]
@@ -54,16 +57,30 @@ def single_run(mz, intensity, q, path):
     print("start: {exp}\tscan: {scan}".format(exp=exp, scan=scan))
     row = {"q":q, "exp":exp, "scan":scan}
     try:
-        folder = experiment.split('/')[-2] # check this!!!
-        fasta = read_fasta(folder)
-        fasta, modifications = modify_fasta(fasta)
-        M, timings = masstodon_single(mz, intensity, fasta, q, '',
-                                      modifications     = modifications,
-                                      isotopic_coverage = isotopic_coverage,
-                                      min_prob          = min_prob,
-                                      std_cnt           = std_cnt,
-                                      orbitrap          = True,
-                                      get_timings       = True)
+        modifications = folder2ptms[exp]
+        single_prec = len(modifications) in (0, 1)
+        if single_prec:
+            if modifications:
+                modifications = modifications[0]
+            else:
+                modifications = {}
+            M, timings = masstodon_single(mz, intensity, fasta, q, '',
+                                          modifications     = modifications,
+                                          isotopic_coverage = isotopic_coverage,
+                                          min_prob          = min_prob,
+                                          std_cnt           = std_cnt,
+                                          orbitrap          = True,
+                                          get_timings       = True)
+        else:
+            precursors = [{"name": "pBora-"+"_".join(map(str, mod.keys())),
+                           "modifications": mod, "q": q, "fasta": fasta }
+                          for mod in modifications]
+            M, timings = masstodon_batch(mz, intensity, precursors,
+                                          isotopic_coverage = isotopic_coverage,
+                                          min_prob          = min_prob,
+                                          std_cnt           = std_cnt,
+                                          orbitrap          = True,
+                                          get_timings       = True)
         local_dump_path = pjoin(dump_path, pjoin(exp), str(scan))
         if not pexists(local_dump_path):
             os.makedirs(local_dump_path)
@@ -80,23 +97,37 @@ def single_run(mz, intensity, q, path):
         row.update({"t_"+str(n): T for n,T in timings})
 
         # intensities
-        for s in ('ETDorHTR', 'ETnoD_PTR_fragments', 'ETnoD_precursor', 'PTR_precursor'):
-            row["cz_simple."+str(s)] = int(M.cz_simple.intensities[s])
-            row["cz."+str(s)]        = int(M.cz.intensities[s])
+        if single_prec:
+            for s in ('ETDorHTR', 'ETnoD_PTR_fragments', 'ETnoD_precursor', 'PTR_precursor'):
+                row["cz_simple."+str(s)] = int(M.cz_simple.intensities[s])
+                row["cz."+str(s)]        = int(M.cz.intensities[s])
 
         # estimates
         row['estimates'] = list(M.ome.iter_molecule_estimates())
         row['success'] = True
     except Exception as e:
         row['success'] = False
+        raise e
     return row
+
+ETD_data    = islice(filter(lambda x: "ETD" in x[3], iter_scans(data_path)), stop)
+nonETD_data = islice(filter(lambda x: "ETD" not in x[3], iter_scans(data_path)), stop)
+
 
 T0 = time()
 with mp.Pool(processes_no) as p:
-    stats = p.starmap(single_run, islice(iter_scans(data_path), stop))
+    stats = p.starmap(single_run, ETD_data)
 T1 = time()
+with open(pjoin(dump_path, "ETD_fit_stats.json"), "w") as f:
+    json.dump(stats, f, indent=4)
+print("Total fit time for all ETD spectra: {t}".format(t=T1-T0))
 
-with open(pjoin(dump_path, "fit_stats.json"), "w") as f:
+
+T2 = time()
+with mp.Pool(processes_no) as p:
+    stats = p.starmap(single_run, nonETD_data)
+T3 = time()
+with open(pjoin(dump_path, "nonETD_fit_stats.json"), "w") as f:
     json.dump(stats, f, indent=4)
 
-print("Total fit time for all spectra: {t}".format(t=T1-T0))
+print("Total fit time for all non-ETD spectra: {t}".format(t=T3-T2))

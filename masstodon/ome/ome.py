@@ -106,7 +106,7 @@ class Ome(object):
 
     def iter_molecule_estimates(self, header=True):
         """Iterate over molecules with positive estimates."""
-        if self.is_one_precursor:
+        if self.is_one_precursor():
             if header:
                 yield ('formula', 'q', 'g',
                        'formula with q and g',

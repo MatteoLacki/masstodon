@@ -174,8 +174,9 @@ class Masstodon(object):
     def write(self, path):
         """Write results to path."""
         self.ome.write(pjoin(path, 'estimates.csv'))
-        self.cz.write(path)
-        self.cz_simple.write(path)
+        if self.ome.is_one_precursor():
+            self.cz.write(path)
+            self.cz_simple.write(path)
         self.imperator.errors_to_json(pjoin(path, 'errors.json'))
 
     def dump(self, path, source_observables_graph=False, indent=4):
