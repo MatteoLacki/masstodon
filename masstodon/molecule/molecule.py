@@ -17,13 +17,11 @@
 #   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 from masstodon.data.constants  import infinity
 from masstodon.plot.spectrum   import plot_spectrum
-from masstodon.isotopes        import iso_calc
 from masstodon.formula.formula import as_formula
 
 
-
 class Molecule(object):
-    def __init__(self, formula, q=0, g=0, iso_calc=iso_calc):
+    def __init__(self, formula, iso_calc, q=0, g=0):
         self.formula   = as_formula(formula)
         self.q         = int(q)
         self.g         = int(g)
@@ -117,7 +115,7 @@ class Molecule(object):
                  show      = show)
 
 
-def molecule(formula, q=0, g=0, iso_calc=iso_calc):
-    mol = Molecule(formula, q, g, iso_calc)
+def molecule(formula, iso_calc, q=0, g=0):
+    mol = Molecule(formula, iso_calc, q, g, iso_calc)
     return mol
 

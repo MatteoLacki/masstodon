@@ -73,7 +73,7 @@ from masstodon.data.constants              import infinity
 from masstodon.deconvolve.divide_ed_impera import imperator, load_imperator
 from masstodon.estimates_matcher.cz        import CzMatch
 from masstodon.estimates_matcher.cz_simple import SimpleCzMatch
-from masstodon.isotopes                    import isotope_calculator
+from masstodon.isotopes.calculator         import isotope_calculator
 from masstodon.precursor.precursor         import precursor
 from masstodon.preprocessing.filters       import filter_subspectra_molecules
 from masstodon.read.npy                    import spectrum_from_npy

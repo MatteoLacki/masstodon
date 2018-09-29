@@ -28,9 +28,10 @@ class Ome(object):
             name   = m_kwds['name']
             m_kwds = m_kwds.copy()
             del m_kwds['name']
-            mol  = molecule(iso_calc=self.iso_calc, **m_kwds)
-            prec = FalsePrecursor(name=name,
-                                  iso_calc=self.iso_calc,
+            mol  = molecule(iso_calc=self.iso_calc,
+                            **m_kwds)
+            prec = FalsePrecursor(name     = name,
+                                  iso_calc = self.iso_calc,
                                   **m_kwds)
             self.G.add_node(prec, s=True)
             self.G.add_node(mol,  s=False)

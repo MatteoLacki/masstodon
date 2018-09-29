@@ -17,7 +17,6 @@
 #   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 from masstodon.data.amino_acids     import get_amino_acids
 from masstodon.formula.formula      import Formula
-from masstodon.isotopes             import iso_calc
 from masstodon.molecule.molecule    import Molecule
 
 
@@ -60,13 +59,13 @@ class Precursor(Molecule):
     def __init__(self,
                  fasta,
                  q,
+                 iso_calc,
                  name              = "",
                  modifications     = {},
                  fragments         = "cz",
                  blocked_fragments = set(['c0']),
                  block_prolines    = True,
                  distance_charges  = 5,
-                 iso_calc          = iso_calc,
                  **kwds):
         self.name = name
         self.real = True
@@ -247,7 +246,7 @@ class FalsePrecursor(Molecule):
     def __init__(self,
                  name,
                  formula,
-                 iso_calc = iso_calc,
+                 iso_calc,
                  q        = 0):
         self.name      = name
         self.formula   = Formula(formula)
@@ -275,21 +274,21 @@ class FalsePrecursor(Molecule):
 
 def precursor(fasta,
               q,
+              iso_calc,
               name              = "",
               modifications     = {},
               fragments         = "cz",
               blocked_fragments = set(['c0']),
               block_prolines    = True,
-              distance_charges  = 5,
-              iso_calc          = iso_calc):
+              distance_charges  = 5):
     """Prepare a ready precursor."""
     prec = Precursor(fasta,
                      q,
+                     iso_calc,
                      name,
                      modifications,
                      fragments,
                      blocked_fragments,
                      block_prolines,
-                     distance_charges,
-                     iso_calc)
+                     distance_charges)
     return prec

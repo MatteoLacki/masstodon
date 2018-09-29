@@ -60,8 +60,47 @@ def min_diff_clust(x, w, min_mz_diff = 1.1):
 
 
 
-Groups = namedtuple('Groups', 'min_mz max_mz mean_mz sd_mz skewness_mz count intensity')
-Groups.__new__.__defaults__ = tuple([] for _ in range(7))
+# Groups = namedtuple('Groups', 'min_mz max_mz mean_mz sd_mz skewness_mz count intensity')
+# Groups.__new__.__defaults__ = tuple([] for _ in range(7))
+class Groups(object):
+    def __init__(self):
+        self.min_mz  = []
+        self.max_mz  = []
+        self.mean_mz = []
+        self.sd_mz   = []
+        self.skewness_mz = []
+        self.count       = []
+        self.intensity   = []
+
+    def get_stats(self, local_spectra, out_trivial_intervals=True):
+        for local_mz, local_intensity in local_spectra:
+            mean_mz = mean(local_mz, local_intensity)
+            sd_mz   = sd(local_mz, local_intensity, mean_mz)
+
+            self.min_mz.append(min(local_mz))
+            self.max_mz.append(max(local_mz))
+            self.mean_mz.append(mean_mz)
+            self.sd_mz.append(sd_mz)
+            self.skewness_mz.append(skewness(local_mz, local_intensity, mean_mz, sd_mz))
+            self.count.append(len(local_mz))
+            self.intensity.append(sum(local_intensity))
+            
+        self.min_mz  = np.array(self.min_mz)
+        self.max_mz  = np.array(self.max_mz)
+        self.mean_mz = np.array(self.mean_mz)
+        self.sd_mz   = np.array(self.sd_mz)
+        self.skewness_mz = np.array(self.skewness_mz)
+        self.count       = np.array(self.count)
+        self.intensity   = np.array(self.intensity)
+        if out_trivial_intervals:
+            OK = self.min_mz < self.max_mz
+            self.min_mz = self.min_mz[OK]
+            self.max_mz = self.max_mz[OK]
+            self.mean_mz = self.mean_mz[OK]
+            self.sd_mz = self.sd_mz[OK]
+            self.skewness_mz = self.skewness_mz[OK]
+            self.count = self.count[OK]
+            self.intensity = self.intensity[OK]
 
 
 class Bitonic(PeakClustering):
@@ -81,21 +120,21 @@ class Bitonic(PeakClustering):
                                            abs_perc_dev)
 
     def get_stats(self, out_trivial_intervals=True):
-        O = Groups()
-        for local_mz, local_intensity in self:
-            mean_mz       = mean(local_mz, local_intensity)
-            sd_mz         = sd(local_mz, local_intensity, mean_mz)
-            skewnesses_mz = skewness(local_mz, local_intensity, mean_mz, sd_mz)
-            min_mz        = min(local_mz)
-            max_mz        = max(local_mz)
-            for o, v in zip(O, (min_mz, max_mz, mean_mz, sd_mz, skewnesses_mz,\
-                                len(local_mz), sum(local_intensity))): 
-                o.append(v)
-        O = Groups(*map(np.array, O))
-        if out_trivial_intervals:
-            OK = O.min_mz < O.max_mz
-            O  = [x[OK] for x in O]
-        self.groups = Groups(*O)
+        self.groups = Groups()
+        self.groups.get_stats(self, out_trivial_intervals)
+        # for local_mz, local_intensity in self:
+        #     mean_mz       = mean(local_mz, local_intensity)
+        #     sd_mz         = sd(local_mz, local_intensity, mean_mz)
+        #     skewnesses_mz = skewness(local_mz, local_intensity, mean_mz, sd_mz)
+        #     min_mz        = min(local_mz)
+        #     max_mz        = max(local_mz)
+        #     for o, v in zip(O, (min_mz, max_mz, mean_mz, sd_mz, skewnesses_mz,\
+        #                         len(local_mz), sum(local_intensity))): 
+        #         o.append(v)
+        # O = Groups(*map(np.array, O))
+        # if out_trivial_intervals:
+        #     OK = O.min_mz < O.max_mz
+        #     O  = [x[OK] for x in O]
 
     def get_lightweight_spectrum(self):
         return lightweight_spectrum(self.groups.min_mz,
