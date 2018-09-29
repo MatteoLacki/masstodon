@@ -98,8 +98,8 @@ def iter_outcomes():
             row["cz_simple."+str(s)] = int(m.cz_simple.intensities[s])
             row["cz."+str(s)]        = int(m.cz.intensities[s])
         for i in range(11):
-            row["cz_simple.prob."+str(i)] = m.cz_simple.probabilities["fragmentation_bond"].get(i, 0.0)
-            row["cz.prob.".str(i)] = m.cz.probabilities["fragmentation_bond"].get(i, 0.0)
+            row["cz_simple.prob." + str(i)] = m.cz_simple.probabilities["fragmentation_bond"].get(i, 0.0)
+            row["cz.prob." + str(i)] = m.cz.probabilities["fragmentation_bond"].get(i, 0.0)
         yield row
         print('Finished with {cff}'.format(cff=cff))
 
@@ -107,6 +107,11 @@ results_for_plot = pd.DataFrame(iter_outcomes())
 results_for_plot.to_csv(
     "/Users/matteo/Projects/masstodon/dumps/belgian/synapt_results.csv",
     index = False)
+
+
+# here be monsters
+
+
 
 
 # getting all the results again...

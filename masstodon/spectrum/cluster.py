@@ -60,8 +60,7 @@ def min_diff_clust(x, w, min_mz_diff = 1.1):
 
 
 
-# Groups = namedtuple('Groups', 'min_mz max_mz mean_mz sd_mz skewness_mz count intensity')
-# Groups.__new__.__defaults__ = tuple([] for _ in range(7))
+
 class Groups(object):
     def __init__(self):
         self.min_mz  = []
@@ -122,20 +121,7 @@ class Bitonic(PeakClustering):
     def get_stats(self, out_trivial_intervals=True):
         self.groups = Groups()
         self.groups.get_stats(self, out_trivial_intervals)
-        # for local_mz, local_intensity in self:
-        #     mean_mz       = mean(local_mz, local_intensity)
-        #     sd_mz         = sd(local_mz, local_intensity, mean_mz)
-        #     skewnesses_mz = skewness(local_mz, local_intensity, mean_mz, sd_mz)
-        #     min_mz        = min(local_mz)
-        #     max_mz        = max(local_mz)
-        #     for o, v in zip(O, (min_mz, max_mz, mean_mz, sd_mz, skewnesses_mz,\
-        #                         len(local_mz), sum(local_intensity))): 
-        #         o.append(v)
-        # O = Groups(*map(np.array, O))
-        # if out_trivial_intervals:
-        #     OK = O.min_mz < O.max_mz
-        #     O  = [x[OK] for x in O]
-
+ 
     def get_lightweight_spectrum(self):
         return lightweight_spectrum(self.groups.min_mz,
                                     self.groups.max_mz,
