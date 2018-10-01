@@ -35,7 +35,7 @@ min_prob          = .8
 isotopic_coverage = .999
 std_cnt           = 3
 timings           = True
-include_zero_intensities = True
+include_zero_intensities = False
 
 bad = []
 

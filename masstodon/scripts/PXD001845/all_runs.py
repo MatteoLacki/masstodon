@@ -28,7 +28,8 @@ if platform == "darwin":
 elif platform == "linux":
     # check if you have long dirty hair
     data_path = "/home/matteo/masstodon/review_answer/numpy_files/"
-    dump_path = "/mnt/disk/masstodon/dumps/many_processes/"
+    # dump_path = "/mnt/disk/masstodon/dumps/many_processes/"
+    dump_path = "/mnt/disk/masstodon/dumps/no_charge_limits/"
     csvpath = "/home/matteo/masstodon/review_answer/csv_files"
     processes_no = 24
 elif "win" in platform:
@@ -71,10 +72,14 @@ def single_run(mz, intensity, q, path):
                                           min_prob          = min_prob,
                                           std_cnt           = std_cnt,
                                           orbitrap          = True,
-                                          get_timings       = True)
+                                          get_timings       = True,
+                                          distance_charges  = 2)
         else:
             precursors = [{"name": "pBora-"+"_".join(map(str, mod.keys())),
-                           "modifications": mod, "q": q, "fasta": fasta }
+                           "modifications": mod,
+                           "q": q, 
+                           "fasta": fasta,
+                           "distance_charges": 2}
                           for mod in modifications]
             M, timings = masstodon_batch(mz, intensity, precursors,
                                           isotopic_coverage = isotopic_coverage,
