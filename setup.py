@@ -24,7 +24,7 @@ with open("README.md", "r") as fh:
 setup(
     name='masstodon',
     packages=find_packages(),
-    version='0.13',
+    version='0.14',
     description='Investigate mass spectra for chemical substances, especially ETD products.',
     author=u'Mateusz Krzysztof Łącki',
     author_email='matteo.lacki@gmail.com',
@@ -42,7 +42,9 @@ setup(
         'License :: OSI Approved :: GNU Affero General Public License v3',
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Chemistry',
-        'Programming Language :: Python :: 3.6'],
+        'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.5'],
     install_requires=[
         'numpy',
         'scipy',
