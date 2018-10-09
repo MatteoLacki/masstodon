@@ -8,7 +8,7 @@ from masstodon.masstodon import masstodon_single, load_masstodon, masstodon_batc
 data_path         = '/Users/matteo/Projects/masstodon/data/PXD001845/numpy_files/20141202_AMB_pBora_PLK_10x_40MeOH_1FA_OT_120k_10uscans_928_ETciD_8ms_15SA_19precZ/1'
 mz, intensity     = spectrum_from_npy(data_path)
 fasta             = "GAASMMGDVKESKMQITPETPGRIPVLNPFESPSDYSNLHEQTLASPSVFKSTKLPTPGKFRWSIDQLAVINPVEIDPEDIHRQALYLSHSRIDKDVEDKRQKAIEEFFTKDVIVPSPWTDHEGKQLSQCHSSKCTNINSDSPVGKKLTIHSEKSD"
-charge            = 24
+charge            = 19
 min_prob          = .8
 isotopic_coverage = .999
 std_cnt           = 3
@@ -27,3 +27,8 @@ m.dump("dump")
 
 # from masstodon.deconvolve.divide_ed_impera import load_imperator
 # load_imperator('dump/deconvolution_graph.gpickle')
+p = m.imperator.solutions[100]
+
+p.plot()
+
+
