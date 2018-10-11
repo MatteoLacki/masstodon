@@ -7,10 +7,12 @@ class Model(object):
     def refit(self, **kwds):
         """Refit the model."""
         raise NotImplementedError
+        # WTF is this????
 
     def __call__(self, x, y, *args, **kwds):
         """Predict the values at the new data points."""
         raise NotImplementedError
+        # WTF is this here???
 
     def predict(self, x):
         """Predict the values at the new data points."""
@@ -20,6 +22,7 @@ class Model(object):
         return self.predict(x)
 
     def fitted(self):
+        """The values fitted to the responses."""
         raise NotImplementedError
 
     def coef(self):

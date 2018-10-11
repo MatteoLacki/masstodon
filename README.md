@@ -1,13 +1,45 @@
 # masstodon
 
-A Python module investigating the Electron Transfer Dissociation in Mass Spectrometry
+Your Python3 module for investigating the Electron Transfer Dissociation in Mass Spectrometry, and more generally finding stuff in the mass spectrum.
 
 # Prerequisites
 Python3
 
 # Installation
+
+The package can be installed directly from the Python Package Index:
 ```
 pip install masstodon
+```
+
+Otherwise, download this github repo, use the default branch, and install the software with:
+
+```
+pip install .
+```
+from the folder containing **setup.py**.
+This will let you import `masstodon` simply by
+
+```{python}
+import masstodon
+``` 
+
+# Running
+
+After installation, you can use `masstodon` as a library (support of CLI and web-based user-interface in progress).
+
+**Importing data.** You can analyze individual mass spectra with `masstodon`. This might very well be individual scans of an *Orbitrap*, or a general mass spectrum. The easiest way to import the mass spectrum is to present a plain **ASCII** file with m/z and intensity values in each row, separated by tab or some other whitespace sign.
+
+
+```{python}
+m = masstodon_single(mz, intensity, fasta, q,
+                                 min_mz_diff        = infinity,
+                                 modifications      = modifications,
+                                 orbitrap           = False,
+                                 threshold          = threshold,
+                                 isotopic_coverage  = isotopic_coverage,
+                                 min_prob           = min_prob, 
+                                 std_cnt            = std_cnt)
 ```
 
 <!-- # Running *masstodon*

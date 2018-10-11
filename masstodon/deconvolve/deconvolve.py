@@ -33,11 +33,14 @@ class DeconvolutionProblem(object):
             Y1 = np.concatenate((Y, np.zeros(X.shape[1])))
             x  = 1.0 - np.array(X.sum(axis=0)).flatten()
             X1 = np.concatenate((X, np.diag(x)))
-            self.model = nnls(X1, Y1)
+            self.model = self.fit_model(X1, Y1)
         else:
-            self.model = nnls(X, Y)
+            self.model = self.fit_model(X, Y)
         self.X = X
         self.Y = Y
+
+    def fit_model(self, X, Y):
+        return nnls(X, Y)
 
     def XY(self):
         """Return contingency matrix and response vector."""
@@ -133,6 +136,15 @@ class DeconvolutionProblem(object):
         plt.scatter(x, y_hat, s = 16, color='red')
         if show:
             plt.show()
+
+
+
+class QuantileDeconvolution(DeconvolutionProblem):
+    def fit_model(self, X, Y):
+        return quant_deconv(X, Y)
+
+    def __repr__(self):
+        return "Ich bin eine Quantil Regression. Hast du Angst?"
 
 
 

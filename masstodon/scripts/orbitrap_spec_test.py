@@ -28,7 +28,4 @@ m.dump("dump")
 # from masstodon.deconvolve.divide_ed_impera import load_imperator
 # load_imperator('dump/deconvolution_graph.gpickle')
 p = m.imperator.solutions[100]
-
 p.plot()
-
-
