@@ -128,10 +128,12 @@ class Masstodon(object):
     def divide_et_impera(self, 
                          min_prob,
                          isotopic_coverage,
+                         deconvolution_method = 'nnls',
                          include_zero_intensities = False):
         # store parameters
         self.min_prob                 = min_prob
         self.isotopic_coverage        = isotopic_coverage
+        self.deconvolution_method     = deconvolution_method
         self.include_zero_intensities = include_zero_intensities
         # divide and rule
         self.imperator = imperator(self.good_mols,
@@ -139,21 +141,28 @@ class Masstodon(object):
                                    self.ls,
                                    self.min_prob,
                                    self.isotopic_coverage,
+                                   self.deconvolution_method,
                                    self.include_zero_intensities)
 
     def load_imperator(self, 
                        deconvolution_graph_path,
                        min_prob, 
-                       isotopic_coverage):
+                       isotopic_coverage,
+                       deconvolution_method = 'nnls',
+                       include_zero_intensities = False):
         self.deconvolution_graph_path = deconvolution_graph_path
         self.min_prob                 = min_prob
         self.isotopic_coverage        = isotopic_coverage
+        self.deconvolution_method     = deconvolution_method
+        self.include_zero_intensities = self.include_zero_intensities
         self.imperator = load_imperator(self.good_mols,
                                         self.groups,
                                         self.ls,
                                         self.deconvolution_graph_path,
                                         self.min_prob,
-                                        self.isotopic_coverage)
+                                        self.isotopic_coverage,
+                                        self.deconvolution_method,
+                                        self.include_zero_intensities)
 
     def match_estimates(self):
         """Match the fragment intensities to get the idea about 
@@ -248,6 +257,7 @@ def masstodon_batch(mz,
                     isotopic_coverage   = .999,
                     min_prob            = .7,
                     get_timings         = False,
+                    deconvolution_method     = 'nnls',
                     include_zero_intensities = False,
                     deconvolution_graph_path = ''):
     """Run a session of masstodon with multiple sources.
@@ -274,8 +284,23 @@ def masstodon_batch(mz,
     min_prob : float
         The minimal probability an envelope has to scoop
         to be included in the deconvolution graph.
+    get_timings : boolean
+        Should the output include the measured timings.
     deconvolution_graph_path : str
         A path to a valid premade deconvolution graph.
+    deconvolution_method : str
+        The deconvolution method to use: right now either 'nnls' or 'quantile'.
+    include_zero_intensities : boolean
+        Should the deconvolution include the fitting to zeros
+        if some of the theoretical peaks were not found next to
+        the experimental ones? Defaults to False, because it is
+        not impossible that the instrument provides some intensity
+        threshold for the detector.
+    Returns
+    =======
+        An instance of the masstodon object,
+        or a tuple consisting of that instance and the 
+        measured timings.
     """
     t0 = time()
     m = Masstodon()
@@ -290,11 +315,14 @@ def masstodon_batch(mz,
     if not deconvolution_graph_path:
         m.divide_et_impera(min_prob,
                            isotopic_coverage,
+                           deconvolution_method,
                            include_zero_intensities)
     else:
         m.load_imperator(deconvolution_graph_path,
                          min_prob,
-                         isotopic_coverage)
+                         isotopic_coverage,
+                         deconvolution_method,
+                         include_zero_intensities)
     t4 = time()
     m.ome.filter_by_estimated_intensity()
     t5 = time()

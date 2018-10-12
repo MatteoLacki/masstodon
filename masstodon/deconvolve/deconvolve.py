@@ -40,7 +40,7 @@ class DeconvolutionProblem(object):
         self.Y = Y
 
     def fit_model(self, X, Y):
-        return nnls(X, Y)
+        raise NotImplementedError
 
     def XY(self):
         """Return contingency matrix and response vector."""
@@ -57,7 +57,6 @@ class DeconvolutionProblem(object):
 
     def spectrum(self):
         pred = self.model.fitted()
-        # Y    = self.model.Y
         Y = self.Y
         return self.mz_s, self.mz_e, self.mean_mz, pred, Y[Y > 0]
 
@@ -138,6 +137,13 @@ class DeconvolutionProblem(object):
             plt.show()
 
 
+class NNLSDeconvolution(DeconvolutionProblem):
+    def fit_model(self, X, Y):
+        return nnls(X, Y)
+
+    def __repr__(self):
+        return "Ich bin eine Nonnegetive Regression. Hast du Angst?"
+
 
 class QuantileDeconvolution(DeconvolutionProblem):
     def fit_model(self, X, Y):
@@ -153,8 +159,13 @@ def deconvolve(connected_component,
                min_mz,
                max_mz,
                mean_mz,
+               method = 'nnls',
                include_zero_intensities = False):
-    dp = DeconvolutionProblem()
+    if method == 'nnls':
+        dp = NNLSDeconvolution()
+    elif method == 'quantile_deconvolution':
+        dp = QuantileDeconvolution()
+
     dp.fit(connected_component,
            total_intensities,
            min_mz,

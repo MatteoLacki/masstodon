@@ -106,7 +106,9 @@ class Imperator(object):
         """Iterate over connected components of the deconvolution graph."""
         return nx.connected_component_subgraphs(self.G)
 
-    def impera(self, include_zero_intensities=False):
+    def impera(self,
+               deconvolution_method = 'nnls',
+               include_zero_intensities=False):
         """List all conected components."""
         # this set will contain all the indices of used mean_mzs.
         self.used_idx = set([])
@@ -115,6 +117,7 @@ class Imperator(object):
                                      self.groups.min_mz,
                                      self.groups.max_mz,
                                      self.groups.mean_mz,
+                                     deconvolution_method,
                                      include_zero_intensities) for cc in self.impera_iter()]
 
     def set_estimated_intensities(self):
@@ -355,6 +358,7 @@ def imperator(molecules,
               lightweight_spectrum,
               min_prob          = .8,
               isotopic_coverage = .99,
+              deconvolution_method = 'nnls',
               include_zero_intensities = False):
     imp = Imperator(molecules,
                     groups,
@@ -362,7 +366,8 @@ def imperator(molecules,
                     min_prob,
                     isotopic_coverage)
     imp.divide()
-    imp.impera(include_zero_intensities)
+    imp.impera(deconvolution_method,
+               include_zero_intensities)
     imp.set_estimated_intensities()
     return imp
 
@@ -373,6 +378,7 @@ def load_imperator(molecules,
                    deconvolution_graph_path,
                    min_prob                 = .8,
                    isotopic_coverage        = .99,
+                   deconvolution_method     = 'nnls',
                    include_zero_intensities = False):
     imp = Imperator(molecules,
                     groups,
@@ -380,6 +386,6 @@ def load_imperator(molecules,
                     min_prob,
                     isotopic_coverage)
     imp.load_graph(deconvolution_graph_path)
-    imp.impera(include_zero_intensities)
+    imp.impera(deconvolution_method, include_zero_intensities)
     imp.set_estimated_intensities()
     return imp
