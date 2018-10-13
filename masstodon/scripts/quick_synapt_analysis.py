@@ -27,7 +27,7 @@ m = masstodon_single(mz, intensity, fasta, q,
                      std_cnt            = std_cnt,
                      include_zero_intensities = False)
 
-m.plotlygl("/Users/matteo/Projects/masstodon/masstodon/dump/deconvs_comparison/nnls")
+fitted_dots = m.plotlygl("/Users/matteo/Projects/masstodon/masstodon/dump/deconvs_comparison/nnls")
 
 
 n = masstodon_single(mz, intensity, fasta, q,

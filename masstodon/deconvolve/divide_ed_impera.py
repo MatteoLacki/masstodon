@@ -5,6 +5,7 @@ Now, it really should."""
 try:
     import plotly
     import plotly.graph_objs as go
+    from plotly.io import write_json
     from masstodon.plot.plotly import get_black_layout
     plotly_available = True
 except ImportError:
@@ -217,7 +218,7 @@ class Imperator(object):
                                     for fit_int, fit2int in zip(fitted_int, fitted_to_int)])
         return fitted_int, fitted_mzs, fitted_to_int, text_annotation
 
-    def plotly(self, path, show=True):
+    def plotly(self, path='', shape='triangles', webgl=True, show=True):
         """Make a plotly plot of the fittings.
 
         The plot overlays scatterplot of fitted intensities
@@ -228,66 +229,48 @@ class Imperator(object):
         path : str
             Where to save the plot.
             The file should have 'html' extension to avoid warnings.
+        webgl : boolean
+            Should we use WebGL?
+        show : boolean
+            Show the plot in browser immediately?
         """
-        # some simplifications
-        if plotly_available:
-            # data 4 plot
-            x, h, l, r = self.__get_xhlr()
-            fitted_int, fitted_mzs, fitted_to_int, text_annotation = self.__get_fitted()
-            # plot elements
-            spectrum_bars = go.Bar(x=x, y=h, width=r-l, name="Peak Group")
-            fitted_dots = go.Scatter(x = fitted_mzs,
-                                     y = fitted_int,
-                                     text      = text_annotation, # maps to labels
-                                     hoverinfo = "text",          # show only labels
-                                     mode      = "markers",       # default='lines'
-                                     marker    = {"color" : "orange"},
-                                     name      = "Fitted")
-            data = [spectrum_bars, fitted_dots]
-            layout = get_black_layout()
-            fig = go.Figure(data=data, layout=layout)
-            plotly.offline.plot(fig,
-                                filename  = path,
-                                auto_open = show)
-        else:
-            raise ImportError("You must install plotly seperately! We want you, the 'enlighted coder', to have the possibility to run masstodon with pypy out-of-the-box.")
-
-    def plotlygl(self, path, shape="rectangles", show=True):
-        """Make a plotly WebGL plot of the fittings.
-
-        The plot overlays scatterplot of fitted intensities
-        over the bars corresponding to total intensities in peak groups.
-
-        Parameters
-        ==========
-        path : str
-            Where to save the plot.
-            The file should have 'html' extension to avoid warnings.
-        """
-        # some simplifications
         if plotly_available:
             # data 4 plot
             x, h, l, r = self.__get_xhlr()
             shape = rectangles if shape == 'rectangles' else triangles
             X, Y = shape(l, r, h)
             fitted_int, fitted_mzs, fitted_to_int, text_annotation = self.__get_fitted()
-            # plot elements
-            spectrum_bars = go.Scattergl(x = X, y = Y, name = "Peak Group")
-            fitted_dots = go.Scattergl(x         = fitted_mzs,
-                                       y         = fitted_int,
-                                       text      = text_annotation, # maps to labels
-                                       hoverinfo = "text",          # show only labels
-                                       mode      = "markers",       # default='lines'
-                                       marker    = {"color" : "orange"},
-                                       name      = "Fitted")
-            data   = [spectrum_bars, fitted_dots]
+            if webgl:
+                scatter = go.Scattergl
+            else:
+                scatter = go.Scatter
+            spectrum_bars = scatter(x = X, y = Y, name = "Peak Group")
+            fitted_dots = scatter(x         = fitted_mzs,
+                                  y         = fitted_int,
+                                  text      = text_annotation, # maps to labels
+                                  hoverinfo = "text",          # show only labels
+                                  mode      = "markers",       # default='lines'
+                                  marker    = {"color" : "orange"},
+                                  name      = "Fitted")
+            data = [spectrum_bars, fitted_dots]
             layout = get_black_layout()
-            fig    = go.Figure(data=data, layout=layout)
-            plotly.offline.plot(fig,
-                                filename  = path,
-                                auto_open = show)
+            self.fig = go.Figure(data=data, layout=layout)
+            if path:
+                plotly.offline.plot(self.fig,
+                                    filename  = path,
+                                    auto_open = show)
         else:
             raise ImportError("You must install plotly seperately! We want you, the 'enlighted coder', to have the possibility to run masstodon with pypy out-of-the-box.")
+
+    def dump_fig_to_json(self, path):
+        """Dump the plotly figure to json.
+
+        Parameters
+        ==========
+        path : str
+            Where to save json with the plot data and layout.
+        """
+        write_json(self.fig, file=path)
 
     def __len__(self):
         return len(self.G)
