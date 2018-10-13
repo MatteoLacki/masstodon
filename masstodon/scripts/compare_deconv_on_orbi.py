@@ -17,11 +17,21 @@ m = masstodon_single(mz, intensity, fasta, charge,
                      orbitrap = True,
                      isotopic_coverage = isotopic_coverage,
                      min_prob = min_prob, 
-                     std_cnt  = std_cnt)
+                     std_cnt  = std_cnt,
+                     deconvolution_method = 'quantile')
 
-m.plotlygl("/Users/matteo/Projects/masstodon/masstodon/dump")
+m.plotlygl("/Users/matteo/Projects/masstodon/masstodon/dump/deconvs_comparison/quantile")
 m.dump("dump")
 
+
+n = masstodon_single(mz, intensity, fasta, charge,
+                     orbitrap = True,
+                     isotopic_coverage = isotopic_coverage,
+                     min_prob = min_prob, 
+                     std_cnt  = std_cnt,
+                     deconvolution_method = 'nnls')
+
+n.plotlygl("/Users/matteo/Projects/masstodon/masstodon/dump/deconvs_comparison/nnls")
 # n = load_masstodon("dump")
 # path = "dump"
 
@@ -29,3 +39,4 @@ m.dump("dump")
 # load_imperator('dump/deconvolution_graph.gpickle')
 p = m.imperator.solutions[100]
 p.plot()
+

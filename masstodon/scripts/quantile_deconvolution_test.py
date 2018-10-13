@@ -50,8 +50,12 @@ c = np.concatenate( ( (1-q) * np.ones(shape=(K,1)),
 c.shape = (c.shape[0],)
 
 A_ub = np.vstack((
-    np.hstack(( -np.identity(K), np.zeros(shape=(K,K)),  X )),
-    np.hstack(( np.zeros(shape=(K,K)), -np.identity(K), -X )) ))
+    np.hstack((-np.identity(K),
+                np.zeros(shape=(K,K)),
+                X )),
+    np.hstack(( np.zeros(shape=(K,K)),
+               -np.identity(K),
+               -X )) ))
 
 b_ub  = np.concatenate((Y,-Y))
 model = linprog(c    = c,
@@ -63,4 +67,9 @@ model['x'][-D:]
 help(np.dot)
 
 np.abs(Y - X @ model['x'][-D:])
+
+
+plt.vlines(x = x, ymin=[0], ymax=self.Y, colors=lines_col)
+
+
 

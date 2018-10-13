@@ -33,8 +33,8 @@ class QuantileDeconvolution(Model):
         # t : the positive parts
         # b : the coefficients of interest
         self.c = np.concatenate(((1-self.q) * np.ones(shape=(K,1)),
-                                 self.q * np.ones(shape=(K,1)),
-                                 self.l1 * np.ones(shape=(K,1))))
+                                 self.q     * np.ones(shape=(K,1)),
+                                 self.l1    * np.ones(shape=(D,1))))
         self.c.shape = (self.c.shape[0],)
         self.A_ub = np.vstack((
             np.hstack((-np.identity(K),
@@ -44,7 +44,9 @@ class QuantileDeconvolution(Model):
                        -np.identity(K),
                        -self.X)) ))
         self.b_ub = np.concatenate((self.Y, -self.Y))
-        self.model = linprog(c=c, A_ub=A_ub, b_ub=b_ub)
+        self.model = linprog(c=self.c,
+                             A_ub=self.A_ub,
+                             b_ub=self.b_ub)
 
     def coef(self):
         """Get the estimated coefficients."""
@@ -67,7 +69,7 @@ class QuantileDeconvolution(Model):
     def fitted(self):
         """The values fitted to the responses."""
         # @ is matrix multiplication! True story!
-        return self.X @ self.coef()
+        return np.array(self.X @ self.coef()).flatten()
 
     def res(self):
         """Calculate the residuals."""
@@ -94,3 +96,8 @@ class QuantileDeconvolution(Model):
         plt.ylabel("Residual")
         if show:
             plt.show()
+
+def quant_deconv(X, Y, q=.8, l1=.1):
+    model = QuantileDeconvolution()
+    model.fit(X, Y, q, l1)
+    return model

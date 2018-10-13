@@ -203,6 +203,7 @@ class Masstodon(object):
                   "threshold" :         self.threshold,
                   "orbitrap"  :         self.orbitrap,
                   "min_mz_diff":        self.min_mz_diff,
+                  "deconvolution_method": self.deconvolution_method,
                   "include_zero_intensities": self.include_zero_intensities}
 
         with open(pjoin(path, 'params.json'), 'w') as f:
@@ -364,6 +365,7 @@ def masstodon_single(mz, intensity, fasta, q,
                      isotopic_coverage = .999,
                      min_prob          = .7,
                      get_timings       = False,
+                     deconvolution_method     = 'nnls',
                      include_zero_intensities = False,
                      deconvolution_graph_path = ''):
     """Run a basic session of the MassTodon.
@@ -402,6 +404,12 @@ def masstodon_single(mz, intensity, fasta, q,
     min_prob : float
         The minimal probability an envelope has to scoop
         to be included in the deconvolution graph.
+    get_timings : boolean
+        Should the output include the measured timings.
+    deconvolution_graph_path : str
+        A path to a valid premade deconvolution graph.
+    deconvolution_method : str
+        The deconvolution method to use: right now either 'nnls' or 'quantile'.
     deconvolution_graph_path : str
         A path to a valid premade deconvolution graph.
     """
@@ -424,6 +432,7 @@ def masstodon_single(mz, intensity, fasta, q,
                            isotopic_coverage,
                            min_prob,
                            get_timings,
+                           deconvolution_method,
                            include_zero_intensities,
                            deconvolution_graph_path)
 

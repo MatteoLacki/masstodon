@@ -6,6 +6,7 @@ except RuntimeError:
     pass
 
 from masstodon.models.nnls import nnls
+from masstodon.models.quantile_deconvolution import quant_deconv
 
 # TODO: sort out the interpretation of betas problem.
 class DeconvolutionProblem(object):
@@ -88,11 +89,13 @@ class DeconvolutionProblem(object):
         return sum(self.Y)
 
     def fitted(self):
-        if self.include_000:
-            fitted = self.model.fitted()
-            return fitted
-        else:
-            return self.model.fitted()
+        # TODO: wtf?
+        # if self.include_000:
+        #     fitted = self.model.fitted()
+        #     return fitted
+        # else:
+        #     return self.model.fitted()
+        return self.model.fitted()
 
     def plot_fancy(self,
                    plt_style = 'fast',
@@ -163,8 +166,10 @@ def deconvolve(connected_component,
                include_zero_intensities = False):
     if method == 'nnls':
         dp = NNLSDeconvolution()
-    elif method == 'quantile_deconvolution':
+    elif method == 'quantile':
         dp = QuantileDeconvolution()
+    else:
+        raise NotImplementedError("The is not such method of deconvolution as {}.".format(method))
 
     dp.fit(connected_component,
            total_intensities,
