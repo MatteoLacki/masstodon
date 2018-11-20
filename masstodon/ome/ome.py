@@ -27,9 +27,18 @@ class Ome(object):
         for m_kwds in molecules:
             name   = m_kwds['name']
             m_kwds = m_kwds.copy()
+            # print(m_kwds['name'])
             del m_kwds['name']
-            mol  = molecule(iso_calc=self.iso_calc,
+            # print(m_kwds)
+            # print(self.iso_calc)
+            # print(m_kwds['formula'])
+            # print(m_kwds['q'])
+            mol = molecule(iso_calc=self.iso_calc,
                             **m_kwds)
+            # mol = molecule(formula = m_kwds['formula'],
+            #                iso_calc=self.iso_calc,
+            #                q       = m_kwds['q'])
+            # print(m_kwds)
             prec = FalsePrecursor(name     = name,
                                   iso_calc = self.iso_calc,
                                   **m_kwds)
