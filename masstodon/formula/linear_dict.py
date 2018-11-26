@@ -48,6 +48,15 @@ class LinearDict(MutableMapping):
         out = self.__class__(self)
         return out
 
+    def __imult__(self, scalar):
+        if other != 1:
+            try:
+                for key in self._storage:
+                    self._storage[key] *= scalar
+            except (TypeError, AttributeError):
+                raise TypeError("Adding supported for dict-like structures.")
+        return self
+
     def __mul__(self, scalar):
         """Implement."""
-        raise NotImplementedError
+        out = self.copy()

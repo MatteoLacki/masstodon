@@ -99,8 +99,5 @@ class Formula(LinearDict):
         return dict2tex(out)
 
 
-def as_formula(f):
-    if isinstance(f, str):
-        return Formula(f)
-    else:
-        return f
+def formula(f):
+    return Formula(f)

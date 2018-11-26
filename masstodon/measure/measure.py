@@ -11,9 +11,9 @@ from masstodon.parse.path     import parse_path
 class Measure(object):
     """Store a discrete finite measure with atoms on the real line."""
 
-    def __init__(self, atoms=np.array([]),
-                       masses=np.array([]),
-                       sort=True):
+    def __init__(self, atoms  = np.array([]),
+                       masses = np.array([]),
+                       sort   = True):
         """Initialize a measure.
 
         Parameters

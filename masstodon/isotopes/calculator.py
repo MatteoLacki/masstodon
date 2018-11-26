@@ -20,10 +20,10 @@ class IsotopeCalculator(object):
                  _probabilities = get_isotopic_probabilities(),
                  _isotope_DB    = {}):
         """Initialize the isotopic calculator."""
-        self.digits         = digits
-        self._masses        = _masses
-        self._probabilities = _probabilities
-        self._isotope_DB    = _isotope_DB
+        self.digits          = digits
+        self._masses         = _masses
+        self._probabilities  = _probabilities
+        self._isotope_DB     = _isotope_DB
         self._mean_mass      = {}
         self._mean_variance  = {}
         self._lightiest_mass = {}

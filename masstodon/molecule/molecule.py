@@ -17,12 +17,12 @@
 #   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
 from masstodon.data.constants  import infinity
 from masstodon.plot.spectrum   import plot_spectrum
-from masstodon.formula.formula import as_formula
+from masstodon.formula.formula import Formula
 
 
 class Molecule(object):
     def __init__(self, formula, iso_calc, q=0, g=0):
-        self.formula   = as_formula(formula)
+        self.formula   = Formula(formula)
         self.q         = int(q)
         self.g         = int(g)
         self.intensity = 0.0
@@ -86,7 +86,7 @@ class Molecule(object):
                             _memoize=_memoize)
 
     def __repr__(self):
-        return "({f} q={q} g={g} I={I_int})".format(
+        return "Mol({f} q={q} g={g} I={I_int})".format(
             I_int = int(self.intensity),
             f = self.formula.str_with_charges(self.q, self.g),
             **self.__dict__)

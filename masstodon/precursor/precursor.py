@@ -229,9 +229,9 @@ class Precursor(Molecule):
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            A = self.name == other.name
+            A = self.name  == other.name
             B = self.fasta == other.fasta
-            C = self.q == other.q
+            C = self.q     == other.q
             return A and B and C
         else:
             return False

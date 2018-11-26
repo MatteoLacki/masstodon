@@ -1,9 +1,7 @@
-import pkg_resources
-import json
-
 from masstodon.formula.formula import Formula
 
 
+#TODO: simplify this for the sake of fuck!
 amino_acids = [['A',
                 [['C_alpha', [['H', 4], ['C', 2]]],
                  ['C_carbo', [['C', 1], ['O', 1]]],
@@ -84,32 +82,6 @@ amino_acids = [['A',
                 [['C_alpha', [['H', 8], ['C', 8], ['O', 1]]],
                  ['C_carbo', [['C', 1], ['O', 1]]],
                     ['N', [['H', 1], ['N', 1]]]]]]
-
-aa2info = dict(
-A=('Ala', 'Alanine', 'GCT', 'GCG', 'GCA', 'GCG'),
-C=('Cys', 'Cysteine', 'TGT', 'TGC'),
-E=('Glu', 'Glutamic Acid', 'GAA', 'GAG'),
-D=('Asp', 'Aspartic Acid', 'GAT', 'GAC'),
-G=('Gly', 'Glycine', 'GGT', 'GGC', 'GGA', 'GGG'),
-F=('Phe', 'Phenylalanine', 'TTT', 'TTC'),
-I=('Ile', 'Isoleucine', 'ATT', 'ATC', 'ATA'),
-H=('His', 'Histidine', 'CAT, CAC'),
-K=('Lys', 'Lysine', 'AAA', 'AAG'),
-M=('Met', 'Methionine', 'ATG'),
-L=('Leu', 'Leucine', 'CTT', 'CTC', 'CTA', 'CTG', 'TTA', 'TTG'),
-N=('Asn', 'Asparagine', 'AAT', 'AAC'),
-Q=('Gln', 'Glutamine', 'CAA', 'CAG'),
-P=('Pro', 'Proline', 'CCT', 'CCC', 'CCA', 'CCG'),
-S=('Ser', 'Serine', 'TCT', 'TCC', 'TCA', 'TCG', 'AGT', 'AGC'),
-R=('Arg', 'Arginine', 'CGT', 'CGC', 'CGA', 'CGG', 'AGA', 'AGG'),
-T=('Thr', 'Threonine', 'ACT', 'ACC', 'ACA', 'ACG'),
-W=('Trp', 'Tryptophan', 'TGG'),
-V=('Val', 'Valine', 'GTT', 'GTC', 'GTA', 'GTG'),
-Y=('Tyr', 'Tyrosine', 'TAT', 'TAC'))
-
-aa2shortName = {aa: v[0] for aa, v in aa2info.items()}
-aa2name = {aa: v[1] for aa, v in aa2info.items()}
-aa2encodingSequence = {aa: v[2:] for aa, v in aa2info.items()}
 
 
 def get_amino_acids():
