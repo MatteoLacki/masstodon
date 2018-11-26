@@ -116,6 +116,6 @@ class Molecule(object):
 
 
 def molecule(formula, iso_calc, q=0, g=0):
-    mol = Molecule(formula, iso_calc, q, g, iso_calc)
+    mol = Molecule(formula, iso_calc, q, g)
     return mol
 
