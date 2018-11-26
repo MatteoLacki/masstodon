@@ -220,15 +220,12 @@ class Masstodon(object):
     def restrict_good_mols(self):
         self.good_mols = [m for m in self.good_mols if m.intensity > 0.0]
 
-    def plotly(self, plotly_kwds={}):
+    def plotly(self, *args, **kwds):
         """Save the html plotly visual output files.
-
-        Paramaters
-        ==========
-        plotly_kwds : dict
-            Other parameters to the imperator.plotly method.
+        For description of the parameters, check out 
+        masstodon.deconvolve.divide_ed_impera.Imperator.plotly
         """
-        self.imperator.plotly(**plotly_kwds)
+        self.imperator.plotly(*args, **kwds)
 
 
 def masstodon_batch(mz, 
@@ -331,7 +328,6 @@ def masstodon_batch(mz,
         return m, timings
     else:
         return m
-
 
 
 

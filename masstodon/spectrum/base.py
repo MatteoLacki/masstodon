@@ -150,7 +150,7 @@ class Spectrum(object):
         return list(self.iter_min_mz_diff_subspectra())
 
     def plot(self, 
-             clusters  = '',
+             clusters  = None,
              plt_style = 'dark_background',
              peak_color= 'white',
              show      = True):

@@ -51,7 +51,7 @@ setup(
         'lxml',
         'pyteomics>=3.4.1',
         'cffi',
-        'IsoSpecPy<2.0',
+        'IsoSpecPy==1.0.7',
         'networkx>=2.0',
         'matplotlib',
         'intervaltree'],
