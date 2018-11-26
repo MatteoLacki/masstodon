@@ -31,3 +31,4 @@ dist
 *.swo
 
 *.zip
+*.sublime-workspace

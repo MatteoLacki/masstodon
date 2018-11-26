@@ -317,7 +317,7 @@ def masstodon_batch(mz,
                 ("imperator", t4-t3),
                 ("filter_by_estimated_intensity", t5-t4),
                 ("restrict_good_mols", t6-t5) ]
-    if m.ome.is_one_precursor():
+    if len(precursors) == 1 and len(molecules) == 0:
         m.match_estimates()
         t7 = time()
         timings.append(("match_estimates", t7-t6))

@@ -26,6 +26,8 @@ setup(
     packages=find_packages(),
     version='0.14',
     description='Investigate mass spectra for chemical substances, especially ETD products.',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author=u'Mateusz Krzysztof Łącki',
     author_email='matteo.lacki@gmail.com',
     url='https://github.com/MatteoLacki/masstodon',
@@ -55,8 +57,15 @@ setup(
         'networkx>=2.0',
         'matplotlib',
         'intervaltree'],
-    long_description=long_description,
-    long_description_content_type="text/markdown",
+    # List additional groups of dependencies here (e.g. development
+    # dependencies). You can install these using the following syntax,
+    # for example:
+    # $ pip install -e .[dev,test]
+    # $ pip install -e ./[dev,test/] # for ZSH
+    extras_require={
+        'dev':  ['ipython', 'matplotlib', 'plotly'],
+        'test': ['pytest']
+    },
     # scripts=[
     #     'bin/masstodon',
     #     'bin/masstodon_example_call',
