@@ -43,4 +43,19 @@ precursors = [{"name": "substanceP",
 mb = masstodon_batch(
     mz,
     intensity,
-    precursors = precursors)
+    precursors = precursors,
+    )
+
+
+from masstodon.spectrum.spectrum import spectrum
+
+s = spectrum(mz, intensity, threshold=.05)
+s.clusters
+s.plot()
+len(s.mz)
+len(s.intensity)
+sum(s.intensity > 0)
+
+from masstodon.plot.spectrum import plot_spectrum
+
+plot_spectrum(mz, intensity)

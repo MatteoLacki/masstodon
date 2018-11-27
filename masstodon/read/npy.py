@@ -19,7 +19,7 @@ def spectrum_from_npy(data_path,
     intensity_name : str
         The name of the file that contains the intensity values.
     """
-    mz        =  np.load(os.path.join(data_path, mz_name))
-    intensity =  np.load(os.path.join(data_path, intensity_name))
+    mz        = np.load(os.path.join(data_path, mz_name))
+    intensity = np.load(os.path.join(data_path, intensity_name))
     return mz, intensity
 

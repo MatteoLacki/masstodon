@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+import argparse
+from argparse import ArgumentParser
+
+from masstodon.read.npy import spectrum_from_npy
+from masstodon.plot.spectrum import plotly_spectrum
+
+
+
+parser = argparse.ArgumentParser(description = 'Visualization of MS spectra.')
+parser.add_argument("-p", "--path",
+    dest='p',
+    type=str, help="Path to files.", default='.')
+parser.add_argument("-mz", type=str, default="mz.npy", dest='mz',
+                    help="Name of the file with the mass to charge ratios.")
+parser.add_argument("-in", type=str, default="intensity.npy", dest='intensity',
+                    help="Name of the file with the intensities.")
+parser.add_argument("-o", type=str, default="spectrum.html",
+                    help="Path to the output html file.")
+parser.add_argument("--dont_show",
+    dest = 'show',
+    action = 'store_const',
+    default = True,
+    const = False,
+    help = "Open the browser to show the output?")
+
+args = parser.parse_args()
+mz, intensity = spectrum_from_npy(args.p, args.mz, args.intensity)
+plotly_spectrum(mz, intensity, path=args.o, webgl=True, show=args.show)

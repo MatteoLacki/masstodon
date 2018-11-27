@@ -2,9 +2,19 @@ try:
     import matplotlib.pyplot as plt
 except RuntimeError:
     pass
+try:
+    import plotly
+    import plotly.graph_objs as go
+    from plotly.io import write_json
+    from masstodon.plot.plotly import get_black_layout
+    plotly_available = True
+except ImportError:
+    plotly_available = False
+
 import numpy as np
 from   scipy.stats import norm
 
+from masstodon.read.npy import spectrum_from_npy
 from masstodon.stats.gaussian import mean, sd
 
 
@@ -45,6 +55,7 @@ def plot_spectrum(mz, intensity,
         plt.show()
 
 
+
 def plot_peak_group(mz,
                     intensity,
                     knots_no  = 100,
@@ -61,3 +72,40 @@ def plot_peak_group(mz,
     plt.plot(x, G.pdf(x) * sum(intensity) * np.diff(mz)[1])
     if show:
         plt.show()
+
+
+
+def plotly_spectrum(mz, intensity,
+                    path="spectrum.html", webgl=True, show=True):
+    """Make a plotly plot of the fittings.
+
+    The plot overlays scatterplot of fitted intensities
+    over the bars corresponding to total intensities in peak groups.
+
+    Parameters
+    ==========
+    mz : numpy.array
+        Mass to charge ratios recorded in the spectrum.
+    intensity : numpy.array
+        Intensities recorded in the spectrum.
+    path : str
+        Where to save the plot.
+        The file should have 'html' extension to avoid warnings.
+    webgl : boolean
+        Should we use WebGL? It's quicker to use: try it!
+    show : boolean
+        Open the browser with the output html file?
+    """
+    if plotly_available:
+        if webgl:
+            scatter = go.Scattergl
+        else:
+            scatter = go.Scatter
+        scatter = go.Scattergl
+        lines  = scatter(x=mz, y=intensity)
+        data = [lines]
+        layout = get_black_layout()
+        fig = go.Figure(data=data, layout=layout)
+        plotly.offline.plot(fig, filename=path, auto_open=show)
+    else:
+        raise ImportError("You must install plotly seperately! We want you, the 'enlighted coder', to have the possibility to run masstodon with pypy out-of-the-box.")

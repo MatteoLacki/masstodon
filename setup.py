@@ -66,10 +66,11 @@ setup(
         'dev':  ['ipython', 'matplotlib', 'plotly'],
         'test': ['pytest']
     },
-    # scripts=[
-    #     'bin/masstodon',
-    #     'bin/masstodon_example_call',
-    #     'bin/plot_mass_spectrum',
-    #     'bin/json2masstodon'
-    # ]
+    scripts=[
+        'bin/plotly_spectrum'
+        # 'bin/masstodon',
+        # 'bin/masstodon_example_call',
+        # 'bin/plot_mass_spectrum',
+        # 'bin/json2masstodon'
+    ]
 )
