@@ -25,6 +25,7 @@ elif platform == "linux": # death metal and long dirty hair, fuck yeah!
     stem_path = "/mnt/disk/masstodon/data/PXD001845"
     path = pjoin(stem_path, "mzmls")
     csvpath = pjoin(stem_path, "csvs")
+    out_folder = pjoin(stem_path, "res")
     upper_limit_of_masstodon_runs = None
     processes_no = 24
 else:
