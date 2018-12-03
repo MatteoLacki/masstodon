@@ -15,7 +15,6 @@ from masstodon.scripts.PXD001845.parse_csvs_with_precursors2 import get_folder2p
 from masstodon.masstodon import masstodon_single, masstodon_batch
 
 
-# data paths
 class WrongSystem(Exception):
     pass
 if platform == "darwin":

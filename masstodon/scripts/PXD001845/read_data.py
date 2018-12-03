@@ -1,22 +1,38 @@
 %load_ext autoreload
 %autoreload 2
-
+from itertools import islice
+import json
+import multiprocessing as mp
 from os import listdir as ls, makedirs as mkdir
 from os.path import join as pjoin
 import re
+from sys import platform
+from time import time
 
 from masstodon.read.mzml import read_mzml
 from masstodon.plot.spectrum import plot_spectrum
 from masstodon.scripts.PXD001845.parse_csvs_with_precursors2 import get_folder2ptms
 from masstodon.masstodon import masstodon_single, masstodon_batch
 
-path    = "/Users/matteo/Projects/masstodon/data/PXD001845/mzmls/"
-csvpath = "/Users/matteo/Projects/masstodon/data/PXD001845/csv_files"
-out_folder = "/Users/matteo/Projects/masstodon/data/PXD001845/res"
+class WrongSystem(Exception):
+    pass
+
+if platform == "darwin": # latte on skimmed soya milk anyone?
+    path = "/Users/matteo/Projects/masstodon/data/PXD001845/mzmls/"
+    csvpath = "/Users/matteo/Projects/masstodon/data/PXD001845/csv_files"
+    out_folder = "/Users/matteo/Projects/masstodon/data/PXD001845/res"
+    upper_limit_of_masstodon_runs = 4
+    processes_no = 4
+elif platform == "linux": # death metal and long dirty hair, fuck yeah!
+    # dump_path = "/mnt/disk/masstodon/dumps/no_charge_limits/"
+    # csvpath = "/home/matteo/masstodon/review_answer/csv_files"
+    upper_limit_of_masstodon_runs = 4
+    processes_no = 24
+else:
+    raise WrongSystem("Path not specified correctly.")
+
 files = [x for x in ls(path) if ".mzML" in x]
 ETD = [f for f in files if "ETD" in f] # independent, multicore execution of masstodons
-
-# parameters for masstodon
 min_prob          = .8
 isotopic_coverage = .999
 std_cnt           = 3
@@ -25,24 +41,22 @@ fasta             = "GAASMMGDVKESKMQITPETPGRIPVLNPFESPSDYSNLHEQTLASPSVFKSTKLPTPG
 folder2ptms       = get_folder2ptms(csvpath)
 get_timings       = True
 orbitrap          = True
-# verbose = False
-
 # this has to be enhanced for data other than ETD:
 get_q = lambda f: int(re.sub('[^0-9]','', f.split("_")[-1]))
 
 def iter_data(out_folder, files=ETD):
     for f in files:
         q = get_q(f)
-        f_no_ext = f.replace('.mzML','')
-        mods = folder2ptms.get(f_no_ext,[])
+        exp = f.replace('.mzML','')
+        mods = folder2ptms.get(exp,[])
         for s in read_mzml(pjoin(path,f)):
             scan_no   = int(s['id'].split("=")[1])
             mz        = s['m/z array']
             intensity = s['intensity array']
-            yield mz, intensity, f_no_ext, scan_no, q, fasta, mods
-            
+            yield mz, intensity, exp, scan_no, q, fasta, mods
+
 # mz, intensity, exp, scan_no, q, fasta, mods = next(iter_data(out_folder))
-def single_run(mz, intensity, exp, scan_no, q, fasta, mods, out_path, verbose=True):
+def single_run(mz, intensity, exp, scan_no, q, fasta, mods, verbose=True):
     if verbose:
         print(exp, scan_no)
     out_path = pjoin(out_folder, exp, str(scan_no))
@@ -91,3 +105,13 @@ def single_run(mz, intensity, exp, scan_no, q, fasta, mods, out_path, verbose=Tr
         row['success'] = False
         raise e
     return row
+
+data = islice(iter_data(out_folder, files=ETD), upper_limit_of_masstodon_runs)
+T0 = time()
+with mp.Pool(processes_no) as p:
+    stats = p.starmap(single_run, data)
+T1 = time()
+with open(pjoin(out_folder, "fit_stats.json"), "w") as f:
+    json.dump(stats, f, indent=4)
+print("Total fit time for all ETD spectra: {t}".format(t=T1-T0))
+
