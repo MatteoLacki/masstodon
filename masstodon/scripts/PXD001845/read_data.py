@@ -1,5 +1,3 @@
-%load_ext autoreload
-%autoreload 2
 from itertools import islice
 import json
 import multiprocessing as mp
