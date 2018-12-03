@@ -9,6 +9,7 @@ from sys import platform
 from masstodon.data.ptms import ptms
 
 # csv = "20141202_AMB_Bora_10x_40MeOH_1FA_OT_120k_10uscans_920_ETD_8ms_19precZ_DC_L2_XlinkX.csv"
+
 def get_folder2ptms(datapath):
     csvs = listdir(datapath)
     folder2ptms = defaultdict(list)
