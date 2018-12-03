@@ -19,14 +19,15 @@ class WrongSystem(Exception):
 
 if platform == "darwin": # latte on skimmed soya milk anyone?
     path = "/Users/matteo/Projects/masstodon/data/PXD001845/mzmls/"
-    csvpath = "/Users/matteo/Projects/masstodon/data/PXD001845/csv_files"
+    csvpath = "/Users/matteo/Projects/masstodon/data/PXD001845/csvs"
     out_folder = "/Users/matteo/Projects/masstodon/data/PXD001845/res"
     upper_limit_of_masstodon_runs = 4
     processes_no = 4
 elif platform == "linux": # death metal and long dirty hair, fuck yeah!
-    # dump_path = "/mnt/disk/masstodon/dumps/no_charge_limits/"
-    # csvpath = "/home/matteo/masstodon/review_answer/csv_files"
-    upper_limit_of_masstodon_runs = 4
+    stem_path = "/mnt/disk/masstodon/data/PXD001845"
+    path = pjoin(stem_path, "mzmls")
+    csvpath = pjoin(stem_path, "csvs")
+    upper_limit_of_masstodon_runs = None
     processes_no = 24
 else:
     raise WrongSystem("Path not specified correctly.")
