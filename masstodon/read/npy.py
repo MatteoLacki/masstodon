@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-def spectrum_from_npy(data_path,
+def spectrum_from_npy(data_path      = '.',
                       mz_name        = 'mz.npy',
                       intensity_name = 'in.npy'):
     """Import spectrum from numpy files.

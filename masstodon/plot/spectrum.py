@@ -74,6 +74,15 @@ def plot_peak_group(mz,
         plt.show()
 
 
+def segments(X, Y):
+    ox = []
+    oy = []
+    for x, y in zip(X, Y):
+        ox.append(x); oy.append(0.0)
+        ox.append(x); oy.append(y)
+        ox.append(x); oy.append(0.0)
+    return np.array(ox), np.array(oy)
+
 
 def plotly_spectrum(mz, intensity,
                     path="spectrum.html", webgl=True, show=True):
@@ -101,9 +110,11 @@ def plotly_spectrum(mz, intensity,
             scatter = go.Scattergl
         else:
             scatter = go.Scatter
-        scatter = go.Scattergl
-        lines  = scatter(x=mz, y=intensity)
-        data = [lines]
+        lines  = scatter(x=mz, y=intensity, line=dict(color="orange"))
+        sx, sy = segments(mz, intensity)
+        points = scatter(x=sx, y=sy, 
+                         line = dict(color='blue'))
+        data = [points, lines]
         layout = get_black_layout()
         fig = go.Figure(data=data, layout=layout)
         plotly.offline.plot(fig, filename=path, auto_open=show)

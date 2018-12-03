@@ -40,9 +40,6 @@ plot_spectrum(mz_old, -intensity_old)
 
 from masstodon.spectrum.spectrum import spectrum
 
-
 spec = spectrum(mz, intensity)
 spec.bitonic_clustering()
 spec.plot()
-
-

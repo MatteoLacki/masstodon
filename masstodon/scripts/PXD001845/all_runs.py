@@ -18,7 +18,6 @@ from masstodon.masstodon import masstodon_single, masstodon_batch
 # data paths
 class WrongSystem(Exception):
     pass
-
 if platform == "darwin":
     # check if you have your latte on skimmed soya milk with you
     data_path = "/Users/matteo/Projects/masstodon/data/PXD001845/numpy_files/"
@@ -29,13 +28,8 @@ elif platform == "linux":
     # check if you have long dirty hair
     data_path = "/home/matteo/masstodon/review_answer/numpy_files/"
     # dump_path = "/mnt/disk/masstodon/dumps/many_processes/"
-    dump_path = "/mnt/disk/masstodon/dumps/no_charge_limits/"
-    csvpath = "/home/matteo/masstodon/review_answer/csv_files"
+    dump_path = "/mnt/disk/masstodon/dumps/no_charge_limits/"    csvpath = "/home/matteo/masstodon/review_answer/csv_files"
     processes_no = 24
-elif "win" in platform:
-    # don't check anything. no use.
-    data_path = "C:/"
-    raise WrongSystem(":D")
 else:
     raise WrongSystem("Path not specified correctly.")
 

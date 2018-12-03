@@ -2,7 +2,7 @@ from pyteomics import mzml  # >= 3.41
 from pyteomics import mzxml  # >= 3.41
 import os
 
-def mzml(path):
+def read_mzml(path):
     """Read mzXML spectra.
 
     Generate a sequence of spectra from the path.

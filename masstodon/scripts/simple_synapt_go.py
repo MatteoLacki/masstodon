@@ -26,7 +26,7 @@ m = masstodon_single(mz, intensity, fasta, q,
                      min_prob           = min_prob, 
                      std_cnt            = std_cnt,
                      include_zero_intensities = False)
-# prec = next(m.ome.sources())
+# prec = next(m.ome.sources())ranger
 # for n in m.ome.observables():
 #     print(m.ome.G[prec][n]["name"])
 #     print(n.formula.tex_with_charges(ce=True))
