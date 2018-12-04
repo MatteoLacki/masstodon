@@ -9,7 +9,7 @@ from time import time
 
 from masstodon.read.mzml import read_mzml
 from masstodon.plot.spectrum import plot_spectrum
-from masstodon.scripts.PXD001845.parse_csvs_with_precursors2 import get_folder2ptms
+from masstodon.scripts.PXD001845.folder2ptms import get_folder2ptms
 from masstodon.masstodon import masstodon_single, masstodon_batch
 
 class WrongSystem(Exception):
@@ -106,6 +106,7 @@ def single_run(mz, intensity, exp, scan_no, q, fasta, mods, verbose=True):
         raise e
     return row
 
+# use of Pandas is unprofessional...but fuck it.
 data = islice(iter_data(out_folder, files=ETD), upper_limit_of_masstodon_runs)
 T0 = time()
 with mp.Pool(processes_no) as p:
