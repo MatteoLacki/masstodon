@@ -36,7 +36,6 @@ ETD = [f for f in files if "ETD" in f] # independent, multicore execution of mas
 min_prob          = .8
 isotopic_coverage = .999
 std_cnt           = 3
-stop              = None
 fasta             = "GAASMMGDVKESKMQITPETPGRIPVLNPFESPSDYSNLHEQTLASPSVFKSTKLPTPGKFRWSIDQLAVINPVEIDPEDIHRQALYLSHSRIDKDVEDKRQKAIEEFFTKDVIVPSPWTDHEGKQLSQCHSSKCTNINSDSPVGKKLTIHSEKSD"
 folder2ptms       = get_folder2ptms(csvpath)
 get_timings       = True
