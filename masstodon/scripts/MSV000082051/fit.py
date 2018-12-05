@@ -44,13 +44,13 @@ charges           = [35, 36, 37]
 distance_charges  = 5
 ApoAI             = "DEPPQSPWDRVKDLATVYVDVLKDSGRDYVSQFEGSALGKQLNLKLLDNWDSVTSTFSKLREQLGPVTQEFWDNLEKETEGLRQEMSKDLEEVKAKVQPYLDDFQKKWQEEMELYRQKVEPLRAELQEGARQKLHELQEKLSPLGEEMRDRARAHVDALRTHLAPYSDELRQRLAARLEALKENGGARLAEYHAKATEHLSTLSEKAKPALEDLRQGLLPVLESFKVSFLSALEEYTKKLNTQ"
 ProtoApoAI        = "RHFWQQDEPPQSPWDRVKDLATVYVDVLKDSGRDYVSQFEGSALGKQLNLKLLDNWDSVTSTFSKLREQLGPVTQEFWDNLEKETEGLRQEMSKDLEEVKAKVQPYLDDFQKKWQEEMELYRQKVEPLRAELQEGARQKLHELQEKLSPLGEEMRDRARAHVDALRTHLAPYSDELRQRLAARLEALKENGGARLAEYHAKATEHLSTLSEKAKPALEDLRQGLLPVLESFKVSFLSALEEYTKKLNTQ"
-experiment_specific_params = {}
+experiments = {}
 Xs = []
 
-
+# The biggest copy-paste ever!!!
 X = "Oleic Acylation ETD 10 ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
                        fasta = ApoAI,
                        q = q,
@@ -60,7 +60,7 @@ experiment_specific_params[X] = dict(
 
 X = "Carboxymethylation ETD 10 ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
                        fasta = ApoAI,
                        q = q, 
@@ -70,7 +70,7 @@ experiment_specific_params[X] = dict(
 
 X = "Canonical ApoA-I ETD 5ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
                        fasta = ApoAI,
                        q = q, 
@@ -79,7 +79,7 @@ experiment_specific_params[X] = dict(
 
 X = "ProtoApoA1 ETD 10ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ProtoApoAI {} q={}".format(X,q),
                        fasta = ProtoApoAI,
                        q = q, 
@@ -88,7 +88,7 @@ experiment_specific_params[X] = dict(
 
 X = "Arachidonic Acylation ETD 10ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
                        fasta = ApoAI,
                        q = q, 
@@ -98,7 +98,7 @@ experiment_specific_params[X] = dict(
 
 X = "Arachidonic Acylation + Truncation ETD 7 ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
                        fasta = ApoAI[:242],
                        q = q, 
@@ -108,7 +108,7 @@ experiment_specific_params[X] = dict(
 
 X = "Phosphorylation ETD 7 ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
                        fasta = ApoAI,
                        q = q, 
@@ -118,7 +118,7 @@ experiment_specific_params[X] = dict(
 
 X = "Oxidation ETD 5 ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
                        fasta = ApoAI,
                        q = q, 
@@ -128,7 +128,7 @@ experiment_specific_params[X] = dict(
 
 X = "Docohexaneoic Acylation ETD 10 ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
                        fasta = ApoAI,
                        q = q, 
@@ -138,7 +138,7 @@ experiment_specific_params[X] = dict(
 
 X = "Palmitic Acylation + Truncation ETD 10 ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
                        fasta = ApoAI[:242],
                        q = q, 
@@ -148,7 +148,7 @@ experiment_specific_params[X] = dict(
 
 X = "ProtoApoA1 Oxidation ETciD 5ms 12ev"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ProtoApoAI {} q={}".format(X,q),
                        fasta = ProtoApoAI,
                        q = q, 
@@ -158,7 +158,7 @@ experiment_specific_params[X] = dict(
 
 X = "Oleic Acylation + Truncation ETD 10 ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ProtoApoAI {} q={}".format(X,q),
                        fasta = ProtoApoAI[:242],
                        q = q, 
@@ -168,7 +168,7 @@ experiment_specific_params[X] = dict(
 
 X = "Dehydration ETD 10 ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
                        fasta = ApoAI,
                        q = q, 
@@ -178,7 +178,7 @@ experiment_specific_params[X] = dict(
 
 X = "Truncation ETciD 5ms 12v"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
                        fasta = ApoAI[:242],
                        q = q, 
@@ -187,7 +187,7 @@ experiment_specific_params[X] = dict(
 
 X = "Palmitic Acylation ETD 10 ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
                        fasta = ApoAI,
                        q = q, 
@@ -197,7 +197,7 @@ experiment_specific_params[X] = dict(
 
 X = "Glyacatio by Hexose ETD 7 ms"
 Xs.append(X)
-experiment_specific_params[X] = dict(
+experiments[X] = dict(
     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
                        fasta = ApoAI,
                        q = q, 
@@ -205,7 +205,42 @@ experiment_specific_params[X] = dict(
                        modifications = {131:{"C_alpha": ptms['glycation_by_hexose']}})
                   for q in charges])
 
-for e in experiment_specific_params:
-    experiment_specific_params[e]["mz"], experiment_specific_params[e]["intensity"] =\
+for e in experiments:
+    experiments[e]["mz"], experiments[e]["intensity"] =\
         spectra[e]
 
+def iter_data(experiments):
+    for exp, d in experiments.items():
+        yield d['mz'], d['intensity'], exp, d['precursors']
+
+# mz, intensity, exp, precursors = next(iter_data(experiments))
+def single_run(mz, intensity, exp, precursors, verbose=True):
+    if verbose:
+        print("Running {}.".format(exp))
+    out_path = pjoin(out_folder, exp.replace(" ", "_"))
+    row = {"exp":exp}
+    try:
+        M, timings = masstodon_batch(mz, intensity, precursors,
+                                     isotopic_coverage = isotopic_coverage,
+                                     min_prob          = min_prob,
+                                     std_cnt           = std_cnt,
+                                     orbitrap          = orbitrap,
+                                     get_timings       = get_timings)
+        mkdir(out_path, exist_ok=True)
+        M.dump(out_path, indent=4)
+        M.write(out_path)
+        M.plotly(pjoin(out_path, "spectrum.html"), show=False)
+        with open(pjoin(out_path, 'timings.json'), 'w') as h:
+            json.dump(timings, h, indent=4)
+        row.update(M.imperator.errors())
+        row.update({"t_"+str(n): T for n,T in timings})
+        if single_prec: # intensities
+            for s in ('ETDorHTR', 'ETnoD_PTR_fragments', 'ETnoD_precursor', 'PTR_precursor'):
+                row["cz_simple."+str(s)] = int(M.cz_simple.intensities[s])
+                row["cz."+str(s)] = int(M.cz.intensities[s])
+        row['estimates'] = list(M.ome.iter_molecule_estimates())
+        row['success'] = True
+    except Exception as e:
+        row['success'] = False
+        raise e
+    return row
