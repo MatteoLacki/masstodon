@@ -13,12 +13,18 @@ with open("/Users/matteo/Projects/masstodon/data/PXD001845/res/fit_stats.json", 
 def get_intensities():
     intensities = Counter()
     for d in etd:
-        for i, e in enumerate(d["estimates"]):
-            if i > 0: # 0th row contains csv headers.
-                intensity = e[4]
-                name = e[5]
-                intensities[(d["exp"], name)] += intensity
+        try:
+            for i, e in enumerate(d["estimates"]):
+                if i > 0: # 0th row contains csv headers.
+                    intensity = e[4]
+                    name = e[5]
+                    intensities[(d["exp"], name)] += intensity
+        except IndexError:
+            print(d["estimates"])
     return intensities
+
+intensities = get_intensities()
+
 
 etd = pd.DataFrame(etd)
 etd.to_csv('/Users/matteo/Projects/masstodon/AC_plots/masstodon/data/december/ETD_fit_stats.csv')

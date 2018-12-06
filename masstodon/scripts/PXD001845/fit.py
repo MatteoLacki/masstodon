@@ -56,6 +56,7 @@ def iter_data(out_folder, files=ETD):
 
 
 def filter_multi_mods(data):
+    """This filters out cases with multiple modifications for testing."""
     for e in data:
         if len(e[6]) > 1:
             yield e
