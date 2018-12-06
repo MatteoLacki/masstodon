@@ -47,16 +47,16 @@ ProtoApoAI        = "RHFWQQDEPPQSPWDRVKDLATVYVDVLKDSGRDYVSQFEGSALGKQLNLKLLDNWDSV
 experiments = {}
 Xs = []
 
-# The biggest copy-paste ever!!!
-X = "Oleic Acylation ETD 10 ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI,
-                       q = q,
-                       distance_charges = distance_charges,
-                       modifications = {133:{"C_alpha": ptms['oleic_acylation']}})
-                  for q in charges])
+## The biggest copy-paste ever!!!
+# X = "Oleic Acylation ETD 10 ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+#                        fasta = ApoAI,
+#                        q = q,
+#                        distance_charges = distance_charges,
+#                        modifications = {133:{"C_alpha": ptms['oleic_acylation']}})
+#                   for q in charges])
 
 X = "Carboxymethylation ETD 10 ms"
 Xs.append(X)
@@ -234,13 +234,18 @@ def single_run(mz, intensity, exp, precursors, verbose=True):
             json.dump(timings, h, indent=4)
         row.update(M.imperator.errors())
         row.update({"t_"+str(n): T for n,T in timings})
-        if single_prec: # intensities
-            for s in ('ETDorHTR', 'ETnoD_PTR_fragments', 'ETnoD_precursor', 'PTR_precursor'):
-                row["cz_simple."+str(s)] = int(M.cz_simple.intensities[s])
-                row["cz."+str(s)] = int(M.cz.intensities[s])
         row['estimates'] = list(M.ome.iter_molecule_estimates())
         row['success'] = True
     except Exception as e:
         row['success'] = False
         raise e
     return row
+
+T0 = time()
+with mp.Pool(processes_no) as p:
+    stats = p.starmap(single_run, iter_data(experiments))
+T1 = time()
+with open(pjoin(out_folder, "fit_stats.json"), "w") as f:
+    json.dump(stats, f, indent=4)
+print("Total fit time for all ETD spectra: {t}".format(t=T1-T0))
+

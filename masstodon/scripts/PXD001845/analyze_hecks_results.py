@@ -1,14 +1,27 @@
 import json
 import numpy as np
 import pandas as pd
+from collections import Counter
 
 import matplotlib.pyplot as plt
 
-with open("/Users/matteo/Projects/masstodon/AC_plots/ETD_fit_stats.json", "r") as f:
+
+with open("/Users/matteo/Projects/masstodon/data/PXD001845/res/fit_stats.json", "r") as f:
     etd = json.load(f)
 
+# get out info on found fragments:
+def get_intensities():
+    intensities = Counter()
+    for d in etd:
+        for i, e in enumerate(d["estimates"]):
+            if i > 0: # 0th row contains csv headers.
+                intensity = e[4]
+                name = e[5]
+                intensities[(d["exp"], name)] += intensity
+    return intensities
+
 etd = pd.DataFrame(etd)
-etd.to_csv('/Users/matteo/Projects/masstodon/AC_plots/ETD_fit_stats.csv')
+etd.to_csv('/Users/matteo/Projects/masstodon/AC_plots/masstodon/data/december/ETD_fit_stats.csv')
 
 def iter_estimates():
     for estimates, i in zip(etd.estimates, etd.index):
@@ -23,8 +36,7 @@ def iter_estimates():
                     out["name"] = e[5]
                 yield out
 our_esitmates = pd.DataFrame(iter_estimates())
-our_esitmates.to_csv("/Users/matteo/Projects/masstodon/AC_plots/estimates.csv", index=False)
-
+our_esitmates.to_csv("/Users/matteo/Projects/masstodon/AC_plots/masstodon/data/december/estimates.csv", index=False)
 
 # export map folder to csv
 from collections import Counter, defaultdict
@@ -35,8 +47,7 @@ import pandas as pd
 import numpy as np
 from masstodon.data.ptms import ptms
 
-
-datapath = "/Users/matteo/Projects/masstodon/data/PXD001845/csv_files"
+datapath = "/Users/matteo/Projects/masstodon/data/PXD001845/csvs"
 csvs = listdir(datapath)
 folder2ptms = defaultdict(list)
 
@@ -47,8 +58,6 @@ def csv_folders():
         folder = folder[:-7] 
         yield csv, folder
 
-pd.DataFrame(csv_folders()).to_csv("/Users/matteo/Projects/masstodon/AC_plots/csv2folders.csv", index=False)
+pd.DataFrame(csv_folders()).to_csv("/Users/matteo/Projects/masstodon/AC_plots/masstodon/data/csv2folders.csv",
+  index=False)
 # good
-
-
-

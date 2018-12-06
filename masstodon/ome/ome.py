@@ -115,24 +115,15 @@ class Ome(object):
 
     def iter_molecule_estimates(self, header=True):
         """Iterate over molecules with positive estimates."""
-        if self.is_one_precursor():
-            if header:
-                yield ('formula', 'q', 'g',
-                       'formula with q and g',
-                       'intensity', 'name')
-            for m in self.observables():
-                yield (str(m.formula), m.q, m.g, 
-                       m.formula.str_with_charges(m.q, m.g), 
-                       ceil(m.intensity), m.name)
-        else:
-            if header:
-                yield ('formula', 'q', 'g', 
-                       'formula with q and g',
-                       'intensity')
-            for m in self.observables():
-                yield (str(m.formula), m.q, m.g,
-                       m.formula.str_with_charges(m.q, m.g),
-                       ceil(m.intensity))
+        if header:
+            yield ('formula', 'q', 'g',
+                   'formula with q and g',
+                   'intensity', 'name(s)')
+        for m in self.observables():
+            names = [self.G[m][k]['name'] for k in self.G[m]]
+            yield (str(m.formula), m.q, m.g,
+                   m.formula.str_with_charges(m.q, m.g),
+                   ceil(m.intensity), names)
 
     def write(self, path):
         """Write precise estimates."""
@@ -205,12 +196,12 @@ class Ome(object):
             DG.add_edge(s,"sink")
         res = min_cost_flow(DG, weight='cost')
         minimal_intensity = {}
-        for s in n.ome.sources():
+        for s in self.sources():
             s.intensity = res[s]["sink"]
 
     def print_PTM_intensities(self):
         """Print out the intensities of different PTMs."""
-        for s in n.ome.sources():
+        for s in self.sources():
             if s.intensity > 0:
                 if s.modifications:
                     i,p = list(s.modifications)[0]

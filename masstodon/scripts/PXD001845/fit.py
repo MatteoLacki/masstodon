@@ -54,7 +54,14 @@ def iter_data(out_folder, files=ETD):
             intensity = s['intensity array']
             yield mz, intensity, exp, scan_no, q, fasta, mods
 
+
+def filter_multi_mods(data):
+    for e in data:
+        if len(e[6]) > 1:
+            yield e
+
 # mz, intensity, exp, scan_no, q, fasta, mods = next(iter_data(out_folder))
+# mz, intensity, exp, scan_no, q, fasta, mods = next(filter_multi_mods(iter_data(out_folder)))
 def single_run(mz, intensity, exp, scan_no, q, fasta, mods, verbose=True):
     if verbose:
         print(exp, scan_no)
@@ -115,3 +122,10 @@ with open(pjoin(out_folder, "fit_stats.json"), "w") as f:
     json.dump(stats, f, indent=4)
 print("Total fit time for all ETD spectra: {t}".format(t=T1-T0))
 
+
+
+#### meta analysis:
+all_data = list(iter_data(out_folder, files=ETD))
+
+from collections import Counter
+Counter(len(a[6]) for a in all_data)
