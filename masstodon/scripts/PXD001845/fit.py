@@ -123,10 +123,8 @@ with open(pjoin(out_folder, "fit_stats.json"), "w") as f:
     json.dump(stats, f, indent=4)
 print("Total fit time for all ETD spectra: {t}".format(t=T1-T0))
 
-
-
 #### meta analysis:
-all_data = list(iter_data(out_folder, files=ETD))
+# all_data = list(iter_data(out_folder, files=ETD))
 
-from collections import Counter
-Counter(len(a[6]) for a in all_data)
+# from collections import Counter
+# Counter(len(a[6]) for a in all_data)

@@ -9,7 +9,16 @@ import matplotlib.pyplot as plt
 with open("/Users/matteo/Projects/masstodon/data/PXD001845/res/fit_stats.json", "r") as f:
     etd = json.load(f)
 
-# get out info on found fragments:
+def names_the_same(etd):
+    """Are all names of fragments the same?"""
+    for d in etd:
+        for i, e in enumerate(d["estimates"]):
+            if i>0:
+                names = e[5]
+                yield all(x == names[0] for x in names)
+assert all(names_the_same(etd))
+
+
 def get_intensities():
     intensities = Counter()
     for d in etd:
@@ -17,13 +26,13 @@ def get_intensities():
             for i, e in enumerate(d["estimates"]):
                 if i > 0: # 0th row contains csv headers.
                     intensity = e[4]
-                    name = e[5]
+                    name = e[5][0]
                     intensities[(d["exp"], name)] += intensity
         except IndexError:
             print(d["estimates"])
     return intensities
-
-intensities = get_intensities()
+intensities = pd.DataFrame((k[0],k[1],v) for k,v in get_intensities().items())
+intensities.to_csv('/Users/matteo/Projects/masstodon/AC_plots/masstodon/data/december/intensities.csv')
 
 
 etd = pd.DataFrame(etd)
