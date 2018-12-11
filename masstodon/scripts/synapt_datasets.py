@@ -1,6 +1,5 @@
 %load_ext autoreload
 %autoreload 2
-%load_ext line_profiler
 
 import pandas   as pd
 from os         import listdir, makedirs
@@ -27,7 +26,7 @@ def iter_data(path, folders):
 
 dump_folder = "/Users/matteo/Projects/masstodon/dumps/belgian/synapt"
 
-threshold         = 0.025
+threshold         = 0.05
 fasta             = 'RPKPQQFFGLM'
 modifications     = {'11': {'C_carbo': {'H': 1, 'N': 1, 'O': -1}}}
 q                 = 3

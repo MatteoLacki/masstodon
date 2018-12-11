@@ -125,7 +125,7 @@ class Imperator(object):
         for sol in self.solutions:
             for idx, estimate in sol.iter_estimates():
                 if estimate > 0.0:
-                    idx = - idx- 1
+                    idx = -idx - 1
                     self.mols[idx].intensity = estimate
 
     def plot(self,

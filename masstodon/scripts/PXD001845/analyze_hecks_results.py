@@ -32,7 +32,8 @@ def get_intensities():
             print(d["estimates"])
     return intensities
 intensities = pd.DataFrame((k[0],k[1],v) for k,v in get_intensities().items())
-intensities.to_csv('/Users/matteo/Projects/masstodon/AC_plots/masstodon/data/december/intensities.csv')
+intensities.columns = ['exp', 'frag', 'intensity']
+intensities.to_csv('/Users/matteo/Projects/masstodon/AC_plots/masstodon/data/december/intensities.csv', index=False)
 
 
 etd = pd.DataFrame(etd)

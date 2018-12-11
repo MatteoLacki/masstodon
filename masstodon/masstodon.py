@@ -88,8 +88,8 @@ class Masstodon(object):
                      min_mz_diff = 1.1,
                      orbitrap    = False,
                      threshold   = 0.0):
-        self.threshold = threshold
-        self.orbitrap  = orbitrap
+        self.threshold   = threshold
+        self.orbitrap    = orbitrap
         self.min_mz_diff = min_mz_diff
         self.spec = spectrum(mz,
                              intensity,
@@ -195,14 +195,14 @@ class Masstodon(object):
         """
         self.spec.dump(path) # dumping spectrum
 
-        params = {"precursors":         self.precursors,
-                  "molecules" :         self.molecules,
-                  "std_cnt"   :         self.std_cnt,
-                  "isotopic_coverage":  self.isotopic_coverage,
-                  "min_prob"  :         self.min_prob,
-                  "threshold" :         self.threshold,
-                  "orbitrap"  :         self.orbitrap,
-                  "min_mz_diff":        self.min_mz_diff,
+        params = {"precursors":           self.precursors,
+                  "molecules" :           self.molecules,
+                  "std_cnt"   :           self.std_cnt,
+                  "isotopic_coverage":    self.isotopic_coverage,
+                  "min_prob"  :           self.min_prob,
+                  "threshold" :           self.threshold,
+                  "orbitrap"  :           self.orbitrap,
+                  "min_mz_diff":          self.min_mz_diff,
                   "deconvolution_method": self.deconvolution_method,
                   "include_zero_intensities": self.include_zero_intensities}
 

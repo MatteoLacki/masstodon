@@ -6,6 +6,7 @@ from math import sqrt
 import numpy as np
 
 from masstodon.data.constants    import infinity
+from masstodon.formula.formula   import as_formula
 from masstodon.data.isotopes     import get_isotopic_masses, get_isotopic_probabilities
 from masstodon.isotopes.misc     import get_mean_and_variance, cdata2numpyarray  # TODO IsoSpec 2.0
 from masstodon.isotopes.envelope import envelope
@@ -104,6 +105,7 @@ class IsotopeCalculator(object):
                     env.round_mz(self.digits)
                 self._isotope_DB[env_key] = env
         else:
+            formula = as_formula(formula)
             env = self._make_envelope(formula, prob)
             if self.digits < infinity:
                 # round to prescibed level.

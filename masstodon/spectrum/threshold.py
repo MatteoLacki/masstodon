@@ -42,6 +42,7 @@ class ThresholdSpectrum(Spectrum):
         min_diff = min(self.groups.max_mz - self.groups.min_mz)
         return abs(floor(log10(min_diff)))
 
+    #TODO: this should be a method of Spectrum.
     def get_lightweight_spectrum(self):
         return lightweight_spectrum(self.groups.min_mz,
                                     self.groups.max_mz,

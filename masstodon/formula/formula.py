@@ -96,7 +96,7 @@ class Formula(LinearDict):
         return dict2tex(out, ce)
 
     def tex(self):
-        return dict2tex(out)
+        return dict2tex(self)
 
 
 def as_formula(f):
