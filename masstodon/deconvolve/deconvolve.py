@@ -26,6 +26,7 @@ class DeconvolutionProblem(object):
         X           = X[:,mol_columns][peak_rows,:]
         self.idx    = ordering[peak_rows]
         self.total_intensities = total_intensities[self.idx]
+        self.mol_idx = ordering[mol_columns]
         self.mz_s   = min_mz[self.idx]
         self.mz_e   = max_mz[self.idx]
         self.mean_mz= mean_mz[self.idx]
@@ -48,10 +49,7 @@ class DeconvolutionProblem(object):
         return self.X, self.Y
 
     def iter_estimates(self):
-        coefs = np.nditer(self.model.coef())
-        for N in self.cc:
-            if N < 0:
-                yield N, float(next(coefs))
+        yield from zip(self.mol_idx, self.model.coef())
 
     def __len__(self):
         return len(self.cc)

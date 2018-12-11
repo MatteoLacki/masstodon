@@ -117,19 +117,27 @@ list(main_clust.iter_estimates())
 
 attr_matrix(main_clust.cc, edge_attr='prob')
 
+total_intensities = groups_m.intensity
+min_mz = groups_m.min_mz
+max_mz = groups_m.max_mz
+mean_mz = groups_m.mean_mz
 
 include_000 = False
 cc          = main_clust.cc
+cc.edges(data=True)
+cc.nodes
+
 X, ordering = attr_matrix(cc, edge_attr='prob')
 ordering    = np.array(ordering)
 mol_columns = ordering < 0
 peak_rows   = ordering >= 0
 X           = X[:,mol_columns][peak_rows,:]
-idx    = ordering[peak_rows]
+idx         = ordering[peak_rows]
+            ordering[mol_columns]
 total_intensities = total_intensities[idx]
-mz_s   = min_mz[idx]
-mz_e   = max_mz[idx]
-mean_mz= mean_mz[idx]
+mz_s        = min_mz[idx]
+mz_e        = max_mz[idx]
+mean_mz     = mean_mz[idx]
 Y           = total_intensities
 if include_000:
     Y1 = np.concatenate((Y, np.zeros(X.shape[1])))
@@ -140,9 +148,10 @@ else:
     model = fit_model(X, Y)
 
 
+mol_idx = ordering[mol_columns]
+coefs   = main_clust.model.coef()
 
-
-
+list(zip(mol_idx, coefs))
 
 
 
