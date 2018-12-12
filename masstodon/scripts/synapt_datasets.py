@@ -56,7 +56,7 @@ def res_with_figs():
                 makedirs(df)
             m.dump(df)
             m.write(df)
-            m.plotlygl(df, shape='rectangles', show=False)
+            m.plotly(df, shape='rectangles', show=False)
             print(f'Finished with {cff}')
         except AssertionError:
             bad.append((cff, mz, intensity))

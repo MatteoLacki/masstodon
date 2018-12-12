@@ -116,7 +116,7 @@ class Ome(object):
     def iter_molecule_estimates(self, header=True):
         """Iterate over molecules with positive estimates."""
         if header:
-            yield ('formula', 'q', 'g',
+            yield ('formula','q','g',
                    'formula with q and g',
                    'intensity', 'name(s)')
         for m in self.observables():

@@ -23,10 +23,9 @@ def iter_data(path, folders):
             except Exception as e:
                 pass
 
-
 dump_folder = "/Users/matteo/Projects/masstodon/dumps/belgian/synapt"
 
-threshold         = 0.075
+threshold         = 0.05
 fasta             = 'RPKPQQFFGLM'
 modifications     = {'11': {'C_carbo': {'H': 1, 'N': 1, 'O': -1}}}
 q                 = 3
