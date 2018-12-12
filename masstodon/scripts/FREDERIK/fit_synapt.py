@@ -4,14 +4,26 @@
 import pandas   as pd
 from os         import listdir, makedirs
 from os.path    import join as pjoin, exists as pexists
+from sys import platform
 
-from masstodon.read.txt     import spectrum_from_txt
-from masstodon.masstodon    import masstodon_single
 from masstodon.data.constants import infinity
+from masstodon.masstodon import masstodon_single
+from masstodon.read.txt import spectrum_from_txt
 
-common_path = "/Users/matteo/Projects/masstodon/data/Belgian/2013_05_01/SUBP"
+class WrongSystem(Exception):
+    pass
+if platform == "darwin": # latte on skimmed soya milk anyone?
+    common_path = "/Users/matteo/Projects/masstodon/data/Belgian/2013_05_01/SUBP"
+    dump_folder = "/Users/matteo/Projects/masstodon/dumps/belgian/synapt"
+    out_csv = "/Users/matteo/Projects/masstodon/dumps/belgian/synapt_results.csv"
+elif platform == "linux": # death metal and long dirty hair, fuck yeah!
+    common_path = "/mnt/disk/masstodon/data/belgian/2013_05_01/SUBP"
+    dump_folder = "/mnt/disk/masstodon/data/belgian/2013_05_01/res"
+    out_csv = "/mnt/disk/masstodon/data/belgian/2013_05_01/synapt_results.csv"
+else:
+    raise WrongSystem("Path not specified correctly.")
+
 folders = ("wave_velocity_300", "wave_height_1.5")
-
 def iter_data(path, folders):
     """Iterate over existing spectra in different folders with common root at the path."""
     for f in folders:
@@ -22,9 +34,6 @@ def iter_data(path, folders):
                 yield cff, spectrum_from_txt(cffp)
             except Exception as e:
                 pass
-
-
-dump_folder = "/Users/matteo/Projects/masstodon/dumps/belgian/synapt"
 
 threshold         = 0.05
 fasta             = 'RPKPQQFFGLM'
@@ -48,7 +57,6 @@ def get_WH_WV(f):
     WV = int(WV[2:])
     return WH, WV
 
-
 bad = []
 # i, (cff, (mz, intensity)) = next(enumerate(iter_data(common_path, folders)))
 def iter_outcomes():
@@ -68,7 +76,7 @@ def iter_outcomes():
             cff = cff.replace(".txt","")
             df = pjoin(dump_folder, str(i) + "_" + cff)
             if not pexists(df):
-                    makedirs(df)
+                makedirs(df)
             m.dump(df)
             m.write(df)
             m.plotly(pjoin(df, "spectrum.html"), shape='rectangles', show=False)
@@ -85,10 +93,8 @@ def iter_outcomes():
             yield row
             print('Finished with {cff}'.format(cff=cff))
     except AssertionError:
-            bad.append((cff, mz, intensity))
+        bad.append((cff, mz, intensity))
 
 results_for_plot = pd.DataFrame(iter_outcomes())
-results_for_plot.to_csv(
-    "/Users/matteo/Projects/masstodon/dumps/belgian/synapt_results.csv",
-    index = False)
+results_for_plot.to_csv(out_csv, index = False)
 
