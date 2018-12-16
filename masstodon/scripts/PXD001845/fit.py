@@ -53,14 +53,11 @@ def iter_data(out_folder, files=ETD):
             mz        = s['m/z array']
             intensity = s['intensity array']
             yield mz, intensity, exp, scan_no, q, fasta, mods
-
-
 def filter_multi_mods(data):
     """This filters out cases with multiple modifications for testing."""
     for e in data:
         if len(e[6]) > 1:
             yield e
-
 # mz, intensity, exp, scan_no, q, fasta, mods = next(iter_data(out_folder))
 # mz, intensity, exp, scan_no, q, fasta, mods = next(filter_multi_mods(iter_data(out_folder)))
 def single_run(mz, intensity, exp, scan_no, q, fasta, mods, verbose=True):

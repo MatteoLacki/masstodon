@@ -48,15 +48,15 @@ experiments = {}
 Xs = []
 
 ## The biggest copy-paste ever!!!
-# X = "Oleic Acylation ETD 10 ms"
-# Xs.append(X)
-# experiments[X] = dict(
-#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-#                        fasta = ApoAI,
-#                        q = q,
-#                        distance_charges = distance_charges,
-#                        modifications = {133:{"C_alpha": ptms['oleic_acylation']}})
-#                   for q in charges])
+X = "Oleic Acylation ETD 10 ms"
+Xs.append(X)
+experiments[X] = dict(
+    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+                       fasta = ApoAI,
+                       q = q,
+                       distance_charges = distance_charges,
+                       modifications = {133:{"C_alpha": ptms['oleic_acylation']}})
+                  for q in charges])
 
 X = "Carboxymethylation ETD 10 ms"
 Xs.append(X)

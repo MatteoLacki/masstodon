@@ -18,7 +18,6 @@ def names_the_same(etd):
                 yield all(x == names[0] for x in names)
 assert all(names_the_same(etd))
 
-
 def get_intensities():
     intensities = Counter()
     for d in etd:
@@ -34,7 +33,6 @@ def get_intensities():
 intensities = pd.DataFrame((k[0],k[1],v) for k,v in get_intensities().items())
 intensities.columns = ['exp', 'frag', 'intensity']
 intensities.to_csv('/Users/matteo/Projects/masstodon/AC_plots/masstodon/data/december/intensities.csv', index=False)
-
 
 etd = pd.DataFrame(etd)
 etd.to_csv('/Users/matteo/Projects/masstodon/AC_plots/masstodon/data/december/ETD_fit_stats.csv')

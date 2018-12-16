@@ -82,8 +82,12 @@ class Groups(object):
             self.sd_mz.append(sd_mz)
             self.skewness_mz.append(skewness(local_mz, local_intensity, mean_mz, sd_mz))
             self.count.append(len(local_mz))
+            # this should be dependent upon the data!
+            # either sum, or max, or some numpy-vectorized function,
+            # possibly of masses to.
             self.intensity.append(sum(local_intensity))
-            
+            # self.intensity.append(max(local_intensity))
+
         self.min_mz  = np.array(self.min_mz)
         self.max_mz  = np.array(self.max_mz)
         self.mean_mz = np.array(self.mean_mz)
