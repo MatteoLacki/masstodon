@@ -16,13 +16,14 @@ def spectrum(mz        = np.array([]),
              drop_duplicates = True,
              drop_zeros      = True):
     if orbitrap:
-        spec = OrbitrapSpectrum(mz, intensity, sort,
+        spec = OrbitrapSpectrum(mz, intensity,
+                                threshold, threshold_type, sort,
                                 drop_duplicates, drop_zeros)
         if min_mz_diff < infinity:
             spec.min_mz_diff_clustering(min_mz_diff)
         spec.bitonic_clustering()
     else:
-        spec = ThresholdSpectrum(mz, intensity, threshold, sort)
+        spec = ThresholdSpectrum(mz, intensity, threshold, threshold_type, sort)
         if min_mz_diff < infinity:
             spec.min_mz_diff_clustering(min_mz_diff)
     return spec

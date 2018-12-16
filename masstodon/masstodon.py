@@ -204,6 +204,7 @@ class Masstodon(object):
                   "isotopic_coverage":    self.isotopic_coverage,
                   "min_prob"  :           self.min_prob,
                   "threshold" :           self.threshold,
+                  "threshold_type" :      self.threshold_type,
                   "orbitrap"  :           self.orbitrap,
                   "min_mz_diff":          self.min_mz_diff,
                   "deconvolution_method": self.deconvolution_method,
@@ -238,6 +239,7 @@ def masstodon_batch(mz,
                     min_mz_diff         = 1.1,
                     orbitrap            = False,
                     threshold           = 0.0,
+                    threshold_type      = "Da",
                     std_cnt             = 3,
                     mz_digits           = None,
                     isotopic_coverage   = .999,
@@ -290,7 +292,8 @@ def masstodon_batch(mz,
     """
     t0 = time()
     m = Masstodon()
-    m.set_spectrum(mz, intensity, min_mz_diff, orbitrap, threshold)
+    m.set_spectrum(mz, intensity, min_mz_diff,
+                   orbitrap, threshold, threshold_type)
     t1 = time()
     if mz_digits is None:
         mz_digits = m.mz_digits
@@ -344,6 +347,7 @@ def masstodon_single(mz, intensity, fasta, q,
                      min_mz_diff       = 1.1,
                      orbitrap          = False,
                      threshold         = 0.0,
+                     threshold_type    = "Da",
                      std_cnt           = 3,
                      mz_digits         = None,
                      isotopic_coverage = .999,
@@ -411,6 +415,7 @@ def masstodon_single(mz, intensity, fasta, q,
                            min_mz_diff,
                            orbitrap,
                            threshold,
+                           threshold_type,
                            std_cnt,
                            mz_digits,
                            isotopic_coverage,

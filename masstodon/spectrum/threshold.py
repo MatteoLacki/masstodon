@@ -35,7 +35,7 @@ class ThresholdSpectrum(Spectrum):
         super().__init__(mz, intensity, sort, drop_duplicates, drop_zeros, mdc)
         X = iter(list(self.mz))
         x = next(X)
-        thr = threshold if thr_type = "absolute" else threshold*x*1e-6
+        thr = threshold if thr_type == "absolute" else threshold*x*1e-6
         l = [x - thr]
         r = []
         for x_next in X:
@@ -43,7 +43,7 @@ class ThresholdSpectrum(Spectrum):
             r.append(x + d)
             l.append(x_next - d)
             x = x_next
-            thr = threshold if thr_type = "absolute" else threshold*x*1e-6
+            thr = threshold if thr_type == "absolute" else threshold*x*1e-6
         r.append(x + thr)
         l = np.array(l)
         r = np.array(r)

@@ -27,9 +27,16 @@ scan = int(x['num'])
 mz = x['m/z array']
 intensity = x['intensity array']
 
-spec = OrbitrapSpectrum(mz, intensity)
+M, t = masstodon_single(mz, intensity, ubiquitin, z, "ubiquitin",
+                        get_timings=True, threshold=5, threshold_type="ppm", orbitrap=True)
+M.plotly("/Users/matteo/Projects/masstodon/spectrum.html")
+list(M.ome.iter_molecule_estimates())
+
+
+spec = OrbitrapSpectrum(mz, intensity, threshold=5, threshold_type="ppm")
 # spec.plot()
 spec.bitonic_clustering(groups_kwds={'ppm':5})
+spec.bitonic_clustering()
 # spec.plot_mz_diffs()
 spec.bc.fit_diff_model()
 # spec.bc.plot_sd()
