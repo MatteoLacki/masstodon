@@ -126,7 +126,6 @@ class OrbitrapSpectrum(Spectrum):
                 Plot the fitted trendline.
             show : logical
                 Immediately show the plot? Alternatively, just add it to the present canvas.
-
         """
         plt.style.use(plt_style)
         if all_diffs:

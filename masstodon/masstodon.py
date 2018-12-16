@@ -87,8 +87,10 @@ class Masstodon(object):
                      intensity,
                      min_mz_diff = 1.1,
                      orbitrap    = False,
-                     threshold   = 0.0):
+                     threshold   = 0.0,
+                     threshold_type = "Da"):
         self.threshold   = threshold
+        self.threshold_type = threshold_type
         self.orbitrap    = orbitrap
         self.min_mz_diff = min_mz_diff
         self.spec = spectrum(mz,
@@ -96,6 +98,7 @@ class Masstodon(object):
                              self.min_mz_diff,
                              self.orbitrap,
                              self.threshold,
+                             self.threshold_type,
                              sort            = True,
                              drop_duplicates = True,
                              drop_zeros      = True)
@@ -207,7 +210,7 @@ class Masstodon(object):
                   "include_zero_intensities": self.include_zero_intensities}
 
         with open(pjoin(path, 'params.json'), 'w') as f:
-            json.dump(params, f, indent=indent)
+            json.dump(self.params, f, indent=indent)
         self.imperator.save_graph(pjoin(path, 'deconvolution_graph.gpickle'))
         self.imperator.errors_to_json(pjoin(path, 'errors.json'),
                                       indent=indent)

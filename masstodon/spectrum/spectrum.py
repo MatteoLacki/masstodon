@@ -11,6 +11,7 @@ def spectrum(mz        = np.array([]),
              min_mz_diff = 1.1,
              orbitrap  = False,
              threshold = 0.0,
+             threshold_type = "Da",
              sort      = True,
              drop_duplicates = True,
              drop_zeros      = True):

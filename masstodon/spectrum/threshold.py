@@ -16,23 +16,35 @@ class ThresholdSpectrum(Spectrum):
     def __init__(self,   mz              = np.array([]),
                          intensity       = np.array([]),
                          threshold       = 0.0,
+                         threshold_type  = "mmu",
                          sort            = True,
                          drop_duplicates = True,
                          drop_zeros      = True,
                          mdc             = None):
         assert threshold > 0.0, "Provide non-zero threshold."
+        assert threshold_type in ("mmu", "ppm", "Da")
         self.threshold = threshold
+        self.threshold_type = threshold_type
+        if threshold_type == "mmu":
+            thr_type = "absolute"
+            threshold /= 1000.0
+        elif threshold_type == "ppm":
+            thr_type = "relative"
+        else:
+            thr_type = "absolute"
         super().__init__(mz, intensity, sort, drop_duplicates, drop_zeros, mdc)
         X = iter(list(self.mz))
         x = next(X)
-        l = [x - self.threshold]
+        thr = threshold if thr_type = "absolute" else threshold*x*1e-6
+        l = [x - thr]
         r = []
         for x_next in X:
-            d = min(self.threshold, (x_next - x)/2.0)
+            d = min(thr, (x_next - x)/2.0)
             r.append(x + d)
             l.append(x_next - d)
             x = x_next
-        r.append(x + self.threshold)
+            thr = threshold if thr_type = "absolute" else threshold*x*1e-6
+        r.append(x + thr)
         l = np.array(l)
         r = np.array(r)
         self.groups = SimpleGroups(l, r, self.mz, self.intensity)
@@ -56,6 +68,7 @@ class ThresholdSpectrum(Spectrum):
             yield self.__class__(mz              = self.mz[s:e],
                                  intensity       = self.intensity[s:e],
                                  threshold       = self.threshold,
+                                 threshold_type  = self.threshold_type,
                                  sort            = False,
                                  drop_duplicates = True,
                                  drop_zeros      = False,
@@ -68,6 +81,7 @@ class ThresholdSpectrum(Spectrum):
         return self.__class__(self.mz[id_s:id_e], 
                               self.intensity[id_s:id_e],
                               self.threshold,
+                              self.threshold_type,
                               False,
                               False,
                               self.mdc)

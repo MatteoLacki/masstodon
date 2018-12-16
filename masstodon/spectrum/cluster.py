@@ -59,51 +59,45 @@ def min_diff_clust(x, w, min_mz_diff = 1.1):
     return mdc
 
 
-
-
+#TODO: this has to disappear...
 class Groups(object):
     def __init__(self):
-        self.min_mz  = []
-        self.max_mz  = []
+        self.min_mz = []
+        self.max_mz = []
         self.mean_mz = []
-        self.sd_mz   = []
+        self.sd_mz = []
         self.skewness_mz = []
-        self.count       = []
-        self.intensity   = []
+        self.count = []
+        self.intensity = []
 
-    def get_stats(self, local_spectra, out_trivial_intervals=True):
+    def get_stats(self,
+                  local_spectra, 
+                  out_trivial_intervals=True,
+                  ppm=0.0,
+                  intensity_cumulant=sum):
+        r_prev  = -inf
         for local_mz, local_intensity in local_spectra:
             mean_mz = mean(local_mz, local_intensity)
             sd_mz   = sd(local_mz, local_intensity, mean_mz)
-
-            self.min_mz.append(min(local_mz))
-            self.max_mz.append(max(local_mz))
-            self.mean_mz.append(mean_mz)
-            self.sd_mz.append(sd_mz)
-            self.skewness_mz.append(skewness(local_mz, local_intensity, mean_mz, sd_mz))
-            self.count.append(len(local_mz))
-            # this should be dependent upon the data!
-            # either sum, or max, or some numpy-vectorized function,
-            # possibly of masses to.
-            self.intensity.append(sum(local_intensity))
-            # self.intensity.append(max(local_intensity))
-
-        self.min_mz  = np.array(self.min_mz)
-        self.max_mz  = np.array(self.max_mz)
-        self.mean_mz = np.array(self.mean_mz)
-        self.sd_mz   = np.array(self.sd_mz)
-        self.skewness_mz = np.array(self.skewness_mz)
-        self.count       = np.array(self.count)
-        self.intensity   = np.array(self.intensity)
-        if out_trivial_intervals:
-            OK = self.min_mz < self.max_mz
-            self.min_mz = self.min_mz[OK]
-            self.max_mz = self.max_mz[OK]
-            self.mean_mz = self.mean_mz[OK]
-            self.sd_mz = self.sd_mz[OK]
-            self.skewness_mz = self.skewness_mz[OK]
-            self.count = self.count[OK]
-            self.intensity = self.intensity[OK]
+            if ppm:
+                l = mean_mz*(1.0-ppm*1e-6)
+                r = mean_mz*(1.0+ppm*1e-6)
+            else:
+                l = min(local_mz)
+                r = max(local_mz)
+            if l < r_prev: # overlaying intervals
+                self.max_mz[-1] = l = (l+r_prev)/2.0
+            if out_trivial_intervals and r > l:
+                r_prev = r
+                self.min_mz.append(l)
+                self.max_mz.append(r)
+                self.mean_mz.append(mean_mz)
+                self.sd_mz.append(sd_mz)
+                self.skewness_mz.append(skewness(local_mz, local_intensity, mean_mz, sd_mz))
+                self.count.append(len(local_mz))
+                self.intensity.append(intensity_cumulant(local_intensity))
+        for k, v in self.__dict__.items():
+            self.__dict__[k] = np.array(v)
 
 
 class Bitonic(PeakClustering):
@@ -122,9 +116,16 @@ class Bitonic(PeakClustering):
                                            min_mz_diff,
                                            abs_perc_dev)
 
-    def get_stats(self, out_trivial_intervals=True):
+    def get_stats(self,
+                  out_trivial_intervals=True,
+                  *groups_args,
+                  **groups_kwds):
         self.groups = Groups()
-        self.groups.get_stats(self, out_trivial_intervals)
+        # this self is terribly not elegant...
+        self.groups.get_stats(self,
+                              out_trivial_intervals,
+                              *groups_args,
+                              **groups_kwds)
  
     def get_lightweight_spectrum(self):
         return lightweight_spectrum(self.groups.min_mz,
@@ -177,10 +178,12 @@ def bitonic_clust(x,
                   fit_to_most_frequent = True,
                   model_sd             = polynomial,
                   model_sd_args        = [],
-                  model_sd_kwds        = {}):
+                  model_sd_kwds        = {},
+                  groups_args          = [],
+                  groups_kwds          = {}):
     bc = Bitonic()
     bc.fit(x, w, min_mz_diff, abs_perc_dev)
-    bc.get_stats(out_trivial_intervals)
+    bc.get_stats(out_trivial_intervals, *groups_args, **groups_kwds)
     bc.get_lightweight_spectrum()
     if model_diff:
         bc.fit_diff_model(model_diff,
