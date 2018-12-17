@@ -211,7 +211,7 @@ class Masstodon(object):
                   "include_zero_intensities": self.include_zero_intensities}
 
         with open(pjoin(path, 'params.json'), 'w') as f:
-            json.dump(self.params, f, indent=indent)
+            json.dump(params, f, indent=indent)
         self.imperator.save_graph(pjoin(path, 'deconvolution_graph.gpickle'))
         self.imperator.errors_to_json(pjoin(path, 'errors.json'),
                                       indent=indent)

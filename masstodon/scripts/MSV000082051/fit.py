@@ -40,6 +40,8 @@ isotopic_coverage = .999
 std_cnt           = 3
 get_timings       = True
 orbitrap          = True
+threshold         = 7
+threshold_type    = "ppm"
 charges           = [35, 36, 37]
 distance_charges  = 5
 ApoAI             = "DEPPQSPWDRVKDLATVYVDVLKDSGRDYVSQFEGSALGKQLNLKLLDNWDSVTSTFSKLREQLGPVTQEFWDNLEKETEGLRQEMSKDLEEVKAKVQPYLDDFQKKWQEEMELYRQKVEPLRAELQEGARQKLHELQEKLSPLGEEMRDRARAHVDALRTHLAPYSDELRQRLAARLEALKENGGARLAEYHAKATEHLSTLSEKAKPALEDLRQGLLPVLESFKVSFLSALEEYTKKLNTQ"
@@ -220,12 +222,15 @@ def single_run(mz, intensity, exp, precursors, verbose=True):
     out_path = pjoin(out_folder, exp.replace(" ", "_"))
     row = {"exp":exp}
     try:
-        M, timings = masstodon_batch(mz, intensity, precursors,
-                                     isotopic_coverage = isotopic_coverage,
-                                     min_prob          = min_prob,
-                                     std_cnt           = std_cnt,
-                                     orbitrap          = orbitrap,
-                                     get_timings       = get_timings)
+        M, timings = masstodon_batch(
+          mz, intensity, precursors,
+          isotopic_coverage = isotopic_coverage,
+          min_prob          = min_prob,
+          std_cnt           = std_cnt,
+          orbitrap          = orbitrap,
+          threshold         = threshold,
+          threshold_type    = threshold_type,
+          get_timings       = get_timings)
         mkdir(out_path, exist_ok=True)
         M.dump(out_path, indent=4)
         M.write(out_path)

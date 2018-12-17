@@ -70,14 +70,17 @@ def single_run(mz, intensity, exp, scan_no, q, fasta, mods, verbose=True):
         single_prec = len(modifications) in (0, 1)
         if single_prec: # one PTM == no PTM-free
             modifications = modifications[0] if modifications else {}
-            M, timings = masstodon_single(mz, intensity, fasta, q, '',
-                                          modifications     = modifications,
-                                          isotopic_coverage = isotopic_coverage,
-                                          min_prob          = min_prob,
-                                          std_cnt           = std_cnt,
-                                          orbitrap          = orbitrap,
-                                          get_timings       = get_timings,
-                                          distance_charges  = 2)
+            M, timings = masstodon_single(
+              mz, intensity, fasta, q, '',
+              modifications     = modifications,
+              isotopic_coverage = isotopic_coverage,
+              min_prob          = min_prob,
+              std_cnt           = std_cnt,
+              orbitrap          = orbitrap,
+              threshold         = 7,
+              threshold_type    = "ppm",
+              get_timings       = get_timings,
+              distance_charges  = 2)
         else:
             precursors = [{"name": "pBora-"+"_".join(map(str, mod.keys())),
                            "modifications": mod,
@@ -85,12 +88,15 @@ def single_run(mz, intensity, exp, scan_no, q, fasta, mods, verbose=True):
                            "fasta": fasta,
                            "distance_charges": 2}
                           for mod in modifications] # phosphorylation == pBora
-            M, timings = masstodon_batch(mz, intensity, precursors,
-                                          isotopic_coverage = isotopic_coverage,
-                                          min_prob          = min_prob,
-                                          std_cnt           = std_cnt,
-                                          orbitrap          = orbitrap,
-                                          get_timings       = get_timings)
+            M, timings = masstodon_batch(
+              mz, intensity, precursors,
+              isotopic_coverage = isotopic_coverage,
+              min_prob          = min_prob,
+              std_cnt           = std_cnt,
+              orbitrap          = orbitrap,
+              threshold         = 7,
+              threshold_type    = "ppm",
+              get_timings       = get_timings)
         mkdir(out_path, exist_ok=True)
         M.dump(out_path, indent=4)
         M.write(out_path)
