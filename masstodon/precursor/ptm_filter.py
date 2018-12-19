@@ -16,6 +16,8 @@ def filter_ptm_assignments(precursors_dictionaries):
     iso = isotope_calculator()
     for prec_kwds in precursors_dictionaries:
         try:
+            if 'q' not in prec_kwds:
+                prec_kwds['q'] = 1
             prec = precursor(iso_calc=iso,
                              **prec_kwds)
             yield prec_kwds
