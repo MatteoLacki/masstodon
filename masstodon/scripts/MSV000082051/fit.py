@@ -117,15 +117,16 @@ insert_data("Palmitic Acylation ETD 10 ms",
 insert_data("Glyacatio by Hexose ETD 7 ms",
             131, 'glycation_by_hexose')
 
-X = "Dehydration ETD 10 ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI,
-                       q = q, 
-                       distance_charges = distance_charges,
-                       modifications = {PTM_position:{"C_alpha": ptms['dehydralation']}})
-                  for q in charges for PTM_position in range(150, 167)])
+# X = "Dehydration ETD 10 ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors=[dict(name = "ApoAI {} q={}".format(X,q),
+#                      fasta = ApoAI,
+#                      q = q, 
+#                      distance_charges = distance_charges,
+#                      modifications = {PTM_position:{"C_alpha": ptms['dehydralation']}})
+#                   for q in charges for PTM_position in range(150, 167)])
+# experiments[X]['precursors'] = list(filter_ptm_assignments(experiments[X]['precursors']))
 
 for e in experiments:
     experiments[e]["mz"], experiments[e]["intensity"] =\
@@ -153,7 +154,8 @@ def single_run(mz, intensity, exp, precursors, verbose=True):
         mkdir(out_path, exist_ok=True)
         M.dump(out_path, indent=4)
         M.write(out_path)
-        M.plotly(pjoin(out_path, "spectrum.html"), show=False)
+        M.plotly(pjoin(out_path, "spectrum.html"),
+                 show = False)
         with open(pjoin(out_path, 'timings.json'), 'w') as h:
             json.dump(timings, h, indent=4)
         row.update(M.imperator.errors())
