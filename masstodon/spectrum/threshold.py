@@ -5,46 +5,38 @@ from   math        import   inf, floor, log10
 
 from masstodon.spectrum.orbitrap    import Spectrum
 from masstodon.spectrum.lightweight import lightweight_spectrum
-
+from masstodon.spectrum.parse_threshold import parse_threshold
 
 SimpleGroups = namedtuple('SimpleGroups',
                           'min_mz max_mz mean_mz intensity')
 SimpleGroups.__new__.__defaults__ = tuple([] for _ in range(7))
 
-
 class ThresholdSpectrum(Spectrum):
-    def __init__(self,   mz              = np.array([]),
-                         intensity       = np.array([]),
-                         threshold       = 0,
-                         threshold_type  = "mmu",
-                         sort            = True,
-                         drop_duplicates = True,
-                         drop_zeros      = True,
-                         mdc             = None):
-        assert threshold > 0.0, "Provide non-zero threshold."
-        assert threshold_type in ("mmu", "ppm", "Da")
-        self.threshold = threshold
-        self.threshold_type = threshold_type
-        if threshold_type == "mmu":
-            thr_type = "absolute"
-            threshold /= 1000.0
-        elif threshold_type == "ppm":
-            thr_type = "relative"
-        else:
-            thr_type = "absolute"
+    def __init__(self,
+                 mz              = np.array([]),
+                 intensity       = np.array([]),
+                 threshold       = "0 Da",
+                 sort            = True,
+                 drop_duplicates = True,
+                 drop_zeros      = True,
+                 mdc             = None):
+        thr, thr_type = parse_threshold(threshold)
+        assert thr > 0.0, "Provide non-zero threshold."
+        self.thr = thr
+        self.thr_type = thr_type
         super().__init__(mz, intensity, sort, drop_duplicates, drop_zeros, mdc)
         X = iter(list(self.mz))
         x = next(X)
-        thr = threshold if thr_type == "absolute" else threshold*x*1e-6
-        l = [x - thr]
+        thr2 = thr if thr_type == "abs" else thr*x
+        l = [x - thr2]
         r = []
         for x_next in X:
-            d = min(thr, (x_next - x)/2.0)
+            d = min(thr2, (x_next - x)/2.0)
             r.append(x + d)
             l.append(x_next - d)
             x = x_next
-            thr = threshold if thr_type == "absolute" else threshold*x*1e-6
-        r.append(x + thr)
+            thr2 = thr if thr_type == "abs" else thr*x
+        r.append(x + thr2)
         l = np.array(l)
         r = np.array(r)
         self.groups = SimpleGroups(l, r, self.mz, self.intensity)

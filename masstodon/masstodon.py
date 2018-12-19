@@ -87,10 +87,8 @@ class Masstodon(object):
                      intensity,
                      min_mz_diff = 1.1,
                      orbitrap    = False,
-                     threshold   = 0.0,
-                     threshold_type = "Da"):
+                     threshold   = "0.0 Da"):
         self.threshold   = threshold
-        self.threshold_type = threshold_type
         self.orbitrap    = orbitrap
         self.min_mz_diff = min_mz_diff
         self.spec = spectrum(mz,
@@ -98,7 +96,6 @@ class Masstodon(object):
                              self.min_mz_diff,
                              self.orbitrap,
                              self.threshold,
-                             self.threshold_type,
                              sort            = True,
                              drop_duplicates = True,
                              drop_zeros      = True)
@@ -204,7 +201,6 @@ class Masstodon(object):
                   "isotopic_coverage":    self.isotopic_coverage,
                   "min_prob"  :           self.min_prob,
                   "threshold" :           self.threshold,
-                  "threshold_type" :      self.threshold_type,
                   "orbitrap"  :           self.orbitrap,
                   "min_mz_diff":          self.min_mz_diff,
                   "deconvolution_method": self.deconvolution_method,
@@ -238,8 +234,7 @@ def masstodon_batch(mz,
                     molecules           = [],
                     min_mz_diff         = 1.1,
                     orbitrap            = False,
-                    threshold           = 0.0,
-                    threshold_type      = "Da",
+                    threshold           = "0.0 Da",
                     std_cnt             = 3,
                     mz_digits           = None,
                     isotopic_coverage   = .999,
@@ -292,8 +287,11 @@ def masstodon_batch(mz,
     """
     t0 = time()
     m = Masstodon()
-    m.set_spectrum(mz, intensity, min_mz_diff,
-                   orbitrap, threshold, threshold_type)
+    m.set_spectrum(mz,
+                   intensity,
+                   min_mz_diff,
+                   orbitrap,
+                   threshold)
     t1 = time()
     if mz_digits is None:
         mz_digits = m.mz_digits
@@ -346,8 +344,7 @@ def masstodon_single(mz, intensity, fasta, q,
                      distance_charges  = 5.,
                      min_mz_diff       = 1.1,
                      orbitrap          = False,
-                     threshold         = 0.0,
-                     threshold_type    = "Da",
+                     threshold         = "0.0 Da",
                      std_cnt           = 3,
                      mz_digits         = None,
                      isotopic_coverage = .999,
@@ -415,7 +412,6 @@ def masstodon_single(mz, intensity, fasta, q,
                            min_mz_diff,
                            orbitrap,
                            threshold,
-                           threshold_type,
                            std_cnt,
                            mz_digits,
                            isotopic_coverage,

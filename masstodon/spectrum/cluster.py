@@ -5,11 +5,13 @@ import numpy       as np
 
 from masstodon.models.polynomial import polynomial
 from masstodon.models.spline     import spline
-from masstodon.spectrum.peak_clustering import bitonic_clustering,\
-                                                        iter_cluster_ends,\
-                                                        min_diff_clustering
+from masstodon.spectrum.peak_clustering import \
+    bitonic_clustering,\
+    iter_cluster_ends,\
+    min_diff_clustering
 from masstodon.spectrum.lightweight import lightweight_spectrum
 from masstodon.stats.gaussian       import mean, sd, skewness
+from masstodon.spectrum.parse_threshold import parse_threshold
 
 
 class PeakClustering(object):
@@ -59,7 +61,7 @@ def min_diff_clust(x, w, min_mz_diff = 1.1):
     return mdc
 
 
-#TODO: this has to disappear...
+# Problem: with absolute threshold, consecutive groups can overlay?
 class Groups(object):
     def __init__(self):
         self.min_mz = []
@@ -71,24 +73,25 @@ class Groups(object):
         self.intensity = []
 
     def get_stats(self,
-                  local_spectra, 
+                  local_spectra,
+                  threshold,
                   out_trivial_intervals=True,
-                  threshold=0.0,
-                  threshold_type="ppm",
                   intensity_cumulant=sum):
         r_prev  = -inf
-        if threshold_type != "ppm":
-            if threshold_type == "mmu":
-                threshold /= 1000.0
+        thr, thr_type = parse_threshold(threshold)
+        assert thr > 0.0, "Provide non-zero threshold."
         for local_mz, local_intensity in local_spectra:
             mean_mz = mean(local_mz, local_intensity)
             sd_mz   = sd(local_mz, local_intensity, mean_mz)
-            if threshold_type == "ppm":
-                l = mean_mz*(1.0-ppm*1e-6)
-                r = mean_mz*(1.0+ppm*1e-6)
-            elif threshold_type == "ppm":
-                l = min(local_mz)
-                r = max(local_mz)
+            if thr_type == "rel":
+                l = mean_mz * (1.0 - thr)
+                r = mean_mz * (1.0 + thr)
+            else:
+                l = mean_mz - thr
+                r = mean_mz + thr
+            # elif threshold_type == "precision":
+            #     l = min(local_mz)
+            #     r = max(local_mz)
             if l < r_prev: # overlaying intervals
                 self.max_mz[-1] = l = (l+r_prev)/2.0
             if out_trivial_intervals and r > l:
@@ -121,15 +124,12 @@ class Bitonic(PeakClustering):
                                            abs_perc_dev)
 
     def get_stats(self,
-                  out_trivial_intervals=True,
-                  *groups_args,
-                  **groups_kwds):
+                  threshold,
+                  out_trivial_intervals=True):
         self.groups = Groups()
-        # this self is terribly not elegant...
         self.groups.get_stats(self,
-                              out_trivial_intervals,
-                              *groups_args,
-                              **groups_kwds)
+                              threshold
+                              out_trivial_intervals)
  
     def get_lightweight_spectrum(self):
         return lightweight_spectrum(self.groups.min_mz,
@@ -147,7 +147,10 @@ class Bitonic(PeakClustering):
                       *model_args,
                      **model_kwds):
         lefts, diffs = self.left_ends_and_diffs()
-        self.diff_model = model(lefts, diffs, *model_args, **model_kwds)
+        self.diff_model = model(lefts,
+                                diffs,
+                                *model_args,
+                                **model_kwds)
 
     def fit_sd_model(self,
                      model = polynomial,
@@ -172,7 +175,8 @@ class Bitonic(PeakClustering):
 
 
 def bitonic_clust(x,
-                  w, 
+                  w,
+                  threshold,
                   min_mz_diff          = .15,
                   abs_perc_dev         = .2,
                   out_trivial_intervals= True,
@@ -182,12 +186,10 @@ def bitonic_clust(x,
                   fit_to_most_frequent = True,
                   model_sd             = polynomial,
                   model_sd_args        = [],
-                  model_sd_kwds        = {},
-                  groups_args          = [],
-                  groups_kwds          = {}):
+                  model_sd_kwds        = {}):
     bc = Bitonic()
     bc.fit(x, w, min_mz_diff, abs_perc_dev)
-    bc.get_stats(out_trivial_intervals, *groups_args, **groups_kwds)
+    bc.get_stats(threshold, out_trivial_intervals)
     bc.get_lightweight_spectrum()
     if model_diff:
         bc.fit_diff_model(model_diff,

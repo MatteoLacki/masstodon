@@ -38,8 +38,7 @@ class OrbitrapSpectrum(Spectrum):
     def __init__(self,
                  mz              = np.array([]),
                  intensity       = np.array([]),
-                 threshold       = 0.0,
-                 threshold_type  = "Da",
+                 threshold       = "0.0 Da",
                  sort            = True,
                  drop_duplicates = True,
                  drop_zeros      = True,
@@ -49,11 +48,7 @@ class OrbitrapSpectrum(Spectrum):
         super().__init__(mz, intensity, sort, drop_duplicates, drop_zeros, mdc)
         # parameters for spectra spawned as subspectra: needeed for convenience mainly.
         self.bc = bc
-        assert threshold > 0.0, "Provide non-zero threshold."
-        assert threshold_type in ("mmu", "ppm", "Da")
         self.threshold = threshold
-        self.threshold_type = threshold_type
-
 
     def __getitem__(self, interval):
         """Similar to filter, but return a class."""
@@ -90,10 +85,9 @@ class OrbitrapSpectrum(Spectrum):
                            min_mz_diff  = .15,
                            abs_perc_dev = .2,
                            **kwds):
-        if not "groups_kwds" in kwds:
-            kwds["groups_kwds"] = {'ppm':self.threshold}
         self.bc = bitonic_clust(self.mz,
                                 self.intensity,
+                                self.threshold,
                                 min_mz_diff,
                                 abs_perc_dev,
                                 **kwds)
