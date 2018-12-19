@@ -11,6 +11,7 @@ from masstodon.read.mzml import read_mzml
 from masstodon.plot.spectrum import plot_spectrum
 from masstodon.masstodon import masstodon_single, masstodon_batch
 from masstodon.data.ptms import ptms
+from masstodon.precursor.ptm_filter import filter_ptm_assignments
 
 class WrongSystem(Exception):
     pass
@@ -40,25 +41,46 @@ isotopic_coverage = .999
 std_cnt           = 3
 get_timings       = True
 orbitrap          = True
-threshold         = 7
-threshold_type    = "ppm"
+threshold         = "5 ppm"
 charges           = [35, 36, 37]
 distance_charges  = 5
 ApoAI             = "DEPPQSPWDRVKDLATVYVDVLKDSGRDYVSQFEGSALGKQLNLKLLDNWDSVTSTFSKLREQLGPVTQEFWDNLEKETEGLRQEMSKDLEEVKAKVQPYLDDFQKKWQEEMELYRQKVEPLRAELQEGARQKLHELQEKLSPLGEEMRDRARAHVDALRTHLAPYSDELRQRLAARLEALKENGGARLAEYHAKATEHLSTLSEKAKPALEDLRQGLLPVLESFKVSFLSALEEYTKKLNTQ"
 ProtoApoAI        = "RHFWQQDEPPQSPWDRVKDLATVYVDVLKDSGRDYVSQFEGSALGKQLNLKLLDNWDSVTSTFSKLREQLGPVTQEFWDNLEKETEGLRQEMSKDLEEVKAKVQPYLDDFQKKWQEEMELYRQKVEPLRAELQEGARQKLHELQEKLSPLGEEMRDRARAHVDALRTHLAPYSDELRQRLAARLEALKENGGARLAEYHAKATEHLSTLSEKAKPALEDLRQGLLPVLESFKVSFLSALEEYTKKLNTQ"
+
+
 experiments = {}
 Xs = []
+def insert_data(file,
+                ptm_position,
+                ptm,
+                name="ApoAI {} q={}",
+                fasta=ApoAI):
+    assignments = filter_ptm_assignments(
+        dict(name = name.format(file, q),
+             fasta = fasta,
+             distance_charges = distance_charges,
+             modifications = {ptm_position:{"C_alpha":ptms[ptm]}}) for q in charges)
+    assignments = list(assignments)
+    if len(assignments) > 0:
+        Xs.append(file)
+        experiments[file] = assignments
+    else:
+        print("There is no place for {} on {}.".format(ptm, file))
 
-## The biggest copy-paste ever!!!
-X = "Oleic Acylation ETD 10 ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI,
-                       q = q,
-                       distance_charges = distance_charges,
-                       modifications = {133:{"C_alpha": ptms['oleic_acylation']}})
-                  for q in charges])
+insert_data("Oleic Acylation ETD 10 ms",
+            133, 'oleic_acylation')
+
+
+# X = "Oleic Acylation ETD 10 ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+#                        fasta = ApoAI,
+#                        q = q,
+#                        distance_charges = distance_charges,
+#                        modifications = {133:{"C_alpha": ptms['oleic_acylation']}})
+#                   for q in charges])
+
 
 X = "Carboxymethylation ETD 10 ms"
 Xs.append(X)
@@ -229,7 +251,6 @@ def single_run(mz, intensity, exp, precursors, verbose=True):
           std_cnt           = std_cnt,
           orbitrap          = orbitrap,
           threshold         = threshold,
-          threshold_type    = threshold_type,
           get_timings       = get_timings)
         mkdir(out_path, exist_ok=True)
         M.dump(out_path, indent=4)

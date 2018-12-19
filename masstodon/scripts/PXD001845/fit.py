@@ -40,6 +40,7 @@ fasta             = "GAASMMGDVKESKMQITPETPGRIPVLNPFESPSDYSNLHEQTLASPSVFKSTKLPTPG
 folder2ptms       = get_folder2ptms(csvpath)
 get_timings       = True
 orbitrap          = True
+threshold         = "5 ppm"
 # this has to be enhanced for data other than ETD:
 get_q = lambda f: int(re.sub('[^0-9]','', f.split("_")[-1]))
 
@@ -77,8 +78,7 @@ def single_run(mz, intensity, exp, scan_no, q, fasta, mods, verbose=True):
               min_prob          = min_prob,
               std_cnt           = std_cnt,
               orbitrap          = orbitrap,
-              threshold         = 5,
-              threshold_type    = "ppm",
+              threshold         = threshold,
               get_timings       = get_timings,
               distance_charges  = 2)
         else:
@@ -94,8 +94,7 @@ def single_run(mz, intensity, exp, scan_no, q, fasta, mods, verbose=True):
               min_prob          = min_prob,
               std_cnt           = std_cnt,
               orbitrap          = orbitrap,
-              threshold         = 7,
-              threshold_type    = "ppm",
+              threshold         = threshold,
               get_timings       = get_timings)
         mkdir(out_path, exist_ok=True)
         M.dump(out_path, indent=4)
