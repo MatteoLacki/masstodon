@@ -237,7 +237,7 @@ class SimpleCzMatch(object):
             yield ('probability', 'ETnoD of PTR',
                    "{:10.3f}%".format(100 * self._P_ETnoD_PTR))
 
-        if self._I_reactions > 0:
+        if self._I_reactions > 0 and self._I_ETDorHTR > 0:
             yield ('probability', 'fragmentation', "{:10.3f}%".format(100 * self._P_fragmentation))
             bonds = list(self._P_fragmentation_bond.items())
             bonds.sort()
