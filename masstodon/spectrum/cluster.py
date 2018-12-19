@@ -128,7 +128,7 @@ class Bitonic(PeakClustering):
                   out_trivial_intervals=True):
         self.groups = Groups()
         self.groups.get_stats(self,
-                              threshold
+                              threshold,
                               out_trivial_intervals)
  
     def get_lightweight_spectrum(self):

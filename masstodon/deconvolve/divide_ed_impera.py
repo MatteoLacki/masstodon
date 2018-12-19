@@ -295,7 +295,7 @@ class Imperator(object):
         ITE = self.total_fitted() +\
               self.total_intensity_fitted_to()
         if ITE > 0:
-            return self.solutions_l1_error_abs()/intensity
+            return self.solutions_l1_error_abs()/ITE
         else:
             # there must have been no experimental intensity at all.
             return 1.0
