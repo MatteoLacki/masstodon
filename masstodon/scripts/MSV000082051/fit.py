@@ -68,6 +68,7 @@ def insert_data(file,
         assignments = [
             dict(name = name.format(file, q),
                  fasta = fasta,
+                 q = q,
                  distance_charges = distance_charges) 
             for q in charges]
     if len(assignments) > 0:
