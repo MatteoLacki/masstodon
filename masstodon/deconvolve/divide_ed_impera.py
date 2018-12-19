@@ -291,8 +291,14 @@ class Imperator(object):
         return sum(s.total_intensity() for s in self.solutions)
 
     def solutions_l1_error_rel(self):
-        return self.solutions_l1_error_abs() /\
-              (self.total_fitted() + self.total_intensity_fitted_to())
+        """Compare the experimental end predicted intensity measures in the areas where traces are found."""
+        ITE = self.total_fitted() +\
+              self.total_intensity_fitted_to()
+        if ITE > 0:
+            return self.solutions_l1_error_abs()/intensity
+        else:
+            # there must have been no experimental intensity at all.
+            return 1.0
 
     def total_intensity(self):
         return sum(self.groups.intensity)
@@ -305,7 +311,8 @@ class Imperator(object):
         used_idx = np.array(list(used_idx))
         used = np.zeros(shape = self.groups.intensity.shape,
                         dtype = bool)
-        used[used_idx] = True
+        if len(used_idx) > 0:
+            used[used_idx] = True
         return used
 
     def total_intensity_fitted_to(self):

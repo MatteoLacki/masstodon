@@ -111,7 +111,7 @@ class Masstodon(object):
     def set_isotopic_calculator(self):
         self.iso_calc = isotope_calculator(digits=self.mz_digits)
 
-    def set_ome(self, 
+    def set_ome(self,
                 precursors=[],
                 molecules=[],
                 std_cnt=3):

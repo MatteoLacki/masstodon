@@ -73,16 +73,20 @@ class Groups(object):
     def get_stats(self,
                   local_spectra, 
                   out_trivial_intervals=True,
-                  ppm=0.0,
+                  threshold=0.0,
+                  threshold_type="ppm",
                   intensity_cumulant=sum):
         r_prev  = -inf
+        if threshold_type != "ppm":
+            if threshold_type == "mmu":
+                threshold /= 1000.0
         for local_mz, local_intensity in local_spectra:
             mean_mz = mean(local_mz, local_intensity)
             sd_mz   = sd(local_mz, local_intensity, mean_mz)
-            if ppm:
+            if threshold_type == "ppm":
                 l = mean_mz*(1.0-ppm*1e-6)
                 r = mean_mz*(1.0+ppm*1e-6)
-            else:
+            elif threshold_type == "ppm":
                 l = min(local_mz)
                 r = max(local_mz)
             if l < r_prev: # overlaying intervals

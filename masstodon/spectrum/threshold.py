@@ -15,7 +15,7 @@ SimpleGroups.__new__.__defaults__ = tuple([] for _ in range(7))
 class ThresholdSpectrum(Spectrum):
     def __init__(self,   mz              = np.array([]),
                          intensity       = np.array([]),
-                         threshold       = 0.0,
+                         threshold       = 0,
                          threshold_type  = "mmu",
                          sort            = True,
                          drop_duplicates = True,

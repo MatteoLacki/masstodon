@@ -49,8 +49,11 @@ class OrbitrapSpectrum(Spectrum):
         super().__init__(mz, intensity, sort, drop_duplicates, drop_zeros, mdc)
         # parameters for spectra spawned as subspectra: needeed for convenience mainly.
         self.bc = bc
+        assert threshold > 0.0, "Provide non-zero threshold."
+        assert threshold_type in ("mmu", "ppm", "Da")
         self.threshold = threshold
         self.threshold_type = threshold_type
+
 
     def __getitem__(self, interval):
         """Similar to filter, but return a class."""
