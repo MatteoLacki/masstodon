@@ -51,16 +51,23 @@ ProtoApoAI        = "RHFWQQDEPPQSPWDRVKDLATVYVDVLKDSGRDYVSQFEGSALGKQLNLKLLDNWDSV
 experiments = {}
 Xs = []
 def insert_data(file,
-                ptm_position,
-                ptm,
+                ptm_position=None,
+                ptm=None,
                 name="ApoAI {} q={}",
                 fasta=ApoAI):
-    assignments = filter_ptm_assignments(
-        dict(name = name.format(file, q),
-             fasta = fasta,
-             distance_charges = distance_charges,
-             modifications = {ptm_position:{"C_alpha":ptms[ptm]}}) for q in charges)
-    assignments = list(assignments)
+    if ptm_position is not None:
+        assignments = filter_ptm_assignments(
+            dict(name = name.format(file, q),
+                 fasta = fasta,
+                 distance_charges = distance_charges,
+                 modifications = {ptm_position:{"C_alpha":ptms[ptm]}}) for q in charges)
+        assignments = list(assignments)
+    else:
+        assignments = [
+            dict(name = name.format(file, q),
+                 fasta = fasta,
+                 distance_charges = distance_charges) 
+            for q in charges]
     if len(assignments) > 0:
         Xs.append(file)
         experiments[file] = assignments
@@ -69,6 +76,43 @@ def insert_data(file,
 
 insert_data("Oleic Acylation ETD 10 ms",
             133, 'oleic_acylation')
+insert_data("Carboxymethylation ETD 10 ms",
+            133, 'carboxymethylation')
+insert_data("Canonical ApoA-I ETD 5ms")
+insert_data("ProtoApoA1 ETD 10ms",
+    name="ProtoApoAI {} q={}",
+    fasta=ProtoApoAI)
+insert_data("Arachidonic Acylation ETD 10ms",
+            88, 'arachidonic_acylation')
+insert_data(
+    "Arachidonic Acylation + Truncation ETD 7 ms",
+    88, 'arachidonic_acylation',
+    fasta = ApoAI[:242])
+insert_data("Phosphorylation ETD 7 ms",
+            115, 'phosphorylation')
+insert_data("Oxidation ETD 5 ms",
+            86, 'oxidation')
+insert_data("Docohexaneoic Acylation ETD 10 ms",
+            88, 'docosahexanoic_acylation')
+insert_data(
+    "Palmitic Acylation + Truncation ETD 10 ms",
+    88, 'palmitic_acylation',
+    fasta = ApoAI[:242])
+insert_data("ProtoApoA1 Oxidation ETciD 5ms 12ev",
+    92, 'oxidation',
+    "ProtoApoAI {} q={}",
+    ProtoApoAI)
+insert_data("Oleic Acylation + Truncation ETD 10 ms",
+    88, 'oleic_acylation',
+    "ProtoApoAI {} q={}",
+    ProtoApoAI[:242])
+insert_data(
+    "Truncation ETciD 5ms 12v",
+    fasta = ApoAI[:242])
+insert_data("Palmitic Acylation ETD 10 ms",
+            88, 'palmitic_acylation')
+insert_data("Glyacatio by Hexose ETD 7 ms",
+            131, 'glycation_by_hexose')
 
 
 # X = "Oleic Acylation ETD 10 ms"
@@ -81,114 +125,113 @@ insert_data("Oleic Acylation ETD 10 ms",
 #                        modifications = {133:{"C_alpha": ptms['oleic_acylation']}})
 #                   for q in charges])
 
+# X = "Carboxymethylation ETD 10 ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+#                        fasta = ApoAI,
+#                        q = q, 
+#                        distance_charges = distance_charges,
+#                        modifications = {133:{"C_alpha": ptms['carboxymethylation']}})
+#                   for q in charges])
 
-X = "Carboxymethylation ETD 10 ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI,
-                       q = q, 
-                       distance_charges = distance_charges,
-                       modifications = {133:{"C_alpha": ptms['carboxymethylation']}})
-                  for q in charges])
+# X = "Canonical ApoA-I ETD 5ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+#                        fasta = ApoAI,
+#                        q = q, 
+#                        distance_charges = distance_charges)
+#                   for q in charges])
 
-X = "Canonical ApoA-I ETD 5ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI,
-                       q = q, 
-                       distance_charges = distance_charges)
-                  for q in charges])
+# X = "ProtoApoA1 ETD 10ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ProtoApoAI {} q={}".format(X,q),
+#                        fasta = ProtoApoAI,
+#                        q = q, 
+#                        distance_charges = distance_charges)
+#                   for q in charges])
 
-X = "ProtoApoA1 ETD 10ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ProtoApoAI {} q={}".format(X,q),
-                       fasta = ProtoApoAI,
-                       q = q, 
-                       distance_charges = distance_charges)
-                  for q in charges])
+# X = "Arachidonic Acylation ETD 10ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+#                        fasta = ApoAI,
+#                        q = q, 
+#                        distance_charges = distance_charges,
+#                        modifications = {88:{"C_alpha": ptms['arachidonic_acylation']}})
+#                   for q in charges])
 
-X = "Arachidonic Acylation ETD 10ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI,
-                       q = q, 
-                       distance_charges = distance_charges,
-                       modifications = {88:{"C_alpha": ptms['arachidonic_acylation']}})
-                  for q in charges])
+# X = "Arachidonic Acylation + Truncation ETD 7 ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+#                        fasta = ApoAI[:242],
+#                        q = q, 
+#                        distance_charges = distance_charges,
+#                        modifications = {88:{"C_alpha": ptms['arachidonic_acylation']}})
+#                   for q in charges])
 
-X = "Arachidonic Acylation + Truncation ETD 7 ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI[:242],
-                       q = q, 
-                       distance_charges = distance_charges,
-                       modifications = {88:{"C_alpha": ptms['arachidonic_acylation']}})
-                  for q in charges])
+# X = "Phosphorylation ETD 7 ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+#                        fasta = ApoAI,
+#                        q = q, 
+#                        distance_charges = distance_charges,
+#                        modifications = {115:{"C_alpha": ptms['phosphorylation']}})
+#                   for q in charges])
 
-X = "Phosphorylation ETD 7 ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI,
-                       q = q, 
-                       distance_charges = distance_charges,
-                       modifications = {115:{"C_alpha": ptms['phosphorylation']}})
-                  for q in charges])
+# X = "Oxidation ETD 5 ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+#                        fasta = ApoAI,
+#                        q = q, 
+#                        distance_charges = distance_charges,
+#                        modifications = {86:{"C_alpha": ptms['oxidation']}})
+#                   for q in charges])
 
-X = "Oxidation ETD 5 ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI,
-                       q = q, 
-                       distance_charges = distance_charges,
-                       modifications = {86:{"C_alpha": ptms['oxidation']}})
-                  for q in charges])
+# X = "Docohexaneoic Acylation ETD 10 ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+#                        fasta = ApoAI,
+#                        q = q, 
+#                        distance_charges = distance_charges,
+#                        modifications = {88:{"C_alpha": ptms['docosahexanoic_acylation']}})
+#                   for q in charges])
 
-X = "Docohexaneoic Acylation ETD 10 ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI,
-                       q = q, 
-                       distance_charges = distance_charges,
-                       modifications = {88:{"C_alpha": ptms['docosahexanoic_acylation']}})
-                  for q in charges])
+# X = "Palmitic Acylation + Truncation ETD 10 ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+#                        fasta = ApoAI[:242],
+#                        q = q, 
+#                        distance_charges = distance_charges,
+#                        modifications = {88:{"C_alpha": ptms['palmitic_acylation']}})
+#                   for q in charges])
 
-X = "Palmitic Acylation + Truncation ETD 10 ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI[:242],
-                       q = q, 
-                       distance_charges = distance_charges,
-                       modifications = {88:{"C_alpha": ptms['palmitic_acylation']}})
-                  for q in charges])
+# X = "ProtoApoA1 Oxidation ETciD 5ms 12ev"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ProtoApoAI {} q={}".format(X,q),
+#                        fasta = ProtoApoAI,
+#                        q = q, 
+#                        distance_charges = distance_charges,
+#                        modifications = {92:{"C_alpha": ptms['oxidation']}})
+#                   for q in charges])
 
-X = "ProtoApoA1 Oxidation ETciD 5ms 12ev"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ProtoApoAI {} q={}".format(X,q),
-                       fasta = ProtoApoAI,
-                       q = q, 
-                       distance_charges = distance_charges,
-                       modifications = {92:{"C_alpha": ptms['oxidation']}})
-                  for q in charges])
-
-X = "Oleic Acylation + Truncation ETD 10 ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ProtoApoAI {} q={}".format(X,q),
-                       fasta = ProtoApoAI[:242],
-                       q = q, 
-                       distance_charges = distance_charges,
-                       modifications = {88:{"C_alpha": ptms['oleic_acylation']}})
-                  for q in charges])
+# X = "Oleic Acylation + Truncation ETD 10 ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ProtoApoAI {} q={}".format(X,q),
+#                        fasta = ProtoApoAI[:242],
+#                        q = q, 
+#                        distance_charges = distance_charges,
+#                        modifications = {88:{"C_alpha": ptms['oleic_acylation']}})
+#                   for q in charges])
 
 X = "Dehydration ETD 10 ms"
 Xs.append(X)
@@ -200,34 +243,34 @@ experiments[X] = dict(
                        modifications = {PTM_position:{"C_alpha": ptms['dehydralation']}})
                   for q in charges for PTM_position in range(150, 167)])
 
-X = "Truncation ETciD 5ms 12v"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI[:242],
-                       q = q, 
-                       distance_charges = distance_charges)
-                  for q in charges])
+# X = "Truncation ETciD 5ms 12v"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+#                        fasta = ApoAI[:242],
+#                        q = q, 
+#                        distance_charges = distance_charges)
+#                   for q in charges])
 
-X = "Palmitic Acylation ETD 10 ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI,
-                       q = q, 
-                       distance_charges = distance_charges,
-                       modifications = {88:{"C_alpha": ptms['palmitic_acylation']}})
-                  for q in charges])
+# X = "Palmitic Acylation ETD 10 ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+#                        fasta = ApoAI,
+#                        q = q, 
+#                        distance_charges = distance_charges,
+#                        modifications = {88:{"C_alpha": ptms['palmitic_acylation']}})
+#                   for q in charges])
 
-X = "Glyacatio by Hexose ETD 7 ms"
-Xs.append(X)
-experiments[X] = dict(
-    precursors = [dict(name = "ApoAI {} q={}".format(X,q),
-                       fasta = ApoAI,
-                       q = q, 
-                       distance_charges = distance_charges,
-                       modifications = {131:{"C_alpha": ptms['glycation_by_hexose']}})
-                  for q in charges])
+# X = "Glyacatio by Hexose ETD 7 ms"
+# Xs.append(X)
+# experiments[X] = dict(
+#     precursors = [dict(name = "ApoAI {} q={}".format(X,q),
+#                        fasta = ApoAI,
+#                        q = q, 
+#                        distance_charges = distance_charges,
+#                        modifications = {131:{"C_alpha": ptms['glycation_by_hexose']}})
+#                   for q in charges])
 
 for e in experiments:
     experiments[e]["mz"], experiments[e]["intensity"] =\
