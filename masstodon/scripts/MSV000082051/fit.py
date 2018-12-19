@@ -59,8 +59,10 @@ def insert_data(file,
         assignments = filter_ptm_assignments(
             dict(name = name.format(file, q),
                  fasta = fasta,
+                 q = q,
                  distance_charges = distance_charges,
-                 modifications = {ptm_position:{"C_alpha":ptms[ptm]}}) for q in charges)
+                 modifications = {ptm_position:{"C_alpha":ptms[ptm]}})
+            for q in charges)
         assignments = list(assignments)
     else:
         assignments = [

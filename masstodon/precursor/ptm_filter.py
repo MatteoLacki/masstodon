@@ -17,7 +17,6 @@ def filter_ptm_assignments(precursors_dictionaries):
     for prec_kwds in precursors_dictionaries:
         try:
             prec = precursor(iso_calc=iso,
-                             q=1,
                              **prec_kwds)
             yield prec_kwds
         except NegativeAtomCount:
