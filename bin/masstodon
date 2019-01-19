@@ -1,0 +1,214 @@
+#!/usr/bin/env python2
+
+# -*- coding: utf-8 -*-
+#   Copyright (C) 2016 Mateusz Krzysztof Łącki and Michał Startek.
+#
+#   This file is part of MassTodon.
+#
+#   MassTodon is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU AFFERO GENERAL PUBLIC LICENSE
+#   Version 3.
+#
+#   MassTodon is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+#
+#   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
+#   Version 3 along with MassTodon.  If not, see
+#   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
+#
+# ................................................................................
+# ............~MMM:...............................................................
+# ..........:M....NM..............................................................
+# ..........8M,....M,.............................................................
+# ............M~...8O.............................................................
+# ..........+.MM,..,M..............................?MMMMMN=.......................
+# ..........:..:M:..M..........................DMMM~..  ....MMMM$.................
+# ..........+...DN..M...............+MMMMMMMMMMM............... $MMM=.............
+# ..........?...OM..M=............ZMD...... .......................ZMM?...........
+# ..........:...?M..8O...........M,...................................MM,.........
+# ..........+...7M..~M..........M......................................OMM........
+# ..........+...IM...M.........MI....................................... MM.......
+# ..........:...ZM...M.........M...M?.8D..................................MM......
+# ..........:...DM...M:.......M:..M....,O.................................?M:.....
+# ..............NM...~M......OM...M....8:..................................MM.....
+# ...........$..ZM....MO.....M.....DMMM.....................................M,....
+# ...........Z..,M.....MM..8M:..............................................MO....
+# ..........:Z...MN......DMO................................................MM....
+# ..........:Z...~M~........................................................7M....
+# ..........?Z....$M7........................................................M....
+# ..........+Z.....=MM...........MZ..........................................,M...
+# ..........~Z.......MMMM=....IMMMM..~M....................................:M.M...
+# ..........=Z......:...IMMMMMZ..MI..NMM....................................NM=...
+# ..........+Z......MMZ.........OM...M,.M....................................M+...
+# ..........:Z.....Z.M.,MMMIIDMMM....M..M.N~..................................M...
+# ..........:Z.....Z..MM...........~MD..M.MM................................M,M7..
+# ..........:Z.....Z....7MMMO:~8MMM7...ND.MN................................MM:+..
+# ..........:Z.....Z..................?I..MD................................M.M...
+# ..........=$.....?.....................MZN................................M+....
+# ..........ZZ.....7....................MD.M........MMM..N,..M...M7M........MO....
+# ..........Z$~....?.......................M........M..M.~D.~N..:,.M........MO....
+# ..........ZZ,....$.... .......=..........M........M:.M..D..M..+=.M,.......MO....
+# ........~.ZZ?....$....=.......=..........MM......?M,.,...........MM......8M=....
+# .$I.,.IZ,I.+,~I.,....~~..7Z.Z.:...=.,$Z...~8MMMMMMI..............~MMMMMMMM8.....
+# ................................................................................
+# ................................................................................
+# ................................................................................
+# .7O......O............................ZZZZZZZ..............Z....................
+# .7......I$...............................Z.................Z....................
+# .7.Z....O7....,ZZZ.....OZZ......ZZO .....Z.....OZZ......OZOZ....,ZZO....ZOOZ+...
+# .7..$..Z.7...7....Z...Z....=.......O.....Z....O....?...=...?...I....Z...Z....O..
+# .7..O..~.7........Z.. Z........7.........Z....O....O...O...O...Z....Z...O....Z..
+# .7...ZZ..7.....8Z.Z.....O.......$Z.......Z....O....O...O...O...Z....Z...O....Z..
+# .7...~...7...Z....Z.......7........O.....Z....O....O...O...O...Z....Z...O....Z..
+# .7.......7...O....O...O... I.......Z.....Z....Z... $...O...O...$....O...O....Z..
+# .7.......7....OOOOO....ZOZI....:ZOZ......Z.....ZOZ7.....OZZ.....7ZOZ....Z....Z..
+# ................................................................................
+
+import argparse
+from collections import defaultdict
+import json
+import os
+from pprint import pprint
+import re
+
+from MassTodonPy.CLI.AdditionalParsers import add_max_times_parsing
+from MassTodonPy.CLI.AdditionalParsers import add_output_parsing
+from MassTodonPy.CLI.AdditionalParsers import add_spectra_plots_parsing
+from MassTodonPy.CLI.AdditionalParsers import add_verbosity_parsing
+from MassTodonPy.CLI.MassTodon_wrapper import run_masstodon
+from MassTodonPy.Data.Constants import eps
+from MassTodonPy.MassTodon import MassTodon
+from MassTodonPy.Parsers.blocked_fragments import parse_blocked_fragments
+from MassTodonPy.Parsers.Paths import parse_path
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument("spectrum",
+                    help="path to the spectrum file, with spectrum file extension: either '.txt', '.mzxml', or '.mzml', case insensitive.")
+add_output_parsing(parser)
+parser.add_argument("fasta",
+                    help="The FASTA sequence of the protein to study.")
+parser.add_argument("charge",
+                    type=int,
+                    help="The initial charge of the precursor filtered out in MS1.")
+parser.add_argument("mz_tol",
+                    type=float,
+                    help="The tolerance in the m/z axis.")
+parser.add_argument("-name",
+                    help="The precursor's name.",
+                    default='')
+# modifications = "11 C_carbo H=-1 N=1 O=-1|10 C_carbo H=-1 N=1 O=-10"
+def modification(modifications):
+    """Parses modifications.
+
+    Parameters
+    ==========
+    modifications : str
+        E.g. "11 C_carbo H=-1 N=1 O=-1|10 C_carbo H=-1 N=1 O=-10"
+    """
+    output = defaultdict(dict)
+    modifications = modifications.split('|')
+    for mod in modifications:
+        mod = mod.split()
+        aa_no, aa_type = mod[0:2]
+        diffs = {}
+        for d in mod[2:]:
+            element, diff = d.split('=')
+            diffs[element] = int(diff)
+        output[int(aa_no)][aa_type] = diffs
+    return dict(output)
+
+
+# what a terrible example of copy-paste. Write as dicts, call.
+parser.add_argument("-modifications",
+                    help="String with modifications of individual amino acids.\n\
+                    Follows the scheme: '<amino acid number> <C_alpha|C_carbo|N> <element>=<integer difference> .. <element>=<integer difference> | ...'.\
+                    For example: '11 C_carbo H=-1 N=1 O=-1|10 C_carbo H=-1 N=1 O=-10'",
+                    type=modification)
+parser.add_argument("-fragments",
+                    help="Only 'cz' accepted for now. Planning other fragmentation schemes, including inner fragments.",
+                    default='cz')
+parser.add_argument("-blocked_fragments",
+                    help="Fragments you don't want to include, e.g. 'z5', or 'c13z21c12c53z1': no spaces between diffferent names.",
+                    type=parse_blocked_fragments,
+                    default='c0')
+parser.add_argument("--unblock_prolines",
+                    dest='block_prolines',
+                    action='store_const',
+                    const=False,
+                    default=True,
+                    help="Stop blocking prolines from fragmenting.")
+parser.add_argument("-distance_charges",
+                    help="The minimal distance between charges on the fasta sequence. Defaults to charges being 4 amino acids apart.",
+                    type=int,
+                    default=5)
+parser.add_argument("-min_intensity",
+                    help="Experimental peaks with lower height will be trimmed.",
+                    type=float,
+                    default=eps)
+parser.add_argument("-percent_top_peaks",
+                    help="Percentage of the heighest peaks in the spectrum to be included.",
+                    type=float,
+                    default=1.0)
+parser.add_argument("-deconvolution_method",
+                    help="Matteo = MassTodon paper deconvolution. Ciacho_Wanda = experimental gaussian kernel deconvolution.",
+                    default='Matteo')
+parser.add_argument("-joint_probability",
+                    help="The joint probability of the calculated isotopic distribution. Defaults to a decent '0.999'.",
+                    type=float,
+                    default=.999)
+parser.add_argument("-min_prob_per_molecule",
+                    help="The minimal probability an envelope has to scoop to be included in the deconvolution graph.",
+                    type=float,
+                    default=.7)
+parser.add_argument("-max_buffer_len",
+                    dest='max_buffer_len',
+                    help="The maximal length of the visual buffer between peaks, i.e. the big rectangle width.",
+                    type=float,
+                    default=.5)
+parser.add_argument("-L1_flow",
+                    dest='_L1_flow',
+                    help="L1 penalty for high flows of intensities.",
+                    type=float,
+                    default=.01)
+parser.add_argument("-L2_flow",
+                    dest="_L1_flow",
+                    help="L2 penalty (a.k.a. ridge regression like) for high flows of intensities.",
+                    type=float,
+                    default=.01)
+parser.add_argument("-L1_intensity",
+                    dest="_L1_intensity",
+                    help="L1 penalty for high intensity estimates.",
+                    type=float,
+                    default=.01)
+parser.add_argument("-L2_intensity",
+                    dest="_L2_intensity",
+                    help="L2 penalty (a.k.a. ridge regression like) for high intensities.",
+                    type=float,
+                    default=.01)
+parser.add_argument("--show_progress",
+                    dest="show_progress",
+                    action='store_const',
+                    const=True,
+                    default=False,
+                    help="Show progress of the CVXOPT calculations.")
+parser.add_argument("-maxiters",
+                    dest='_maxiters',
+                    type=int,
+                    help="Maximum number of steps for the CVXOPT algorithm.",
+                    default=1000)
+parser.add_argument("-sigma2",
+                    help="Variance of the experimental peak's m/z ratio.",
+                    type=float,
+                    default=.1)
+parser.add_argument("-ni2",
+                    help="Variance of the theoretic isotopologue's m/z ratio.",
+                    type=float,
+                    default=.1)
+add_spectra_plots_parsing(parser)
+add_verbosity_parsing(parser)
+add_max_times_parsing(parser)
+
+args = parser.parse_args().__dict__ # parsing & making a dictionary
+run_masstodon(args)
