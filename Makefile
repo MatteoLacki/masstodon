@@ -14,7 +14,8 @@ pypi_install: ## Install from testpypi
 	virtualenv -p python3 ../pypi
 	../pypi/bin/pip install masstodon
 
-
+test_masstodon_cli: ## testing command line tools
+	./bin/masstodon spectrum.txt -m 11=H-1C10Ag2 5N=H-1CAg 4C_carbo=HPO
 
 # -----------------------------------------------------------
 # -----  EVERYTHING BELOW THIS LINE IS NOT IMPORTANT --------

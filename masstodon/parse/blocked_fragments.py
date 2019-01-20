@@ -1,5 +1,9 @@
+"""Parser for blocked fragments."""
 import re
 
-def parse_blocked_fragments(blocked_fragments):
-    pattern = re.compile('([a-z])([0-9]*)')
+
+pattern = re.compile('([a-z])([0-9])*')
+
+
+def parse(blocked_fragments):
     return  set([e+c for e, c in re.findall(pattern, blocked_fragments)])
