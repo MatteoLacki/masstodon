@@ -6,6 +6,7 @@
 # License: see LICENCE file.
 
 import re
+from collections import defaultdict
 
 # check it out on https://www.debuggex.com/
 chem_diff = re.compile(r"([A-Z][a-z]?)(-?\d*)")
@@ -40,3 +41,14 @@ def test_parse():
     assert parse("10N=CAr10") == (10, 'N', {'C':1, 'Ar':10})
     assert parse("10C_carbo=P10") == (10, 'C_carbo', {'P':10})
     assert parse("10C_alpha=H-20P10") == (10, 'C_alpha', {'H':-20, 'P':10})
+
+
+def parse_mods(mods):
+    out = defaultdict(lambda:defaultdict(dict))
+    for mod in mods:
+        aa_no, aa_atom, diff = parse(mod)
+        out[aa_no][aa_atom] = diff
+    out = dict(out)
+    for i in out:
+        out[i] = dict(out[i])
+    return out

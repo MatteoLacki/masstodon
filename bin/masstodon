@@ -7,175 +7,111 @@
 #
 # License: see LICENCE file.
 
+#TODO: bloody hell, there are potentially many fastas, each with modifications.
+# then, simply prepare the simpler script first.
 
 import argparse
 
-from masstodon.data.constants import eps
-from masstodon.parse.mods import parse as parse_mod
+from masstodon.data.constants import eps, infinity
 from masstodon.parse.blocked_fragments import parse as parse_blocked_fragments
+from masstodon.parse.mods import parse_mods
+from masstodon.masstodon import masstodon_single
 
+debug = True
 
 p = argparse.ArgumentParser(description="Analyze one precursor with masstodon.")
 
-
-#TODO: bloody hell, there are potentially many fastas, each with modifications.
-# then, simply prepare the simpler script first.
-p.add_argument( "-s",
-                "--spectrum",
-                help="Path to the spectrum file: parseable extensions include '.txt' for ASCII, '.mzxml', or '.mzml' (case insensitive).",
+p.add_argument( "-s", "--spectrum",
+help="Path to the spectrum file: parseable extensions include '.txt' for ASCII, '.mzxml', or '.mzml' (case insensitive).",
                 required=True)
 
-#TODO: this is part of the more complicated script.
-# p.add_argument( "-name",
-#                 help="The precursor's name.",
-#                 default='')
+p.add_argument( "-orbi",
+                "--orbitrap",
+                action='store_const',
+                const=True,
+                default=False,
+                help="This is an Orbitrap spectrum.")
 
-p.add_argument( "-f",
-                "--fasta",
+p.add_argument( "-f", "--fasta",
                 type=str,
-                nargs="+",
                 help="Fasta sequence.",
                 required=True)
 
-p.add_argument( "-q",
-                "--charge",
-                type=int,
-                help="The initial charge of the precursor filtered out in MS1.",
-                required=True)
+p.add_argument( "-m", "--mods",
+                nargs="+",
+help = "Modifications of particular amino acids, like 11=C10H-2, 10C_carbo=Ag3, 1N=K2H-2")
 
-p.add_argument("-dq",
-               "--distance_charges",
-                help="How many consecutive amino-acids are there per charge. Defaults to 5 (including the amino acid the charge is linked to).",
+p.add_argument( "-q", "--charge",
+                type=int,
+help="The initial charge of the precursor filtered out in MS1.",
+                required=True,
+                dest='q')
+
+p.add_argument("-dq", "--distance_charges",
+help="How many consecutive amino-acids are there per charge. Defaults to 5 (including the amino acid the charge is linked to).",
                 type=int,
                 default=5)
 
-p.add_argument( "-tol"
-                "--tolerance",
-                type=float,
-                help="The tolerance in the m/z axis (relative or absolute). Valid expressions include 0.05Da, 0,06Th, 10ppm, 12.2ppm, 20.0mmu, 10mmu. ppm = parts per million, mmu = milli-mass unit, Da = daltons, Th = Thompsons (for Thor almighty's sake).",
+p.add_argument( "-tol", "--tolerance",
+help="The tolerance in the m/z axis (relative or absolute). Valid expressions include 0.05Da, 0,06Th, 10ppm, 12.2ppm, 20.0mmu, 10mmu. ppm = parts per million, mmu = milli-mass unit, Da = daltons, Th = Thompsons (for Thor almighty's sake).",
                 required=True)
 
-p.add_argument( "-m", 
-                "--mods", 
-                type=str,
-                nargs="+",
-help = "List of modifications, like 11=C10H-2, 10C_carbo=Ag3, 1N=K2H-2")
+p.add_argument( "-std", "--standard_deviations_count",
+help="The number of standard deviations defining the tolerance in the coarse filtering stage.",
+                type=float,
+                default=3.0)
 
-p.add_argument( "-fr",
-                "--fragments",
+p.add_argument( "-fr", "--fragments",
                 help="Only 'cz' accepted for now. Planning other fragmentation schemes, including inner fragments.",
                 default='cz')
 
-p.add_argument( "-bfr",
-                "--blocked_fragments",
+p.add_argument( "-bfr", "--blocked_fragments",
 help="Fragments not included in the analysis, e.g. 'z5', or 'c13z21c12c53z1': no spaces between diffferent names.",
                 type=parse_blocked_fragments,
                 default='c0')
 
-p.add_argument( "-ep"
-                "--min_entry_prob",
+p.add_argument( "-ep", "--min_entry_prob",
 help="The minimal probability an envelope has to scoop to be included in the deconvolution graph.",
                 type=float,
                 default=.8)
 
-p.add_argument( "-ip"
-                "--iso_prob",
+p.add_argument( "-ip", "--iso_prob",
 help="The probability p in the p-optimal isotopic distribution. Defaults to 0.999.",
                 type=float,
                 default=.999)
 
-p.add_argument( "-mi",
-                "--min_intensity",
+p.add_argument( "-mi", "--min_intensity",
 help="Experimental peaks with lower height will be trimmed. Defaults to a tincy-wincy nonzero number.",
                 type=float,
                 default=eps)
 
-#TODO which are the available methods? nnls and what?
-p.add_argument( "-dm",
-                "--deconvolution_method",
-help="Matteo = MassTodon paper deconvolution. Ciacho_Wanda = experimental gaussian kernel deconvolution.",
-                    default='Matteo')
+p.add_argument( "-dm", "--deconvolution_method",
+help="nonnegative least squares (nnls) or quantile regression (quantile).",
+                default="nnls",
+                choices=["nnls", "quantile"])
 
-p.add_argument( "--timeit",
+p.add_argument( "--include_zero_intensities",
                 action='store_const',
-                const=False,
-                default=True,
-                help="Return timings.")
+                const=True,
+                default=False,
+                help="Include zero intensities in the fitting of fragments. Don't do it for the Orbitrap, as it presumably cuts away some of the signal below an arbitrary detection limit.")
+
+a = p.parse_args()
+
+if debug:
+    print(a.__dict__)
 
 
-args = p.parse_args()
-mods = [parse_mod(mod) for mod in args.mods]
-print(args.__dict__)
+m, t = masstodon_single(
+    mz, i, a.fasta, a.q,
+    min_mz_diff=infinity,
+    modifications=parse_mods(a.mods),
+    orbitrap=a.orbirap,
+    threshold=a.tol,
+    isotopic_coverage=a.iso_prob,
+    min_prob=a.min_entry_prob,
+    std_cnt=a.std,
+    get_timings=True,
+    include_zero_intensities=a.include_zero_intensities)
 
-
-# from MassTodonPy.CLI.AdditionalParsers import add_max_times_parsing
-# from MassTodonPy.CLI.AdditionalParsers import add_output_parsing
-# from MassTodonPy.CLI.AdditionalParsers import add_spectra_plots_parsing
-# from MassTodonPy.CLI.AdditionalParsers import add_verbosity_parsing
-# from MassTodonPy.CLI.MassTodon_wrapper import run_masstodon
-
-# from MassTodonPy.MassTodon import MassTodon
-# from MassTodonPy.Parsers.blocked_fragments import parse_blocked_fragments
-# from MassTodonPy.Parsers.Paths import parse_path
-
-
-
-# p.add_argument("--unblock_prolines",
-#                     dest='block_prolines',
-#                     action='store_const',
-#                     const=False,
-#                     default=True,
-#                     help="Stop blocking prolines from fragmenting.")
-# p.add_argument("-distance_charges",
-#                     help="The minimal distance between charges on the fasta sequence. Defaults to charges being 4 amino acids apart.",
-#                     type=int,
-#                     default=5)
-# p.add_argument("-min_intensity",
-#                     help="Experimental peaks with lower height will be trimmed.",
-#                     type=float,
-#                     default=eps)
-# p.add_argument("-percent_top_peaks",
-#                     help="Percentage of the heighest peaks in the spectrum to be included.",
-#                     type=float,
-#                     default=1.0)
-# p.add_argument("-deconvolution_method",
-#                     help="Matteo = MassTodon paper deconvolution. Ciacho_Wanda = experimental gaussian kernel deconvolution.",
-#                     default='Matteo')
-
-# p.add_argument("-max_buffer_len",
-#                     dest='max_buffer_len',
-#                     help="The maximal length of the visual buffer between peaks, i.e. the big rectangle width.",
-#                     type=float,
-#                     default=.5)
-# p.add_argument("-L1_flow",
-#                     dest='_L1_flow',
-#                     help="L1 penalty for high flows of intensities.",
-#                     type=float,
-#                     default=.01)
-# p.add_argument("-L2_flow",
-#                     dest="_L1_flow",
-#                     help="L2 penalty (a.k.a. ridge regression like) for high flows of intensities.",
-#                     type=float,
-#                     default=.01)
-# p.add_argument("-L1_intensity",
-#                     dest="_L1_intensity",
-#                     help="L1 penalty for high intensity estimates.",
-#                     type=float,
-#                     default=.01)
-# p.add_argument("-L2_intensity",
-#                     dest="_L2_intensity",
-#                     help="L2 penalty (a.k.a. ridge regression like) for high intensities.",
-#                     type=float,
-#                     default=.01)
-# p.add_argument("-sigma2",
-#                     help="Variance of the experimental peak's m/z ratio.",
-#                     type=float,
-#                     default=.1)
-# p.add_argument("-ni2",
-#                     help="Variance of the theoretic isotopologue's m/z ratio.",
-#                     type=float,
-#                     default=.1)
-# add_spectra_plots_parsing(p)
-
-# args = p.parse_args().__dict__ # parsing & making a dictionary
-# run_masstodon(args)
+m.plotly("spectrum.html", shape='rectangles', show=True)
