@@ -3,9 +3,9 @@ from   collections import   namedtuple
 import numpy       as       np
 from   math        import   inf, floor, log10
 
-from masstodon.spectrum.orbitrap    import Spectrum
+from masstodon.spectrum.orbitrap import Spectrum
 from masstodon.spectrum.lightweight import lightweight_spectrum
-from masstodon.spectrum.parse_threshold import parse_threshold
+from masstodon.parse.threshold import parse as parse_threshold
 
 SimpleGroups = namedtuple('SimpleGroups',
                           'min_mz max_mz mean_mz intensity')

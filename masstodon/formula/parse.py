@@ -19,7 +19,7 @@ import re
 from masstodon.data.elements import elements
 
 
-def get_pattern(pattern='([A-Z][a-z]?)([0-9]*)'):
+def parser_factory(pattern='([A-Z][a-z]?)([0-9]*)'):
     """A factory to set up formula parsers.
 
     Parameters
@@ -30,35 +30,38 @@ def get_pattern(pattern='([A-Z][a-z]?)([0-9]*)'):
     Returns : function
         A formula parser.
     """
-    return re.compile(pattern)
+    formula_patern = re.compile('([A-Z][a-z]?)([0-9]*)')
 
+    def parse(formula, pattern=formula_patern):
+        """Parses chemical formula based on the class pattern definition.
 
-def parse(formula, pattern):
-    """Parses chemical formula based on the class pattern definition.
+        Parameters
+        ----------
+        formula : str
+            The chemical formula string.
 
-    Parameters
-    ----------
-    formula : str
-        The chemical formula string.
+        Returns
+        -------
+        atomCnt : Counter
+            A counter with elements for keys and atom counts for values.
 
-    Returns
-    -------
-    atomCnt : Counter
-        A counter with elements for keys and atom counts for values.
+        Examples
+        --------
+            >>> FP = formulaParser()
+            >>> FP('C100H202')
+            Counter({'C': 100, 'H': 202})
+        """
+        atomCnt = {}
+        for elemTag, cnt in re.findall(pattern, formula):
+            if not elemTag in elements:
+                print("WARNING! Element tag {} ain't recognized.".format(elemTag))
+            if cnt == '':
+                cnt = 1
+            else:
+                cnt = int(cnt)
+            atomCnt[elemTag] = cnt
+        return atomCnt
 
-    Examples
-    --------
-        >>> FP = formulaParser()
-        >>> FP('C100H202')
-        Counter({'C': 100, 'H': 202})
-    """
-    atomCnt = {}
-    for elemTag, cnt in re.findall(pattern, formula):
-        if not elemTag in elements:
-            print("WARNING! Element tag {} ain't recognized.".format(elemTag))
-        if cnt == '':
-            cnt = 1
-        else:
-            cnt = int(cnt)
-        atomCnt[elemTag] = cnt
-    return atomCnt
+    return parse
+
+parser = parser_factory()

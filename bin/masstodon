@@ -15,7 +15,7 @@ from masstodon.parse.mods import parse as parse_mod
 from masstodon.parse.blocked_fragments import parse as parse_blocked_fragments
 
 
-p = argparse.ArgumentParser(description="This function lets you call masstodon on one precursor.")
+p = argparse.ArgumentParser(description="Analyze one precursor with masstodon.")
 
 
 #TODO: bloody hell, there are potentially many fastas, each with modifications.
@@ -24,9 +24,12 @@ p.add_argument( "-s",
                 "--spectrum",
                 help="Path to the spectrum file: parseable extensions include '.txt' for ASCII, '.mzxml', or '.mzml' (case insensitive).",
                 required=True)
+
+#TODO: this is part of the more complicated script.
 # p.add_argument( "-name",
 #                 help="The precursor's name.",
 #                 default='')
+
 p.add_argument( "-f",
                 "--fasta",
                 type=str,
@@ -49,7 +52,7 @@ p.add_argument("-dq",
 p.add_argument( "-tol"
                 "--tolerance",
                 type=float,
-                help="The tolerance in the m/z axis.",
+                help="The tolerance in the m/z axis (relative or absolute). Valid expressions include 0.05Da, 0,06Th, 10ppm, 12.2ppm, 20.0mmu, 10mmu. ppm = parts per million, mmu = milli-mass unit, Da = daltons, Th = Thompsons (for Thor almighty's sake).",
                 required=True)
 
 p.add_argument( "-m", 
@@ -69,14 +72,14 @@ help="Fragments not included in the analysis, e.g. 'z5', or 'c13z21c12c53z1': no
                 type=parse_blocked_fragments,
                 default='c0')
 
-p.add_argument( "--ep"
-                "-min_entry_prob",
+p.add_argument( "-ep"
+                "--min_entry_prob",
 help="The minimal probability an envelope has to scoop to be included in the deconvolution graph.",
                 type=float,
                 default=.8)
 
-p.add_argument( "--ip"
-                "-iso_prob",
+p.add_argument( "-ip"
+                "--iso_prob",
 help="The probability p in the p-optimal isotopic distribution. Defaults to 0.999.",
                 type=float,
                 default=.999)
@@ -92,6 +95,13 @@ p.add_argument( "-dm",
                 "--deconvolution_method",
 help="Matteo = MassTodon paper deconvolution. Ciacho_Wanda = experimental gaussian kernel deconvolution.",
                     default='Matteo')
+
+p.add_argument( "--timeit",
+                action='store_const',
+                const=False,
+                default=True,
+                help="Return timings.")
+
 
 args = p.parse_args()
 mods = [parse_mod(mod) for mod in args.mods]

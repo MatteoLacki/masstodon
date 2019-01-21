@@ -15,7 +15,7 @@
 #   You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
 #   Version 3 along with MassTodon.  If not, see
 #   <https://www.gnu.org/licenses/agpl-3.0.en.html>.
-from masstodon.formula.parse import get_pattern, parse
+from masstodon.formula.parse import parser as str2formula
 from masstodon.formula.linear_dict import LinearDict
 
 
@@ -41,13 +41,7 @@ def dict2tex(d, ce=False):
 
 
 class Formula(LinearDict):
-    pattern = get_pattern('([A-Z][a-z]?)([0-9]*)')
-
-    @classmethod
-    def recompile_pattern(cls, pattern='([A-Z][a-z]?)([0-9]*)'):
-        cls.pattern = get_pattern(pattern)
-
-    def __init__(self, formula={}):
+    def __init__(self, formula={}, parser=str2formula):
         """Initialize the formula.
 
         Parameters
@@ -57,7 +51,7 @@ class Formula(LinearDict):
             specifying the chemical formula, e.g. "{'C':100, 'H':202}".
         """
         if isinstance(formula, str):
-            formula = parse(formula, self.pattern)
+            formula = parser(formula)
         super().__init__(formula)
 
     def __str__(self):

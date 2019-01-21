@@ -1,17 +1,17 @@
-from   collections import Counter, namedtuple
-from   math        import floor, log10, inf
-import numpy       as np
+from collections import Counter, namedtuple
+from math import floor, log10, inf
+import numpy as np
 
 
 from masstodon.models.polynomial import polynomial
-from masstodon.models.spline     import spline
+from masstodon.models.spline import spline
 from masstodon.spectrum.peak_clustering import \
     bitonic_clustering,\
     iter_cluster_ends,\
     min_diff_clustering
 from masstodon.spectrum.lightweight import lightweight_spectrum
-from masstodon.stats.gaussian       import mean, sd, skewness
-from masstodon.spectrum.parse_threshold import parse_threshold
+from masstodon.stats.gaussian import mean, sd, skewness
+from masstodon.parse.threshold import parse as parse_threshold
 
 
 class PeakClustering(object):
