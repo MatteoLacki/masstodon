@@ -67,8 +67,8 @@ setup(
         'test': ['pytest']
     },
     scripts=[
-        'bin/plotly_spectrum'
-        # 'bin/masstodon',
+        'bin/plotly_spectrum',
+        'bin/masstodon'
         # 'bin/masstodon_example_call',
         # 'bin/plot_mass_spectrum',
         # 'bin/json2masstodon'

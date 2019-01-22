@@ -7,10 +7,10 @@
 #
 # License: see LICENCE file.
 
-#TODO: bloody hell, there are potentially many fastas, each with modifications.
-# then, simply prepare the simpler script first.
-
 import argparse
+import json
+from os import listdir as ls, makedirs as mkdir
+from os.path import join as pjoin
 
 from masstodon.data.constants import eps, infinity
 from masstodon.parse.blocked_fragments import parse as parse_blocked_fragments
@@ -18,7 +18,7 @@ from masstodon.parse.mods import parse_mods
 from masstodon.masstodon import masstodon_single
 from masstodon.parse.spectrum_file import parse as parse_spectrum_file
 
-debug = True
+debug = False
 
 p = argparse.ArgumentParser(description="Analyze one precursor with masstodon.")
 
@@ -107,17 +107,29 @@ if debug:
 
 mz, i = parse_spectrum_file(a.spectrum)
 
-m, t = masstodon_single(
+m, timings = masstodon_single(
     mz, i, a.fasta, a.q,
     min_mz_diff=infinity,
     modifications=parse_mods(a.mods),
-    orbitrap=a.orbirap,
-    threshold=a.tol,
+    orbitrap=a.orbitrap,
+    threshold=a.tolerance,
     isotopic_coverage=a.iso_prob,
     min_prob=a.min_entry_prob,
-    std_cnt=a.std,
+    std_cnt=a.standard_deviations_count,
     get_timings=True,
     include_zero_intensities=a.include_zero_intensities)
 
+t = a.target_folder
+
+if t is not '.':
+    mkdir(t, exist_ok=True)
+
 print("Saving spectrum to where you started your python from.")
-m.plotly("spectrum.html", shape='rectangles', show=True)
+
+m.plotly(pjoin(t,"spectrum.html"),
+         shape='rectangles',
+         show=True)
+
+m.write(t)
+with open(pjoin(t, 'timings.json'), 'w') as h:
+    json.dump(timings, h, indent=4)

@@ -10,16 +10,16 @@ import numpy   as     np
 from   os.path import join as pjoin
 from   time    import time
 
-from masstodon.data.constants              import infinity
-from masstodon.deconvolve.divide_ed_impera import imperator, load_imperator
-from masstodon.estimates_matcher.cz        import CzMatch
-from masstodon.estimates_matcher.cz_simple import SimpleCzMatch
-from masstodon.isotopes.calculator         import isotope_calculator
-from masstodon.precursor.precursor         import precursor
-from masstodon.preprocessing.filters       import filter_subspectra_molecules
-from masstodon.read.npy                    import spectrum_from_npy
-from masstodon.spectrum.spectrum           import spectrum
-from masstodon.ome.ome                     import ome
+from .data.constants import infinity
+from .deconvolve.divide_ed_impera import imperator, load_imperator
+from .estimates_matcher.cz import CzMatch
+from .estimates_matcher.cz_simple import SimpleCzMatch
+from .isotopes.calculator import isotope_calculator
+from .precursor.precursor import precursor
+from .preprocessing.filters import filter_subspectra_molecules
+from .parse.npy import spectrum_from_npy
+from .spectrum.spectrum import spectrum
+from .ome.ome import ome
 
 
 class Masstodon(object):

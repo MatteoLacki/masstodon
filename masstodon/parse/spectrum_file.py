@@ -15,7 +15,7 @@ readers = {
 def parse(path, scan_no=0):
     """Parse a path to spectrum."""
     p, ext = path.split('.')
-    ext = ext.to_lower()
+    ext = ext.lower()
     try:
         mz, i = readers[ext](path)
     except KeyError as e:

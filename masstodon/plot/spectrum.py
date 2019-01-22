@@ -14,7 +14,7 @@ except ImportError:
 import numpy as np
 from   scipy.stats import norm
 
-from masstodon.read.npy import spectrum_from_npy
+from masstodon.parse.npy import spectrum_from_npy
 from masstodon.stats.gaussian import mean, sd
 
 
