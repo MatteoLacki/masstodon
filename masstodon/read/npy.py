@@ -19,7 +19,16 @@ def spectrum_from_npy(data_path      = '.',
     intensity_name : str
         The name of the file that contains the intensity values.
     """
-    mz        = np.load(os.path.join(data_path, mz_name))
+    mz = np.load(os.path.join(data_path, mz_name))
     intensity = np.load(os.path.join(data_path, intensity_name))
     return mz, intensity
+
+
+def read_npy(path):
+    file = os.path.basename(path)
+    assert file in ('mz.npy', 'in.npy'), "Supply a path to some mz.npy or in.npy file. The other file should be in the same folder."
+    if file == 'mz.npy':
+        d_p = path.replace('mz.npy', '')
+    elif file == 'in.npy':
+        mz_p = path.replace('in.npy', '')
 

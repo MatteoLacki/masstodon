@@ -21,3 +21,4 @@ def read_mzml(path):
     with reader.read(path) as info:
         for spectrum in info:
             yield spectrum
+

@@ -10,15 +10,19 @@ from masstodon.masstodon import masstodon_single
 from masstodon.data.substance_p_wv_1_5_wh_4500 import mz, i
 
 
-parser = argparse.ArgumentParser(description = 'Test run of masstodon.')
-parser.add_argument("-p", type=str, default="",
-                    help="Path to the input spectrum txt.")
-parser.add_argument("-o", type=str, default=".",
-                    help="Path to the output html file.")
-args = parser.parse_args()
+p = argparse.ArgumentParser(description = 'Test run of masstodon.')
+
+p.add_argument("-p", type=str, default="",
+help="Path to the input spectrum txt.")
+
+p.add_argument("-o", type=str, default=".",
+help="Path to the output html file.")
+
+args = p.parse_args()
 
 print("Opening spectrum.")
 print("Using Substance-P spectrum collected at wave velocity")
+
 mz = np.array(mz)
 i = np.array(i)
 

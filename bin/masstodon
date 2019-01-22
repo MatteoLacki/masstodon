@@ -16,6 +16,7 @@ from masstodon.data.constants import eps, infinity
 from masstodon.parse.blocked_fragments import parse as parse_blocked_fragments
 from masstodon.parse.mods import parse_mods
 from masstodon.masstodon import masstodon_single
+from masstodon.parse.spectrum_file import parse as parse_spectrum_file
 
 debug = True
 
@@ -25,8 +26,7 @@ p.add_argument( "-s", "--spectrum",
 help="Path to the spectrum file: parseable extensions include '.txt' for ASCII, '.mzxml', or '.mzml' (case insensitive).",
                 required=True)
 
-p.add_argument( "-orbi",
-                "--orbitrap",
+p.add_argument( "-orbi", "--orbitrap",
                 action='store_const',
                 const=True,
                 default=False,
@@ -96,11 +96,16 @@ p.add_argument( "--include_zero_intensities",
                 default=False,
                 help="Include zero intensities in the fitting of fragments. Don't do it for the Orbitrap, as it presumably cuts away some of the signal below an arbitrary detection limit.")
 
+p.add_argument( "-t", "--target_folder",
+help="Folder to write the results into. If not existing, will be created. Defaults to current folder.",
+                default='.')
+
 a = p.parse_args()
 
 if debug:
     print(a.__dict__)
 
+mz, i = parse_spectrum_file(a.spectrum)
 
 m, t = masstodon_single(
     mz, i, a.fasta, a.q,
@@ -114,4 +119,5 @@ m, t = masstodon_single(
     get_timings=True,
     include_zero_intensities=a.include_zero_intensities)
 
+print("Saving spectrum to where you started your python from.")
 m.plotly("spectrum.html", shape='rectangles', show=True)
