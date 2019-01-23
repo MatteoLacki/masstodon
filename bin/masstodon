@@ -32,9 +32,13 @@ p.add_argument( "-orbi", "--orbitrap",
                 default=False,
                 help="This is an Orbitrap spectrum.")
 
+p.add_argument( "-tol", "--tolerance",
+help="The tolerance in the m/z axis (relative or absolute). Valid expressions include 0.05Da, 0,06Th, 10ppm, 12.2ppm, 20.0mmu, 10mmu. ppm = parts per million, mmu = milli-mass unit, Da = daltons, Th = Thompsons (for Thor almighty's sake).",
+                required=True)
+
 p.add_argument( "-f", "--fasta",
                 type=str,
-                help="Fasta sequence.",
+                help="The amino acid sequence.",
                 required=True)
 
 p.add_argument( "-m", "--mods",
@@ -52,15 +56,6 @@ help="How many consecutive amino-acids are there per charge. Defaults to 5 (incl
                 type=int,
                 default=5)
 
-p.add_argument( "-tol", "--tolerance",
-help="The tolerance in the m/z axis (relative or absolute). Valid expressions include 0.05Da, 0,06Th, 10ppm, 12.2ppm, 20.0mmu, 10mmu. ppm = parts per million, mmu = milli-mass unit, Da = daltons, Th = Thompsons (for Thor almighty's sake).",
-                required=True)
-
-p.add_argument( "-std", "--standard_deviations_count",
-help="The number of standard deviations defining the tolerance in the coarse filtering stage.",
-                type=float,
-                default=3.0)
-
 p.add_argument( "-fr", "--fragments",
                 help="Only 'cz' accepted for now. Planning other fragmentation schemes, including inner fragments.",
                 default='cz')
@@ -74,6 +69,10 @@ p.add_argument( "-ep", "--min_entry_prob",
 help="The minimal probability an envelope has to scoop to be included in the deconvolution graph.",
                 type=float,
                 default=.8)
+
+p.add_argument( "-t", "--target_folder",
+help="Folder to write the results into. If not existing, will be created. Defaults to current folder.",
+                default='.')
 
 p.add_argument( "-ip", "--iso_prob",
 help="The probability p in the p-optimal isotopic distribution. Defaults to 0.999.",
@@ -96,9 +95,13 @@ p.add_argument( "--include_zero_intensities",
                 default=False,
                 help="Include zero intensities in the fitting of fragments. Don't do it for the Orbitrap, as it presumably cuts away some of the signal below an arbitrary detection limit.")
 
-p.add_argument( "-t", "--target_folder",
-help="Folder to write the results into. If not existing, will be created. Defaults to current folder.",
-                default='.')
+p.add_argument( "-std", "--standard_deviations_count",
+help="The number of standard deviations defining the tolerance in the coarse filtering stage.",
+                type=float,
+                default=3.0)
+
+
+
 
 a = p.parse_args()
 

@@ -26,11 +26,35 @@ import masstodon
 
 # Running
 
-After installation, you can use `masstodon` as a library (support of CLI and web-based user-interface in progress).
+## command line interface
 
-**Importing data.** You can analyze individual mass spectra with `masstodon`. This might very well be individual scans of an *Orbitrap*, or a general mass spectrum. The easiest way to import the mass spectrum is to present a plain **ASCII** file with m/z and intensity values in each row, separated by tab or some other whitespace sign.
+It is possible to run `masstodon` from command line after installing it from PIP.
+Given that it would be not comfortable to input multiple compounds with their possible modifications and charges from the terminal, we have restricted (for now) the possibility to run `masstodon` in the traditional case of studying precisely one protein and its c/z fragmentation patterns.
+
+To see a detailed description of the possible arguments, open the terminal (or the Anaconda prompt on Windows, but seriously, Windows? You should feel guilty...) and write
+```{bash}
+    masstodon -h
+```
+
+To run `masstodon`, you do need to supply at least:
+* the file with the spectrum
+* the tolerance for the search in the m/z axis
+* the amino acid sequence (fasta)
+* the charge of the substance
+
+All other parameters can be skipped, but it might be silly.
+For instance, if you know that there is a particular PTM on a given amino acid,
+you should supply the `-m` parameter, and so on.
 
 
+## Python scripting
+
+**Importing data.** You can analyze individual mass spectra with `masstodon`.
+This might very well be individual scans of an *Orbitrap*, or a general mass spectrum.
+The easiest way to import the mass spectrum is to present a plain **ASCII** file with m/z and intensity values in each row, separated by tab or some other whitespace sign.
+
+**Running masstodon**.
+To call `masstodon` with a single compound, use the `masstodon_single` function.
 ```{python}
 m = masstodon_single(mz, intensity, fasta, q,
                                  min_mz_diff        = infinity,
