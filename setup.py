@@ -24,7 +24,7 @@ with open("README.md", "r") as fh:
 setup(
     name='masstodon',
     packages=find_packages(),
-    version='0.14',
+    version='0.15',
     description='Investigate mass spectra for chemical substances, especially ETD products.',
     long_description=long_description,
     long_description_content_type="text/markdown",
