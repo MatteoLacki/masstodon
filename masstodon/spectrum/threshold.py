@@ -15,15 +15,14 @@ class ThresholdSpectrum(Spectrum):
     def __init__(self,
                  mz              = np.array([]),
                  intensity       = np.array([]),
-                 threshold       = "0 Da",
+                 threshold       = "0Da",
                  sort            = True,
                  drop_duplicates = True,
                  drop_zeros      = True,
                  mdc             = None):
+        self.threshold = threshold
         thr, thr_type = parse_threshold(threshold)
         assert thr > 0.0, "Provide non-zero threshold."
-        self.thr = thr
-        self.thr_type = thr_type
         super().__init__(mz, intensity, sort, drop_duplicates, drop_zeros, mdc)
         X = iter(list(self.mz))
         x = next(X)
@@ -60,7 +59,6 @@ class ThresholdSpectrum(Spectrum):
             yield self.__class__(mz              = self.mz[s:e],
                                  intensity       = self.intensity[s:e],
                                  threshold       = self.threshold,
-                                 threshold_type  = self.threshold_type,
                                  sort            = False,
                                  drop_duplicates = True,
                                  drop_zeros      = False,

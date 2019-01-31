@@ -5,6 +5,7 @@ pattern = re.compile(r"(\d+([.,]\d*)?|([.,]\d*))([a-zA-Z]+)")
 
 def parse(x = '0.0Da'):
     """Parse a threshold string."""
+    x = x.replace(" ","")
     g = re.match(pattern, x)
     unit = g[4].lower()
     assert unit in ('da', 'th', 'mmu', 'ppm'), "Wrong or missing unit."

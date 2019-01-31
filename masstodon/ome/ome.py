@@ -5,13 +5,15 @@ import networkx             as nx
 from   networkx.algorithms.flow import min_cost_flow
 import matplotlib.pyplot    as plt
 from   math                 import ceil
-from   collections          import defaultdict
+from   collections          import defaultdict, Counter
 
 from masstodon.precursor.precursor  import precursor, FalsePrecursor
 from masstodon.molecule.molecule    import molecule
 from masstodon.formula.formula      import Formula, dict2string
 from masstodon.write.csv_tsv        import write_rows
 
+
+#TODO: change the name to ST graph to match the paper.
 class Ome(object):
     def __init__(self, iso_calc):
         self.iso_calc = iso_calc
@@ -25,22 +27,12 @@ class Ome(object):
                 self.G.add_node(mol, s=False)
                 self.G.add_edge(mol, prec, name=name)
         for m_kwds in molecules:
-            name   = m_kwds['name']
+            name = m_kwds['name']
             m_kwds = m_kwds.copy()
-            # print(m_kwds['name'])
             del m_kwds['name']
-            # print(m_kwds)
-            # print(self.iso_calc)
-            # print(m_kwds['formula'])
-            # print(m_kwds['q'])
-            mol = molecule(iso_calc=self.iso_calc,
-                            **m_kwds)
-            # mol = molecule(formula = m_kwds['formula'],
-            #                iso_calc=self.iso_calc,
-            #                q       = m_kwds['q'])
-            # print(m_kwds)
-            prec = FalsePrecursor(name     = name,
-                                  iso_calc = self.iso_calc,
+            mol = molecule(iso_calc=self.iso_calc, **m_kwds)
+            prec = FalsePrecursor(name=name,
+                                  iso_calc=self.iso_calc,
                                   **m_kwds)
             self.G.add_node(prec, s=True)
             self.G.add_node(mol,  s=False)
@@ -80,15 +72,13 @@ class Ome(object):
         for s in self.sources():
             node_labels[s] = s.name
         node_labels = nx.draw_networkx_labels(self.G, 
-                                              pos       = layout,
-                                              labels    = node_labels,
-                                              font_size = node_label_size)
-        nx.draw_networkx_nodes(self.G, pos=layout, node_size = node_size)
+                                              pos=layout,
+                                              labels=node_labels,
+                                              font_size=node_label_size)
+        nx.draw_networkx_nodes(self.G, pos=layout, node_size=node_size)
         nx.draw_networkx_edges(self.G, pos=layout)
         edge_labels = {(a,b): self.G[a][b]['name'] for a,b in self.G.edges}
-        nx.draw_networkx_edge_labels(self.G,
-                                     pos         = layout,
-                                     edge_labels = edge_labels)
+        nx.draw_networkx_edge_labels(self.G, pos=layout, edge_labels=edge_labels)
         if show:
             plt.show()
 
@@ -113,21 +103,39 @@ class Ome(object):
         except StopIteration:
             return True
 
-    def iter_molecule_estimates(self, header=True):
+    def iter_estimates(self, header=True):
         """Iterate over molecules with positive estimates."""
         if header:
             yield ('formula','q','g',
                    'formula with q and g',
-                   'intensity', 'name(s)')
+                   'intensity', 'name(s)', 'monoisotopic m/z')
         for m in self.observables():
             names = [self.G[m][k]['name'] for k in self.G[m]]
-            yield (str(m.formula), m.q, m.g,
+            yield (str(m.formula),
+                   m.q,
+                   m.g,
                    m.formula.str_with_charges(m.q, m.g),
-                   ceil(m.intensity), names)
+                   ceil(m.intensity),
+                   ".".join(names),
+                   m.monoisotopic_mz)
 
-    def write(self, path):
+    def iter_estimates_no_g(self, header=True):
+        """Aggregates the estimates over quenched charge g."""
+        if header:
+            yield ('formula','q','intensity', 'name(s)')
+        intensities = Counter()
+        for f, q, g, fgq, i, n, mono_mz in self.iter_estimates(header=False):
+            intensities[(f,q,n)] += i
+        for (f,q,n), i in intensities.items():
+            yield f,q,i,n
+
+    def write_estimates(self, path):
         """Write precise estimates."""
-        write_rows(self.iter_molecule_estimates(), path)
+        write_rows(self.iter_estimates(), path)
+
+    def write_estimates_no_g(self, path):
+        """Write aggregated estimates."""
+        write_rows(self.iter_estimates_no_g(), path)
 
     def filter_by_deviations(self, 
                              subspectra,

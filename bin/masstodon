@@ -101,10 +101,7 @@ help="The number of standard deviations defining the tolerance in the coarse fil
                 default=3.0)
 
 
-
-
 a = p.parse_args()
-
 if debug:
     print(a.__dict__)
 
