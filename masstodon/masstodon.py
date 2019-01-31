@@ -28,10 +28,10 @@ class Masstodon(object):
                      intensity,
                      min_mz_diff = 1.1,
                      orbitrap    = False,
-                     threshold   = "0.0 Da"):
-        self.threshold   = threshold
-        self.orbitrap    = orbitrap
-        self.min_mz_diff = min_mz_diff
+                     threshold   = "0.0Da"):
+        self.threshold = threshold # TODO all these should be props of the spectrum. 
+        self.orbitrap = orbitrap # TODO all these should be props of the spectrum.
+        self.min_mz_diff = min_mz_diff # TODO all these should be props of the spectrum.
         self.spec = spectrum(mz,
                              intensity,
                              self.min_mz_diff,
@@ -40,9 +40,9 @@ class Masstodon(object):
                              sort            = True,
                              drop_duplicates = True,
                              drop_zeros      = True)
-        self.mz_digits = self.spec.get_smallest_diff_digits()
-        self.ls        = self.spec.get_lightweight_spectrum()
-        self.groups    = self.spec.get_groups()
+        self.mz_digits = self.spec.get_smallest_diff_digits() # TODO all these 
+        self.ls = self.spec.get_lightweight_spectrum() # TODO all these 
+        self.groups = self.spec.get_groups() # TODO all these 
         if min_mz_diff < infinity:
             self.subspectra = self.spec.get_min_mz_diff_subspectra()
 
@@ -54,8 +54,8 @@ class Masstodon(object):
                 molecules=[],
                 std_cnt=3):
         self.precursors = precursors
-        self.molecules  = molecules
-        self.std_cnt    = std_cnt
+        self.molecules = molecules
+        self.std_cnt = std_cnt
         self.ome = ome(self.iso_calc,
                        self.precursors,
                        self.molecules)
@@ -72,9 +72,9 @@ class Masstodon(object):
                          deconvolution_method = 'nnls',
                          include_zero_intensities = False):
         # store parameters
-        self.min_prob                 = min_prob
-        self.isotopic_coverage        = isotopic_coverage
-        self.deconvolution_method     = deconvolution_method
+        self.min_prob = min_prob
+        self.isotopic_coverage = isotopic_coverage
+        self.deconvolution_method = deconvolution_method
         self.include_zero_intensities = include_zero_intensities
         # divide and rule
         self.imperator = imperator(self.good_mols,
@@ -123,7 +123,8 @@ class Masstodon(object):
 
     def write(self, path):
         """Write results to path."""
-        self.ome.write(pjoin(path, 'estimates.csv'))
+        self.ome.write_estimates(pjoin(path, 'estimates.csv'))
+        self.ome.write_estimates_no_g(pjoin(path, 'estimates_no_g.csv'))
         if self.ome.is_one_precursor():
             self.cz.write(path)
             self.cz_simple.write(path)
@@ -175,7 +176,7 @@ def masstodon_batch(mz,
                     molecules           = [],
                     min_mz_diff         = 1.1,
                     orbitrap            = False,
-                    threshold           = "0.0 Da",
+                    threshold           = "0.0Da",
                     std_cnt             = 3,
                     mz_digits           = None,
                     isotopic_coverage   = .999,
@@ -285,7 +286,7 @@ def masstodon_single(mz, intensity, fasta, q,
                      distance_charges  = 5.,
                      min_mz_diff       = 1.1,
                      orbitrap          = False,
-                     threshold         = "0.0 Da",
+                     threshold         = "0.0Da",
                      std_cnt           = 3,
                      mz_digits         = None,
                      isotopic_coverage = .999,
