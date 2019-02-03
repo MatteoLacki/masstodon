@@ -55,15 +55,52 @@ The easiest way to import the mass spectrum is to present a plain **ASCII** file
 
 **Running masstodon**.
 To call `masstodon` with a single compound, use the `masstodon_single` function.
+
+For instance:
+
 ```{python}
-m = masstodon_single(mz, intensity, fasta, q,
-                                 min_mz_diff        = infinity,
-                                 modifications      = modifications,
-                                 orbitrap           = False,
-                                 threshold          = threshold,
-                                 isotopic_coverage  = isotopic_coverage,
-                                 min_prob           = min_prob, 
-                                 std_cnt            = std_cnt)
+from masstodon.data.substanceP_wh15_wv400 import mz, intensity, fasta, modifications, z # input data
+from masstodon.masstodon import masstodon_single # masstodon-proper
+from pprint import pprint # nicer output in the terminal
+
+print(mz)
+# array([  61.01 ,   64.152,   66.515, ..., 1403.9  , 1485.578, 1497.226])
+print(intensity)
+# array([844.4 ,  25.35, 190.1 , ...,  15.38,  55.62,  21.  ])
+print(fasta)
+# 'RPKPQQFFGLM'
+print(modifications)
+# {'11': {'C_carbo': {'H': 1, 'N': 1, 'O': -1}}}
+# (modify 11th amino-acid [starting from 1 for user-friendliness],
+# by adding the chemical diff unto the group of atoms that include the C_carbo.)
+print(z)
+# 3
+
+m = masstodon_single(mz, intensity, fasta, z,
+                     min_mz_diff        = 1.1, # this is actually the default
+                     modifications      = modifications,
+                     orbitrap           = False, # this ain't an orbitrap profile spectrum
+                     threshold          = "0.05 Da", # how far away to search for
+                     isotopic_coverage  = .999, # IsoSpec isotopic envelope coverage
+                     min_prob           = .8, # minimal acceptance probability of a candidate theoretical envelope.
+                     std_cnt            = 3 # m/z standard deviation count filter)
+# for min_prob and std_cnt check out the publication under the filtering procedures.
+
+print("Save spectrum to where you started your python from.")
+m.plotly("spectrum.html", shape='rectangles', show=True)
+
+print("Getting stats on inintial and final number of nodes and edges in the deconvolution graph.")
+pprint(m.ome.G_stats)
+
+print("Errors: absolute deviations and relative distance between spectra.")
+pprint(m.imperator.errors())
+
+print("Estimates of intensities of reactions and fragmentations.")
+pprint(m.cz_simple.intensities)
+pprint(m.cz_simple.probabilities)
+
+print("Save all things under the given path.")
+m.write(".")
 ```
 
 <!-- # Running *masstodon*
