@@ -1,8 +1,6 @@
 %load_ext autoreload
 %autoreload 2
 
-import numpy as np
-
 from masstodon.data.substanceP_wh15_wv400 import mz, intensity, fasta, modifications, z
 from masstodon.plot.spectrum    import plot_spectrum
 from masstodon.masstodon        import masstodon_single
