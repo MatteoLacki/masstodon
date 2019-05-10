@@ -16,6 +16,7 @@ from masstodon.spectrum.base    import Spectrum
 from masstodon.spectrum.cluster import bitonic_clust
 from masstodon.plot.spectrum    import plot_spectrum
 
+
 class OrbitrapSpectrum(Spectrum):
     """Prepare experimental spectrum.
 

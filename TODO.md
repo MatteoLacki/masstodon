@@ -9,7 +9,10 @@
     * the parameters should be stored as dictionaries.
     * the docs should have references to check up on them.
 * write a test comparing the output of different deconvolution methods.
-
+* get rid of these set themes:
+    * the user should decide about this
+    * create a separate module for pictures management
+* the ppm intervals might overlap!!!
 
 DONE:
 * quality of fit

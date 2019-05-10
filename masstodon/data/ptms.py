@@ -15,7 +15,8 @@ ptms = {
 "palmitic_acylation":           {"C":16,"H":30,"O":1},
 "oleic_acylation":              {"C":18,"H":32,"O":1},
 "arachidonic_acylation":        {"C":20,"H":30,"O":1},
-"docosahexanoic_acylation":     {"C":22,"H":30,"O":1}
+"docosahexanoic_acylation":     {"C":22,"H":30,"O":1},
+"carbamidomethylation":         {"C":2, "H":3, "N":1, "O":1}
 }
 
 typical_ptm_sites = {
