@@ -32,6 +32,8 @@ class Spectrum(object):
                          drop_zeros      = True,
                          mdc             = None):
         """Initialize the Spectrum."""
+        mz = np.array(mz)
+        intensity = np.array(intensity)
         self.drop_duplicates = drop_duplicates
         self.drop_zeros      = drop_zeros
         if self.drop_zeros:
